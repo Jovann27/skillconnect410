@@ -1,0 +1,475 @@
+.aboutus-container {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to bottom, #e6b7d2, #d9b4dc);
+  color: #333;
+  text-align: center;
+  overflow-x: hidden;
+}
+
+/* HEADER SECTION */
+.header-section {
+  padding: 40px 0px;
+  background: linear-gradient(to bottom, #d08abf, #efc2d5);
+}
+
+.barangay-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #4b004b;
+}
+
+.page-title {
+  font-size: 36px;
+  font-weight: 800;
+  color: #1f0036;
+  margin: 10px 0 20px 0;
+}
+
+.header-image {
+  width: 100vw;              /* full viewport width */
+  margin-left: 50%;          /* trick to center the full-width image */
+  transform: translateX(-50%);
+  overflow: hidden;
+}
+
+.header-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+/* INFO SECTION */
+.info-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+  padding: 0px 0px;
+  flex-wrap: wrap;
+  background-color: #ffffff;
+}
+
+/* Left text column */
+.description-text {
+  flex: 1;
+  min-width: 280px;
+  max-width: 400px;
+  font-size: 17px;
+  line-height: 1.8;
+  color: #000;
+  letter-spacing: 1px;
+  text-align: left;
+  font-weight: 400;
+  margin: 10px 0;
+}
+
+/* Right map area (full width inside its half) */
+.map-container {
+  flex: 1;
+  position: relative;
+}
+
+.map-container img {
+  width: 80%;
+  height: 80%;
+  object-fit: cover;
+  border-left: 1px solid #f2f2f2; 
+}
+
+
+/* MISSION & VISION SECTION */
+.mission-vision-section {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 40px;
+  padding: 60px 20px;
+  flex-wrap: wrap;
+}
+
+/* Base Card Styling */
+.card {
+  flex: 1;
+  min-width: 420px;
+  max-width: 550px;
+  padding: 50px 60px;
+  border-radius: 20px;
+  background-color: #fff;
+  text-align: left;
+  line-height: 1.8;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Mission Card */
+.mission-card {
+  background-color: #fff1f6;
+  border-left: 8px solid #d6336c;
+  border-top-left-radius: 40px;
+  border-bottom-left-radius: 40px;
+}
+
+.mission-card h3 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #d6336c;
+  text-transform: uppercase;
+  border-bottom: 3px solid #d6336c;
+  display: inline-block;
+  padding-bottom: 6px;
+  margin-bottom: 20px;
+}
+
+/* Vision Card */
+.vision-card {
+  background-color: #e8f5ff;
+  border-left: 8px solid #003366;
+  border-top-left-radius: 40px;
+  border-bottom-left-radius: 40px;
+}
+
+.vision-card h3 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #003366;
+  text-transform: uppercase;
+  border-bottom: 3px solid #003366;
+  display: inline-block;
+  padding-bottom: 6px;
+  margin-bottom: 20px;
+}
+
+/* Card Paragraph Text */
+.card p {
+  font-size: 17px;
+  color: #1f1f1f;
+  margin-top: 10px;
+  line-height: 1.9;
+  letter-spacing: 0.2px;
+}
+
+/* Hover effect */
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+.card {
+  background-color: white;
+  padding: 25px 20px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 320px;
+}
+
+.card h3 {
+  font-size: 22px;
+  color: #a10d6a;
+  margin-bottom: 10px;
+}
+
+.card p {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* DEVELOPMENT CARDS */
+.development-cards {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 30px;
+  padding: 40px 20px;
+}
+
+.dev-card {
+  background: white;
+  border-radius: 15px;
+  padding: 15px;
+  width: 350px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.dev-card img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.dev-card h4 {
+  margin-top: 12px;
+  font-size: 18px;
+  color: #a10d6a;
+}
+
+.dev-card p {
+  font-size: 14px;
+  color: #120000;
+  margin-top: 6px;
+}
+
+/* ABOUT SKILLCONNECT */
+.about-skillconnect {
+  padding: 20px 500px;
+  background: linear-gradient(to bottom, #f2d7e9, #e6bfd7);
+  border-radius: 15px;
+  margin: 50px auto;
+  max-width: 900px;
+}
+
+.about-skillconnect h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #a10d6a;
+  margin-bottom: 15px;
+}
+
+.about-skillconnect p {
+  font-size: 15px;
+  color: #333;
+  max-width: 700px;
+  margin: 0 auto 20px auto;
+  line-height: 1.6;
+}
+
+.skillconnect-image img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* CONTACT SECTION */
+.contact-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap-reverse;
+  gap: 40px;
+  background: linear-gradient(to bottom right, #d2b3ff, #9d76c1);
+  border-radius: 20px;
+  padding: 0px 0px;
+  color: white;
+  max-width: 900px;
+  margin: 40px auto;
+}
+
+.contact-form {
+  flex: 1;
+  min-width: 280px;
+  text-align: left;
+}
+
+.contact-form h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.contact-form label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.send-btn {
+  background-color: #ffccf2;
+  color: #f9f8f9;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.send-btn:hover {
+  background-color: #f9bce0;
+}
+
+.contact-image {
+  flex: 1;
+  background: linear-gradient(180deg, #1e3a8a, #2563eb);
+
+  min-height: 400px; 
+}
+.contact-image img {
+  position: relative;
+  bottom: 0;
+  
+  object-fit: cover;
+  width: 100%;
+  margin: 0;
+}
+/* LEARN MORE BUTTON */
+.learn-more-button {
+  text-align: center;
+  padding: 30px 0 60px;
+}
+
+.learn-more-button button {
+  background-color: #a10d6a;
+  color: white;
+  padding: 12px 35px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.learn-more-button button:hover {
+  background-color: #8a0959;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .mission-vision-section,
+  .info-section,
+  .contact-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .card, .dev-card {
+    width: 90%;
+  }
+
+  .map-container img {
+    max-width: 100%;
+  }
+}/* CONTACT SECTION */
+.contact-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  flex-wrap: wrap;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 900px;
+  margin: 60px auto;
+}
+
+/* LEFT SIDE – FORM */
+.contact-form {
+  flex: 1;
+  background: #fff;
+  padding: 50px 40px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.contact-form h3 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 30px;
+}
+
+.contact-form label {
+  display: none; /* hidden for minimal clean look */
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: none;
+  background: #f6f6f6;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  font-size: 15px;
+  margin-bottom: 15px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  background: #fff;
+  box-shadow: 0 0 0 2px #5b73ff;
+}
+
+/* SEND BUTTON */
+.send-btn {
+  background: linear-gradient(to right, #5b73ff, #3b5bff);
+  color: #fff;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+  align-self: flex-start;
+  box-shadow: 0 4px 10px rgba(91, 115, 255, 0.4);
+}
+
+.send-btn:hover {
+  background: linear-gradient(to right, #4863f7, #2f4af2);
+}
+
+/* RIGHT SIDE – IMAGE WITH BLUE BACKGROUND */
+.contact-image {
+  flex: 1;
+  background: linear-gradient(135deg, #cc1b56 0%, #f37ab6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+
+.contact-image img {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  object-fit: contain;
+  margin: 0px
+}
+
+/* LEARN MORE BUTTON */
+.learn-more-button {
+  text-align: center;
+  padding: 40px 0 80px;
+}
+
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .contact-section {
+    flex-direction: column;
+  }
+
+  .contact-form, .contact-image {
+    width: 100%;
+    padding: 30px 25px;
+  }
+
+  .contact-form h3 {
+    text-align: center;
+  }
+
+  .send-btn {
+    align-self: center;
+  }
+}
