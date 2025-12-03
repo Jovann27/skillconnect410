@@ -6,6 +6,13 @@ import app from "./app.js";
 import { dbConnection } from "./database/dbConnection.js";
 // import "./config/cloudinaryConfig.js";
 import { checkAndUpdateExpiredRequests } from "./utils/expirationHandler.js";
+import { Server } from "socket.io";
+import http from "http";
+import jwt from "jsonwebtoken";
+import User from "./models/userSchema.js";
+import Chat from "./models/chat.js";
+import Booking from "./models/booking.js";
+import { initializeSocketNotify } from "./utils/socketNotify.js";
 
 // Initialize database connection
 dbConnection();
@@ -25,16 +32,6 @@ export default app;
 // Declare io and onlineUsers for export
 let io = null;
 let onlineUsers = null;
-
-// For local development, start the server
-if (process.env.NODE_ENV !== 'production') {
-  const { Server } = await import("socket.io");
-  const http = await import("http");
-  const jwt = (await import("jsonwebtoken")).default;
-  const User = (await import("./models/userSchema.js")).default;
-  const Chat = (await import("./models/chat.js")).default;
-  const Booking = (await import("./models/booking.js")).default;
-  const { initializeSocketNotify } = await import("./utils/socketNotify.js");
 
   const PORT = process.env.PORT || 4000;
   const server = http.createServer(app);
@@ -298,9 +295,8 @@ if (process.env.NODE_ENV !== 'production') {
   });
 
   server.listen(PORT, () => {
-    console.log(`Server running at http://192.168.1.12:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
   });
-}
 
 // Export io and onlineUsers for use in other modules
 export { io, onlineUsers };
