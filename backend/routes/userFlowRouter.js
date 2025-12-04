@@ -25,7 +25,8 @@ import {
   offerToProvider,
   acceptOffer,
   rejectOffer,
-  reverseGeocode
+  reverseGeocode,
+  getCompletedJobsByProvider
 } from '../controllers/userFlowController.js';
 import { getServices } from '../controllers/adminFlowController.js';
 
@@ -211,6 +212,9 @@ router.get('/predefined-services', isUserAuthenticated, isUserVerified, getServi
 
 // Service Providers route
 router.get('/service-providers', isUserAuthenticated, isUserVerified, getServiceProviders);
+
+// Public route to get completed jobs by provider (for profile viewing)
+router.get('/provider/:providerId/completed-jobs', getCompletedJobsByProvider);
 
 // Offer routes
 router.post('/offer-to-provider', isUserAuthenticated, isUserVerified, offerToProvider);

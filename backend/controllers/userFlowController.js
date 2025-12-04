@@ -1359,6 +1359,40 @@ export const completeBooking = catchAsyncError(async (req, res, next) => {
 //   return result.secure_url;
 // };
 
+export const getCompletedJobsByProvider = catchAsyncError(async (req, res, next) => {
+  const { providerId } = req.params;
+
+  if (!providerId) {
+    return next(new ErrorHandler("Provider ID is required", 400));
+  }
+
+  try {
+    // Get completed service requests where this user was the service provider
+    const completedRequests = await ServiceRequest.find({
+      serviceProvider: providerId,
+      status: 'Complete'
+    })
+    .populate('requester', 'firstName lastName username email phone profilePic')
+    .sort({ updatedAt: -1 })
+    .limit(50); // Limit to prevent performance issues
+
+    res.status(200).json({
+      success: true,
+      requests: completedRequests,
+      debug: {
+        totalCompletedJobs: completedRequests.length,
+        providerId: providerId
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching completed jobs:", error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch completed jobs'
+    });
+  }
+});
+
 export const reverseGeocode = catchAsyncError(async (req, res, next) => {
   const { lat, lon } = req.query;
 

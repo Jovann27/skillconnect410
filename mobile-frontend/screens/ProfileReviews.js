@@ -19,6 +19,8 @@ const { width } = Dimensions.get("window");
 export default function ProfileReviews({ route, navigation }) {
   const { api } = useMainContext();
   const [reviews, setReviews] = useState([]);
+  const [completedJobs, setCompletedJobs] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
   const userId = route.params?.userId || "123";
   const fromFavorites = route.params?.fromFavorites || false;
 
@@ -32,9 +34,38 @@ export default function ProfileReviews({ route, navigation }) {
     }
   };
 
+  const fetchCompletedJobs = async () => {
+    setLoadingJobs(true);
+    try {
+      // Get completed jobs using the new public endpoint
+      const response = await apiClient.get(`/user/provider/${userId}/completed-jobs`);
+      if (response.data.success) {
+        const completedRequests = response.data.requests;
+        setCompletedJobs(completedRequests.map(request => ({
+          _id: request._id,
+          serviceRequest: {
+            typeOfWork: request.typeOfWork,
+            budget: request.budget
+          },
+          requester: request.requester,
+          provider: request.serviceProvider,
+          createdAt: request.createdAt,
+          updatedAt: request.updatedAt || request.completedAt,
+          status: 'Complete'
+        })));
+      }
+    } catch (error) {
+      console.log("Error fetching completed jobs:", error);
+      setCompletedJobs([]);
+    } finally {
+      setLoadingJobs(false);
+    }
+  };
+
   useEffect(() => {
     fetchReviews();
-  }, []);
+    fetchCompletedJobs();
+  }, [userId]);
 
   const renderStars = (rating) => (
     <View style={styles.starsRow}>
@@ -77,6 +108,27 @@ export default function ProfileReviews({ route, navigation }) {
           ))}
         </View>
       )}
+    </View>
+  );
+
+  const renderJob = ({ item }) => (
+    <View style={styles.jobCard}>
+      <View style={styles.jobHeader}>
+        <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+        <View style={{ marginLeft: 10, flex: 1 }}>
+          <Text style={styles.jobService}>{item.serviceRequest?.typeOfWork || "Service"}</Text>
+          <Text style={styles.jobClient}>
+            Client: {item.requester?.firstName || ""} {item.requester?.lastName || ""}{" "}
+            {item.requester?.firstName || item.requester?.lastName ? "" : item.requester?.username || "Unknown Client"}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.jobDetails}>
+        <Text style={styles.jobDate}>
+          Completed: {new Date(item.updatedAt || item.createdAt).toLocaleDateString()}
+        </Text>
+        <Text style={styles.jobBudget}>₱{item.serviceRequest?.budget || "0"}</Text>
+      </View>
     </View>
   );
 
@@ -174,6 +226,24 @@ export default function ProfileReviews({ route, navigation }) {
           />
         )}
       </View>
+
+      {/* Completed Jobs Section */}
+      <View style={styles.jobsSection}>
+        <Text style={styles.reviewsTitle}>Completed Jobs</Text>
+
+        {loadingJobs ? (
+          <Text style={styles.emptyText}>Loading completed jobs...</Text>
+        ) : completedJobs.length === 0 ? (
+          <Text style={styles.emptyText}>No completed jobs yet.</Text>
+        ) : (
+          <FlatList
+            data={completedJobs}
+            keyExtractor={(item) => item._id}
+            renderItem={renderJob}
+            scrollEnabled={false}
+          />
+        )}
+      </View>
     </ScrollView>
   );
 }
@@ -250,6 +320,54 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 12,
     color: "#222",
+  },
+
+  /* Jobs */
+  jobsSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    borderTopWidth: 1,
+    borderColor: "#eee",
+  },
+  jobCard: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  jobHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  jobService: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#222",
+  },
+  jobClient: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 2,
+  },
+  jobDetails: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  jobDate: {
+    fontSize: 12,
+    color: "#888",
+  },
+  jobBudget: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4CAF50",
   },
   reviewCard: {
     backgroundColor: "#fafafa",

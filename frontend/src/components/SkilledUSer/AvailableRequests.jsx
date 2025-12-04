@@ -43,31 +43,17 @@ const AvailableRequests = ({ searchTerm, filterStatus, filterServiceType, filter
         console.log('AvailableRequests - matching-requests endpoint not available, trying alternatives');
       }
 
-      // Fallback: Try to get all available requests
+      // Fallback: Try to get service requests (this will get filtered requests for the provider)
       try {
-        const { data } = await api.get("/settings/available-requests");
+        const { data } = await api.get("/user/service-requests", { withCredentials: true });
         if (data.success && data.requests) {
-          console.log('AvailableRequests - Got requests from available-requests endpoint:', data.requests.length);
+          console.log('AvailableRequests - Got requests from service-requests endpoint:', data.requests.length);
           setRequests(data.requests);
           setLoading(false);
           return;
         }
-      } catch (availableError) {
-        console.log('AvailableRequests - available-requests endpoint not available either');
-      }
-
-      // Last resort: Try to get from general requests endpoint and filter client-side
-      try {
-        const { data } = await api.get("/user/all-service-requests");
-        if (data.success && data.requests) {
-          const availableRequests = data.requests.filter(req => req.status === "Waiting" || req.status === "Open");
-          console.log('AvailableRequests - Filtered available requests from all requests:', availableRequests.length);
-          setRequests(availableRequests);
-          setLoading(false);
-          return;
-        }
-      } catch (allRequestsError) {
-        console.log('AvailableRequests - all-service-requests endpoint not available');
+      } catch (requestsError) {
+        console.log('AvailableRequests - service-requests endpoint not available either');
       }
 
       // If all endpoints fail, set empty array
