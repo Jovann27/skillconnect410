@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "seed": "node seeder.js",
     "lint": "eslint .",
-    "build": "echo 'No build step required for Node.js backend'",
+    "build": "echo 'Build completed - ready for deployment'",
+    "render-build": "npm install && npm run seed",
     "vercel-build": "echo 'Vercel build completed'"
   },
   "author": "",
