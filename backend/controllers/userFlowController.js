@@ -541,14 +541,27 @@ export const updateServiceProfile = catchAsyncError(async (req, res, next) => {
   user.serviceDescription = description || user.serviceDescription;
 
   // Update skills array to include the selected service for matching
-  if (service) {
-    // Initialize skills array if it doesn't exist
-    if (!user.skills) {
-      user.skills = [];
-    }
-    // Add the service to skills if not already present
-    if (!user.skills.includes(service)) {
-      user.skills.push(service);
+  if (service && typeof service === 'string' && service.trim()) {
+    try {
+      // Ensure skills is an array
+      if (!Array.isArray(user.skills)) {
+        user.skills = [];
+      }
+
+      const trimmedService = service.trim();
+
+      // Add the service to skills if not already present and if we have space
+      if (!user.skills.includes(trimmedService)) {
+        // For service providers, limit to 3 skills max
+        if (user.role === "Service Provider" && user.skills.length >= 3) {
+          // If skills are full, remove the oldest one and add new one
+          user.skills.shift();
+        }
+        user.skills.push(trimmedService);
+      }
+    } catch (skillsError) {
+      console.error("Error updating user skills:", skillsError);
+      // Continue with the update even if skills update fails
     }
   }
 

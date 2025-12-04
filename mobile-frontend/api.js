@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Constants for configuration
-const API_BASE_URL = 'http://192.168.1.12:4000/api/v1';
+const API_BASE_URL = 'http://10.21.79.204:4000/api/v1';
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BASE_DELAY = 1000; // 1 second base delay
 const RETRY_MULTIPLIER = 2; // Exponential backoff multiplier

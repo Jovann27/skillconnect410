@@ -1,25 +1,48 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, ActivityIndicator } from "react-native";
 import apiClient from "../api";
+import { socket } from "../utils/socket";
+import { getImageUrl } from "../utils/imageUtils";
 
 export default function AcceptedScreen({ route, navigation }) {
   const { serviceRequestId } = route.params || {};
   const [serviceRequest, setServiceRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     if (serviceRequestId) {
       fetchServiceRequest();
+      setupSocketListeners();
     } else {
       setError("No service request ID provided");
       setLoading(false);
     }
+
+    return () => {
+      cleanupSocketListeners();
+    };
   }, [serviceRequestId]);
+
+  const setupSocketListeners = () => {
+    if (socket && serviceRequestId) {
+      socket.emit("join-service-request", serviceRequestId);
+      socket.on("service-request-updated", handleServiceRequestUpdate);
+    }
+  };
+
+  const cleanupSocketListeners = () => {
+    if (socket && serviceRequestId) {
+      socket.off("service-request-updated", handleServiceRequestUpdate);
+      socket.emit("leave-service-request", serviceRequestId);
+    }
+  };
 
   const fetchServiceRequest = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await apiClient.get(`/user/service-request/${serviceRequestId}`);
       if (response.data.success) {
         setServiceRequest(response.data.request);
@@ -31,6 +54,13 @@ export default function AcceptedScreen({ route, navigation }) {
       setError(err.response?.data?.message || "Failed to load order details");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleServiceRequestUpdate = (updateData) => {
+    if (updateData?.requestId === serviceRequestId) {
+      // Refresh data when service request is updated
+      fetchServiceRequest();
     }
   };
 
@@ -49,7 +79,7 @@ export default function AcceptedScreen({ route, navigation }) {
             try {
               await apiClient.delete(`/user/service-request/${serviceRequest._id}/cancel`);
               Alert.alert("Success", "Order cancelled successfully");
-              navigation.navigate("PlaceOrder");
+              navigation.goBack();
             } catch (err) {
               console.error("Error cancelling order:", err);
               Alert.alert("Error", "Failed to cancel the order. Please try again.");
@@ -109,7 +139,7 @@ export default function AcceptedScreen({ route, navigation }) {
       <View style={styles.workerBox}>
         <Image
           source={{
-            uri: worker?.profilePic || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+            uri: getImageUrl(worker?.profilePic) || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
           }}
           style={styles.workerImage}
         />

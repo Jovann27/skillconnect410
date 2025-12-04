@@ -13,6 +13,7 @@ const WaitingForWorkerPage = ({ requestData }) => {
   const [availableRequests, setAvailableRequests] = useState([]);
   const [requestClients, setRequestClients] = useState({});
   const [requestStats, setRequestStats] = useState({});
+  const [clientReviews, setClientReviews] = useState({});
   const [applyingTo, setApplyingTo] = useState(null);
   const [currentProvider, setCurrentProvider] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,7 +23,7 @@ const WaitingForWorkerPage = ({ requestData }) => {
   const fetchCurrentProvider = async () => {
     try {
       console.log('WaitingForWorkerPage - Fetching current provider profile');
-      const response = await api.get('/user/profile');
+      const response = await api.get('/user/me');
       if (response.data?.user) {
         const provider = response.data.user;
         console.log('WaitingForWorkerPage - Current provider:', provider);
@@ -118,62 +119,34 @@ const WaitingForWorkerPage = ({ requestData }) => {
     }
   };
 
-  // Fetch reviews and stats for providers
-  const fetchProviderData = async (providers) => {
-    if (!providers?.length) return;
-    const reviews = {};
-    const stats = {};
-    const batchSize = 5;
+  // Fetch stats for the matched requests
+  const fetchRequestStats = async () => {
+    const stats = {
+      totalRequests: availableRequests.length,
+      matchedBySkills: 0,
+      matchedByBudget: 0,
+      averageBudget: 0
+    };
 
-    console.log('WaitingForWorkerPage - Fetching provider data for', providers.length, 'providers');
+    if (availableRequests.length > 0 && currentProvider) {
+      let totalBudget = 0;
+      availableRequests.forEach(request => {
+        const skillsMatch = currentProvider.skills?.some(skill =>
+          skill.toLowerCase().includes(request.typeOfWork?.toLowerCase()) ||
+          request.typeOfWork?.toLowerCase().includes(skill.toLowerCase())
+        );
+        const budgetMatch = currentProvider.serviceRate &&
+          Math.abs(request.budget - currentProvider.serviceRate) / currentProvider.serviceRate <= 0.5;
 
-    for (let i = 0; i < providers.length; i += batchSize) {
-      const batch = providers.slice(i, i + batchSize);
-      await Promise.all(batch.map(async (provider) => {
-        if (!provider?._id) return;
-
-        try {
-          // Try to get provider profile data first
-          console.log('WaitingForWorkerPage - Fetching profile for provider:', provider._id);
-          const profileResponse = await api.get(`/user/profile/${provider._id}`);
-          if (profileResponse.data?.user) {
-            const profileData = profileResponse.data.user;
-            // Update the provider data with complete profile info
-            provider.profilePic = profileData.profilePic || provider.profilePic;
-            provider.skills = profileData.skills || provider.skills;
-            provider.serviceDescription = profileData.serviceDescription || provider.serviceDescription;
-            provider.serviceRate = profileData.serviceRate || provider.serviceRate;
-            provider.isOnline = profileData.isOnline || provider.isOnline;
-            console.log('WaitingForWorkerPage - Updated provider profile:', provider._id, profileData);
-          }
-        } catch (profileError) {
-          console.log('WaitingForWorkerPage - Profile endpoint not available, using existing data for provider:', provider._id);
-        }
-
-        try {
-          // Try to get review stats
-          const statsResponse = await api.get(`/review/stats/${provider._id}`);
-          stats[provider._id] = statsResponse.data?.stats || { totalReviews: 0, averageRating: 0 };
-        } catch (statsError) {
-          console.log('WaitingForWorkerPage - Review stats not available for provider:', provider._id);
-          stats[provider._id] = { totalReviews: 0, averageRating: 0 };
-        }
-
-        try {
-          // Try to get recent reviews
-          const reviewsResponse = await api.get(`/review/user/${provider._id}`);
-          const reviewData = reviewsResponse.data?.reviews || [];
-          reviews[provider._id] = Array.isArray(reviewData) ? reviewData.slice(0, 3) : [];
-        } catch (reviewsError) {
-          console.log('WaitingForWorkerPage - Reviews not available for provider:', provider._id);
-          reviews[provider._id] = [];
-        }
-      }));
+        if (skillsMatch) stats.matchedBySkills++;
+        if (budgetMatch) stats.matchedByBudget++;
+        totalBudget += request.budget || 0;
+      });
+      stats.averageBudget = totalBudget / availableRequests.length;
     }
 
-    console.log('WaitingForWorkerPage - Completed fetching provider data');
-    setProviderStats(stats);
-    setProviderReviews(reviews);
+    console.log('WaitingForWorkerPage - Request stats:', stats);
+    setRequestStats(stats);
   };
 
   // Offer request to specific provider
@@ -263,6 +236,13 @@ const WaitingForWorkerPage = ({ requestData }) => {
       };
     }
   }, []);
+
+  // Calculate stats when requests or provider data changes
+  useEffect(() => {
+    if (availableRequests.length >= 0 && currentProvider) {
+      fetchRequestStats();
+    }
+  }, [availableRequests, currentProvider]);
 
   const renderStars = (rating) => {
     return "★".repeat(Math.round(rating)) + "☆".repeat(5 - Math.round(rating));
@@ -457,26 +437,44 @@ const WaitingForWorkerPage = ({ requestData }) => {
           {/* RIGHT COLUMN - Stats & Info */}
           <div className="sidebar">
 
-              <div className="actions-card">
-                <div className="info-card">
-                  <h4>How Matching Works</h4>
-                  <p>You see jobs that match:</p>
-                  <ul style={{paddingLeft: 20, margin: 0}}>
-                    <li>Your listed skills</li>
-                    <li>Jobs within 50% of your rate</li>
-                    <li>Available requests only</li>
-                  </ul>
-                </div>
+            <div className="actions-card">
+              <div className="info-card">
+                <h4>How Matching Works</h4>
+                <p>You see jobs that match:</p>
+                <ul style={{paddingLeft: 20, margin: 0}}>
+                  <li>Your listed skills</li>
+                  <li>Jobs within 50% of your rate</li>
+                  <li>Available requests only</li>
+                </ul>
+              </div>
 
-                {currentProvider && (
-                  <div className="info-card" style={{marginTop: 20}}>
-                    <h4>Your Stats</h4>
-                    <p>Skills: {currentProvider.skills?.length || 0}</p>
-                    <p>Rate: ₱{currentProvider.serviceRate || "Not set"}</p>
+              <div className="info-card" style={{marginTop: 20}}>
+                <h4>Request Statistics</h4>
+                {requestStats.totalRequests !== undefined ? (
+                  <div>
+                    <p><strong>Total Jobs:</strong> {requestStats.totalRequests}</p>
+                    <p><strong>Matched by Skills:</strong> {requestStats.matchedBySkills || 0}</p>
+                    <p><strong>Matched by Budget:</strong> {requestStats.matchedByBudget || 0}</p>
+                    {requestStats.averageBudget > 0 && (
+                      <p><strong>Avg. Budget:</strong> ₱{requestStats.averageBudget.toFixed(0)}</p>
+                    )}
                   </div>
+                ) : (
+                  <p>Loading statistics...</p>
                 )}
               </div>
+
+              {currentProvider && (
+                <div className="info-card" style={{marginTop: 20}}>
+                  <h4>Your Profile Stats</h4>
+                  <p><strong>Skills:</strong> {currentProvider.skills?.length || 0}</p>
+                  <p><strong>Rate:</strong> ₱{currentProvider.serviceRate || "Not set"}</p>
+                  <p><strong>Online:</strong> {currentProvider.isOnline ? "Yes" : "No"}</p>
+                </div>
+              )}
+            </div>
           </div>
+
         </div>
       </div>
     </div>

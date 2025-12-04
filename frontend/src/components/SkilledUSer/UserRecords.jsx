@@ -4,7 +4,7 @@ import api from "../../api";
 import { useMainContext } from "../../mainContext";
 import { usePopup } from "../../components/Layout/PopupContext";
 import RequestDetailPopup from "./RequestDetailPopup";
-import AcceptedOrderWeb from "./AcceptedOrderWeb";
+import AcceptedOrderPage from "./AcceptedOrderPage";
 import MyRequests from './MyRequests';
 import AvailableRequests from './AvailableRequests';
 import WorkRecords from './WorkRecords';
@@ -385,8 +385,9 @@ const UserWorkRecord = () => {
       />
 
       {/* Accepted Order Popup */}
-      <AcceptedOrderWeb
-        request={selectedAcceptedOrder}
+      <AcceptedOrderPage
+        requestData={selectedAcceptedOrder}
+        isModal={true}
         isOpen={acceptedOrderPopupOpen}
         onClose={() => {
           setAcceptedOrderPopupOpen(false);

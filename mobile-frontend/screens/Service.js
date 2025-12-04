@@ -305,7 +305,11 @@ export default function MyServiceScreen({ navigation }) {
         Alert.alert("Request Accepted", `You accepted ${client.name}'s request.`, [
           {
             text: "OK",
-            onPress: () => navigation.navigate("ClientAccepted", { client }),
+            onPress: () => navigation.navigate("ClientAccepted", {
+              client,
+              request: response.data.request,
+              bookingId: response.data.booking._id
+            }),
           },
         ]);
         loadData();

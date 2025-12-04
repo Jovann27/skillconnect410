@@ -1,8 +1,11 @@
 import User from "../models/userSchema.js";
 import JobFair from "../models/jobFairSchema.js";
 import ServiceRequest from "../models/serviceRequest.js";
+import Booking from "../models/booking.js";
 import Settings from "../models/settings.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
+import { sendNotification } from "../utils/socketNotify.js";
+import { io, onlineUsers } from "../server.js";
 
 export const getSkilledUsers = async (req, res) => {
   try {
@@ -101,7 +104,7 @@ export const getAllRequests = async (req, res) => {
 export const acceptServiceRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const request = await ServiceRequest.findById(id);
+    const request = await ServiceRequest.findById(id).populate('requester');
 
     if (!request)
       return res.status(404).json({ success: false, message: "Service request not found" });
@@ -110,20 +113,49 @@ export const acceptServiceRequest = async (req, res) => {
       return res.status(401).json({ success: false, message: "Unauthorized. Please log in first." });
     }
 
+    if (request.status !== "Waiting")
+      return res.status(400).json({ success: false, message: "Request is not available" });
+
+    // Ensure provider
+    const provider = await User.findById(req.user._id);
+    if (!provider || provider.role !== "Service Provider")
+      return res.status(403).json({ success: false, message: "Not a service provider" });
+
     // If already assigned to a provider, prevent re-accepting
     if (request.serviceProvider)
       return res.status(400).json({ success: false, message: "Request already accepted" });
+
+    // Create booking
+    const booking = await Booking.create({
+      requester: request.requester._id,
+      provider: req.user._id,
+      serviceRequest: request._id,
+      status: "Working",
+    });
 
     // Assign current user as the service provider and mark as Working (confirmed)
     request.serviceProvider = req.user._id;
     request.acceptedBy = req.user._id; // backward compatibility
     request.status = "Working";
+    request.eta = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
 
     await request.save();
 
-    res.json({ success: true, message: "Service request accepted", request });
+    // Notify requester
+    await sendNotification(
+      request.requester._id,
+      "Request Accepted",
+      `Your "${request.typeOfWork}" request has been accepted by ${provider.firstName} ${provider.lastName}`,
+      { requestId: request._id, bookingId: booking._id, type: "service-request-accepted" }
+    );
+
+    // Emit socket events for real-time updates
+    io.emit("service-request-updated", { requestId: request._id, action: "accepted" });
+    io.emit("booking-updated", { bookingId: booking._id, action: "created" });
+
+    res.json({ success: true, message: "Service request accepted", request, booking });
   } catch (err) {
-    console.error("❌ Error updating service request:", err);
+    console.error("❌ Error accepting service request:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };

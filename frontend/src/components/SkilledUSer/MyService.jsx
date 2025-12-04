@@ -372,19 +372,19 @@ const MyService = () => {
         console.log('MyService: Not authorized or no user, skipping service fetch');
         return;
       }
-      
+
       console.log('MyService: Fetching user services...');
       try {
         const response = await api.get('/user/services');
         console.log('MyService: User services response:', response.data);
-        
+
         if (response.data.success && response.data.services && Array.isArray(response.data.services)) {
           // Services from user's services array in database
           // Expected structure: [{ _id, name, rate, description }, ...]
           const services = response.data.services.filter(service => service && service.name);
           console.log('MyService: Filtered services:', services);
           console.log('MyService: Services count:', services.length);
-          
+
           if (services.length > 0) {
             setPredefinedServices(services);
             console.log('MyService: Set predefinedServices to user services');
@@ -433,6 +433,26 @@ const MyService = () => {
     };
     fetchUserServices();
   }, [user, isAuthorized]);
+
+  // Ensure current service is always available in the select options
+  useEffect(() => {
+    if (formData.service && predefinedServices.length > 0) {
+      const hasCurrentService = predefinedServices.some(s => s.name === formData.service);
+      if (!hasCurrentService) {
+        const updatedServices = [
+          {
+            name: formData.service,
+            rate: formData.rate || 0,
+            description: formData.description || '',
+            _id: 'current-service'
+          },
+          ...predefinedServices
+        ];
+        setPredefinedServices(updatedServices);
+        console.log('MyService: Added current service to predefinedServices');
+      }
+    }
+  }, [formData.service, formData.rate, formData.description, predefinedServices]);
 
   const handleServiceSelect = async (serviceName) => {
     if (!serviceName) {

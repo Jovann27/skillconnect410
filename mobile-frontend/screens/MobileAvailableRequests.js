@@ -10,6 +10,23 @@ const MobileAvailableRequests = ({ searchTerm, filterStatus, filterServiceType, 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userServices, setUserServices] = useState([]);
+
+  const fetchUserServices = async () => {
+    try {
+      const { data } = await apiClient.get("/user/services", { withCredentials: true });
+      if (data.success && data.services) {
+        setUserServices(data.services);
+        console.log("MobileAvailableRequests - User services loaded:", data.services.map(s => s.name));
+      } else {
+        console.warn("MobileAvailableRequests - No services found for user");
+        setUserServices([]);
+      }
+    } catch (err) {
+      console.error("MobileAvailableRequests - Error fetching user services:", err);
+      setUserServices([]);
+    }
+  };
 
   const fetchCurrentRequests = async () => {
     try {
@@ -25,7 +42,12 @@ const MobileAvailableRequests = ({ searchTerm, filterStatus, filterServiceType, 
   };
 
   useEffect(() => {
-    fetchCurrentRequests();
+    const initializeData = async () => {
+      await fetchUserServices();
+      await fetchCurrentRequests();
+    };
+
+    initializeData();
 
     // Listen for real-time updates
     if (socket && typeof socket.on === 'function') {
@@ -61,6 +83,19 @@ const MobileAvailableRequests = ({ searchTerm, filterStatus, filterServiceType, 
       return false;
     }
 
+    // Match against user's services
+    const matchesUserServices = userServices.length > 0
+      ? userServices.some(service =>
+          request.typeOfWork?.toLowerCase().includes(service.name?.toLowerCase()) ||
+          service.name?.toLowerCase().includes(request.typeOfWork?.toLowerCase())
+        )
+      : true; // If no user services, show all requests
+
+    if (!matchesUserServices) {
+      console.log("Excluding request not matching user's services:", request._id, "Request service:", request.typeOfWork, "User services:", userServices.map(s => s.name));
+      return false;
+    }
+
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch = request.typeOfWork?.toLowerCase().includes(searchLower) ||
                           request.requester?.firstName?.toLowerCase().includes(searchLower) ||
@@ -76,7 +111,7 @@ const MobileAvailableRequests = ({ searchTerm, filterStatus, filterServiceType, 
     const matchesBudget = (!filterBudgetRange.min || request.budget >= parseFloat(filterBudgetRange.min)) &&
                          (!filterBudgetRange.max || request.budget <= parseFloat(filterBudgetRange.max));
 
-    const result = isAvailableRequest && isNotOwnRequest && matchesSearch && matchesStatus && matchesServiceType && matchesBudget;
+    const result = isAvailableRequest && isNotOwnRequest && matchesUserServices && matchesSearch && matchesStatus && matchesServiceType && matchesBudget;
     if (result) {
       console.log("Request passed filter:", request._id, "Status:", request.status, "Not own request:", isNotOwnRequest);
     }
