@@ -14,16 +14,18 @@ import Chat from "./models/chat.js";
 import Booking from "./models/booking.js";
 import { initializeSocketNotify } from "./utils/socketNotify.js";
 
-// Initialize database connection
-dbConnection();
-
-// Check and update expired service requests on server start
-checkAndUpdateExpiredRequests().then(count => {
-  if (count > 0) {
-    console.log(`Server startup: Updated ${count} expired service requests`);
-  }
+// Initialize database connection and then check expired requests
+dbConnection().then(() => {
+  // Check and update expired service requests on server start
+  checkAndUpdateExpiredRequests().then(count => {
+    if (count > 0) {
+      console.log(`Server startup: Updated ${count} expired service requests`);
+    }
+  }).catch(error => {
+    console.error("Error during server startup expiration check:", error);
+  });
 }).catch(error => {
-  console.error("Error during server startup expiration check:", error);
+  console.error("Database connection failed:", error);
 });
 
 // For Vercel deployment, export the app
