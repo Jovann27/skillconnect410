@@ -1,6 +1,0 @@
-node_modules
-.vercel
-.env
-backend/.env
-frontend/.env
-mobile-frontend/.env

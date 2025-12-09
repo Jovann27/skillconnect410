@@ -177,6 +177,7 @@ router.post('/review', isUserAuthenticated, isUserVerified, leaveReview);
 
 // Service Request routes
 router.get('/service-requests', isUserAuthenticated, isUserVerified, getServiceRequests);
+router.get('/available-service-requests', isUserAuthenticated, isUserVerified, getAvailableServiceRequests);
 router.post('/post-service-request', isUserAuthenticated, isUserVerified, postServiceRequest);
 router.get('/user-service-requests', isUserAuthenticated, isUserVerified, getUserServiceRequests);
 router.get('/service-request/:id', isUserAuthenticated, isUserVerified, getServiceRequest);

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useMainContext } from '../mainContext';
 import api from '../api';
 import socket from '../utils/socket';
-import './ChatIcon.css';
 import { FaFacebookMessenger } from 'react-icons/fa';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { MdClose } from 'react-icons/md';
@@ -41,6 +40,613 @@ const ChatIcon = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+
+  const styles = {
+    navbarIconBtn: {
+      position: 'relative',
+      width: '40px',
+      height: '40px',
+      display: 'flex',
+      padding: '3px 2px 0 2px',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      borderRadius: '20px',
+      transition: 'all 0.3s ease',
+      marginRight: '10px',
+      color: '#ffffff',
+      fontSize: '20px',
+      border: 'none',
+      background: 'transparent'
+    },
+    navbarIconBtnHover: {
+      transform: 'scale(1.1)',
+      background: '#e4e3e3',
+      color: '#111111',
+      boxShadow: '0 6px 25px rgba(0, 0, 0, 0.2)'
+    },
+    chatBadge: {
+      position: 'absolute',
+      top: '-5px',
+      right: '-5px',
+      background: '#ff4757',
+      color: 'white',
+      borderRadius: '50%',
+      width: '25px',
+      height: '25px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '14px',
+      fontWeight: 'bold'
+    },
+    chatPanel: {
+      position: 'fixed',
+      top: '70px',
+      right: '0',
+      width: '520px',
+      height: '616px',
+      background: '#f3cde3',
+      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)',
+      display: 'flex',
+      flexDirection: 'column',
+      zIndex: '1001',
+      overflow: 'hidden'
+    },
+    chatHeader: {
+      background: 'linear-gradient(135deg, #ea6692 0%, #e667c6 100%)',
+      color: 'white',
+      padding: '12px 15px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: '10px',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+    },
+    backButton: {
+      background: 'none',
+      border: 'none',
+      color: 'white',
+      fontSize: '20px',
+      cursor: 'pointer',
+      padding: '4px 6px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'all 0.2s'
+    },
+    backButtonHover: {
+      transform: 'scale(1.15)'
+    },
+    headerTitleSection: {
+      flex: '1',
+      textAlign: 'center'
+    },
+    chatHeaderTitle: {
+      margin: '0',
+      fontSize: '16px',
+      fontWeight: '600'
+    },
+    chatHeaderActions: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px'
+    },
+    statusBadge: {
+      fontSize: '12px',
+      padding: '4px 10px',
+      borderRadius: '12px',
+      backgroundColor: '#FFA500',
+      fontWeight: '600',
+      textTransform: 'capitalize',
+      color: 'white'
+    },
+    statusBadgeAvailable: {
+      backgroundColor: '#4CAF50'
+    },
+    statusBadgeWorking: {
+      backgroundColor: '#FFA500'
+    },
+    statusBadgeComplete: {
+      backgroundColor: '#2196F3'
+    },
+    statusBadgeCancelled: {
+      backgroundColor: '#f44336'
+    },
+    userMenuBtn: {
+      background: 'none',
+      border: 'none',
+      color: 'white',
+      cursor: 'pointer',
+      padding: '6px 8px',
+      borderRadius: '4px',
+      transition: 'all 0.2s',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '18px'
+    },
+    userMenuBtnHover: {
+      background: 'rgba(255, 255, 255, 0.15)',
+      transform: 'scale(1.05)'
+    },
+    headerActions: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px'
+    },
+    helpHeaderBtn: {
+      border: 'none',
+      color: 'white',
+      cursor: 'pointer',
+      padding: '8px',
+      borderRadius: '50%',
+      width: '35px',
+      height: '35px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'all 0.2s',
+      background: 'rgba(255, 255, 255, 0.1)'
+    },
+    helpHeaderBtnHover: {
+      transform: 'scale(1.1)',
+      background: 'rgba(255, 255, 255, 0.2)'
+    },
+    closeHeaderBtn: {
+      border: 'none',
+      color: 'white',
+      cursor: 'pointer',
+      padding: '8px',
+      fontWeight: '600',
+      borderRadius: '50%',
+      width: '35px',
+      height: '35px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'all 0.2s',
+      background: 'rgba(255, 255, 255, 0.1)'
+    },
+    closeHeaderBtnHover: {
+      transform: 'scale(1.1)',
+      background: 'rgba(255, 255, 255, 0.2)'
+    },
+    userMenuDropdown: {
+      position: 'absolute',
+      top: '65px',
+      right: '0px',
+      background: 'white',
+      borderRadius: '8px',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+      border: '1px solid #e2e8f0',
+      zIndex: '1002',
+      minWidth: '180px',
+      overflow: 'hidden'
+    },
+    userMenuItem: {
+      width: '100%',
+      padding: '12px 16px',
+      background: 'none',
+      border: 'none',
+      textAlign: 'left',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      color: '#374151',
+      transition: 'background-color 0.2s',
+      borderBottom: '1px solid #f3f4f6'
+    },
+    userMenuItemLast: {
+      width: '100%',
+      padding: '12px 16px',
+      background: 'none',
+      border: 'none',
+      textAlign: 'left',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      color: '#374151',
+      transition: 'background-color 0.2s'
+    },
+    userMenuItemHover: {
+      background: '#f9fafb',
+      color: '#1f2937'
+    },
+    userMenuItemActive: {
+      background: '#f3f4f6'
+    },
+    messagesContainer: {
+      flex: '1',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    },
+    loadingText: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '12px',
+      padding: '20px'
+    },
+    errorText: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '20px'
+    },
+    chatList: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px',
+      padding: '15px',
+      overflowY: 'auto',
+      height: '100%'
+    },
+    chatItem: {
+      padding: '15px',
+      border: '1px solid #e0e0e0',
+      borderRadius: '12px',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      background: '#fafafa',
+      position: 'relative'
+    },
+    chatItemHover: {
+      background: '#f0f0f0',
+      borderColor: '#667eea',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+    },
+    chatItemHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '8px'
+    },
+    chatItemHeaderH4: {
+      margin: '0',
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#333'
+    },
+    chatItemHeaderSmall: {
+      fontSize: '14px',
+      color: '#666'
+    },
+    chatItemContent: {
+      marginBottom: '5px'
+    },
+    serviceName: {
+      fontSize: '14px',
+      color: '#667eea',
+      fontWeight: '500',
+      margin: '0 0 5px 0'
+    },
+    lastMessage: {
+      fontSize: '15px',
+      color: '#666',
+      margin: '0',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    },
+    noMessages: {
+      fontSize: '15px',
+      color: '#999',
+      fontStyle: 'italic',
+      margin: '0'
+    },
+    unreadBadge: {
+      position: 'absolute',
+      top: '10px',
+      right: '10px',
+      background: '#ff4757',
+      color: 'white',
+      borderRadius: '50%',
+      width: '20px',
+      height: '20px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '13px',
+      fontWeight: 'bold'
+    },
+    chatMessages: {
+      flex: '1',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%'
+    },
+    messagesContainerInner: {
+      flex: '1',
+      overflowY: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
+      background: '#dd8bbb4b'
+    },
+    error: {
+      color: '#ff6b6b',
+      textAlign: 'center',
+      padding: '10px',
+      background: '#2c2c2c',
+      borderRadius: '8px',
+      margin: '15px',
+      fontSize: '14px',
+      border: '1px solid #ff4757'
+    },
+    messageWrapper: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-start'
+    },
+    messageWrapperOwn: {
+      alignItems: 'flex-end'
+    },
+    messageTimestamp: {
+      fontSize: '12px',
+      color: '#999',
+      marginBottom: '6px',
+      textAlign: 'right',
+      marginRight: '8px'
+    },
+    message: {
+      display: 'flex',
+      alignItems: 'flex-end',
+      maxWidth: '75%',
+      animation: 'messageSlideIn 0.3s ease-out'
+    },
+    messageOwn: {
+      flexDirection: 'row-reverse'
+    },
+    messageOther: {
+      flexDirection: 'row'
+    },
+    messageAvatar: {
+      width: '32px',
+      height: '32px',
+      borderRadius: '50%',
+      margin: '0 8px',
+      objectFit: 'cover',
+      border: '2px solid #E0E0E0'
+    },
+    messageContent: {
+      padding: '10px 14px',
+      borderRadius: '18px',
+      maxWidth: '220px',
+      wordWrap: 'break-word',
+      position: 'relative',
+      fontSize: '14px',
+      lineHeight: '1.4'
+    },
+    messageContentOwn: {
+      background: 'linear-gradient(135deg, #007AFF 0%, #0056CC 100%)',
+      color: 'white',
+      borderBottomRightRadius: '4px',
+      boxShadow: '0 2px 8px rgba(0, 122, 255, 0.2)'
+    },
+    messageContentOther: {
+      background: '#FFFFFF',
+      color: '#000',
+      borderBottomLeftRadius: '4px',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+    },
+    messageStatus: {
+      position: 'absolute',
+      bottom: '-2px',
+      right: '-2px',
+      fontSize: '14px',
+      color: '#ccc'
+    },
+    typingIndicator: {
+      padding: '8px 12px',
+      background: '#e5e5ea',
+      borderRadius: '18px',
+      borderBottomLeftRadius: '4px',
+      alignSelf: 'flex-start',
+      fontStyle: 'italic',
+      color: '#666',
+      fontSize: '15px'
+    },
+    messageInputSection: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      padding: '12px 15px',
+      borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+      background: 'linear-gradient(135deg, #ea6692 0%, #e667c6 100%)'
+    },
+    messageInput: {
+      flex: '1',
+      padding: '12px 16px',
+      border: '1px solid #141313',
+      borderRadius: '24px',
+      outline: 'none',
+      fontSize: '14px',
+      background: '#F5F5F5',
+      color: '#000',
+      transition: 'all 0.2s',
+      fontFamily: 'inherit'
+    },
+    messageInputFocus: {
+      borderColor: '#DD8BBB',
+      background: '#FFFFFF',
+      boxShadow: '0 0 0 3px rgb(56, 48, 53)'
+    },
+    messageInputPlaceholder: {
+      color: '#313131'
+    },
+    sendButton: {
+      background: 'linear-gradient(135deg, #DD5A9F 0%, #E8579B 100%)',
+      color: 'white',
+      border: 'none',
+      borderRadius: '50%',
+      width: '42px',
+      height: '42px',
+      cursor: 'pointer',
+      fontSize: '16px',
+      transition: 'all 0.2s',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: '0',
+      boxShadow: '0 2px 8px rgba(221, 139, 187, 0.3)'
+    },
+    sendButtonHover: {
+      transform: 'scale(1.05)',
+      boxShadow: '0 4px 12px rgba(221, 139, 187, 0.4)'
+    },
+    sendButtonDisabled: {
+      opacity: '0.5',
+      cursor: 'not-allowed'
+    },
+    helpTopicsView: {
+      flex: '1',
+      padding: '15px',
+      overflowY: 'auto',
+      background: '#dd8bbb4b'
+    },
+    categorySection: {
+      marginBottom: '25px'
+    },
+    categoryTitle: {
+      fontSize: '18px',
+      fontWeight: '700',
+      color: '#333',
+      marginBottom: '15px',
+      paddingBottom: '8px',
+      borderBottom: '2px solid #667eea'
+    },
+    helpTopicItem: {
+      background: '#ffffff',
+      padding: '15px',
+      marginBottom: '10px',
+      borderRadius: '12px',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      border: '1px solid #e0e0e0',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between'
+    },
+    helpTopicItemHover: {
+      background: '#f8f9fa',
+      borderColor: '#667eea',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+    },
+    helpTopicContent: {
+      flex: '1'
+    },
+    helpTopicTitle: {
+      fontSize: '16px',
+      fontWeight: '600',
+      color: '#333',
+      margin: '0 0 5px 0'
+    },
+    helpTopicDesc: {
+      fontSize: '14px',
+      color: '#666',
+      margin: '0',
+      lineHeight: '1.4'
+    },
+    helpTopicArrow: {
+      fontSize: '18px',
+      color: '#999',
+      fontWeight: 'bold'
+    },
+    quickActions: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '8px',
+      marginTop: '10px'
+    },
+    quickActionButton: {
+      background: '#667eea',
+      color: 'white',
+      border: 'none',
+      padding: '8px 12px',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      transition: 'background-color 0.2s'
+    },
+    quickActionButtonHover: {
+      background: '#5a67d8'
+    },
+    browseTopicsButton: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#f8f9fa',
+      padding: '12px 20px',
+      borderRadius: '8px',
+      marginTop: '15px',
+      border: '1px solid #e9ecef',
+      cursor: 'pointer',
+      transition: 'all 0.2s'
+    },
+    browseTopicsButtonHover: {
+      background: '#e9ecef',
+      borderColor: '#667eea'
+    },
+    browseTopicsText: {
+      color: '#c20884',
+      fontSize: '14px',
+      fontWeight: '600',
+      marginLeft: '8px'
+    },
+    messageInputSupport: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      padding: '10px 15px',
+      borderTop: '1px solid #333',
+      background: '#dd8bbbad'
+    },
+    messageInputSupportInput: {
+      flex: '1',
+      padding: '10px 15px',
+      border: '1px solid #555',
+      borderRadius: '20px',
+      outline: 'none',
+      fontSize: '14px',
+      background: '#c9c9c9',
+      color: '#000000',
+      transition: 'border-color 0.2s'
+    },
+    messageInputSupportInputFocus: {
+      borderColor: '#000000'
+    },
+    messageInputSupportInputPlaceholder: {
+      color: '#474646'
+    },
+    sendBtn: {
+      background: '#007aff',
+      color: 'white',
+      border: 'none',
+      borderRadius: '50%',
+      width: '40px',
+      height: '40px',
+      cursor: 'pointer',
+      fontSize: '16px',
+      transition: 'all 0.2s',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    sendBtnHover: {
+      background: '#0056cc',
+      transform: 'scale(1.05)'
+    },
+    sendBtnDisabled: {
+      opacity: '0.5',
+      cursor: 'not-allowed',
+      transform: 'none'
+    }
+  };
 
   // Functions used in useEffect
 
@@ -629,10 +1235,15 @@ const ChatIcon = () => {
   return (
     <>
       {/* Chat Icon */}
-      <button className="navbar-icon-btn" onClick={toggleChat}>
+      <button
+        style={styles.navbarIconBtn}
+        onClick={toggleChat}
+        onMouseEnter={(e) => e.target.style = {...styles.navbarIconBtn, ...styles.navbarIconBtnHover}}
+        onMouseLeave={(e) => e.target.style = styles.navbarIconBtn}
+      >
         <FaFacebookMessenger size={24} />
         {totalUnreadCount > 0 && (
-          <span className="chat-badge">{totalUnreadCount}</span>
+          <span style={styles.chatBadge}>{totalUnreadCount}</span>
         )}
       </button>
 

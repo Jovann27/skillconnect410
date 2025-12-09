@@ -3,7 +3,6 @@ import { FaStar, FaRegStar } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import { getImageUrl } from '../../utils/imageUtils';
-import './dashboard-content.css';
 
 const ManageProfile = () => {
   const [user, setUser] = useState(null);

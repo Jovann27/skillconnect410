@@ -223,191 +223,13 @@ export const leaveReview = catchAsyncError(async (req, res, next) => {
 
 
 
-export const getServiceRequests = catchAsyncError(async (req, res, next) => {
-  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-
-  // Check if we should show all requests
-  const showAll = req.query.showAll === 'true';
-
-  // Get provider's details for matching
-  const provider = await User.findById(req.user._id);
-  if (!provider || provider.role !== "Service Provider") {
-    return next(new ErrorHandler("Not a service provider", 403));
-  }
-
-  // Check if provider is online (using isOnline instead of availability)
-  if (!provider.isOnline && !showAll) {
-    return res.status(200).json({
-      success: true,
-      requests: [],
-      message: "You are currently offline and cannot receive new requests."
-    });
-  }
-
-  // Get all active waiting requests (filter out expired ones)
-  const activeRequestsFilter = getActiveRequestsFilter();
-  const allRequests = await ServiceRequest.find({
-    ...activeRequestsFilter,
-    status: "Waiting"
-  })
-    .populate({
-      path: 'requester',
-      select: 'firstName lastName username email phone',
-      model: 'User'
-    })
-    .populate({
-      path: 'serviceProvider',
-      select: 'firstName lastName username email phone serviceRate',
-      model: 'User'
-    })
-    .sort({ createdAt: -1 });
-
-  let finalRequests = allRequests;
-
-  if (!showAll) {
-    const providerSkills = provider.skills || [];
-    const providerRate = provider.serviceRate || 0;
-    const rateTolerance = 200; // Allow ±200 peso tolerance for budget matching
-
-    // Get provider's current location from query params
-    const providerLat = req.query.lat ? parseFloat(req.query.lat) : null;
-    const providerLng = req.query.lng ? parseFloat(req.query.lng) : null;
-    const maxDistanceKm = 3; // Maximum distance in kilometers for location matching
-
-    // Helper function to calculate distance between two coordinates
-    const calculateDistance = (lat1, lng1, lat2, lng2) => {
-      const R = 6371; // Earth's radius in kilometers
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLng = (lng2 - lng1) * Math.PI / 180;
-      const a =
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLng/2) * Math.sin(dLng/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-    };
-
-    // Filter requests based on provider's skills, rate, and location (more lenient matching)
-    let filteredRequests = allRequests.filter(request => {
-      // Service/Skill Match: Check if provider's skills match the requested service
-      const skillMatch = providerSkills.length > 0
-        ? providerSkills.some(skill =>
-            request.typeOfWork?.toLowerCase().includes(skill.toLowerCase()) ||
-            skill.toLowerCase().includes(request.typeOfWork?.toLowerCase())
-          )
-        : true; // If provider has no skills listed, show all requests
-
-      // Rate Match: Check if request budget is within provider's rate tolerance
-      const rateMatch = (() => {
-        if (!request.budget || !providerRate) return true; // If no budget specified, consider it a match
-        const minRate = Math.max(0, providerRate - rateTolerance);
-        const maxRate = providerRate + rateTolerance;
-        return request.budget >= minRate && request.budget <= maxRate;
-      })();
-
-      // Location Match: Check if request location is within maximum distance
-      const locationMatch = (() => {
-        if (!providerLat || !providerLng || !request.location || !request.location.lat || !request.location.lng) {
-          return true; // If no location data available, consider it a match
-        }
-        const distance = calculateDistance(providerLat, providerLng, request.location.lat, request.location.lng);
-        return distance <= maxDistanceKm;
-      })();
-
-      return skillMatch && rateMatch && locationMatch;
-    });
-
-    // Also include requests specifically targeted to this provider (bypass normal matching)
-    const targetedRequests = await ServiceRequest.find({
-      status: "Waiting",
-      targetProvider: req.user._id
-    })
-    .populate({
-      path: 'requester',
-      select: 'firstName lastName username email phone',
-      model: 'User'
-    })
-    .populate({
-      path: 'serviceProvider',
-      select: 'firstName lastName username email phone serviceRate',
-      model: 'User'
-    })
-    .sort({ createdAt: -1 });
-
-    // Combine filtered requests with targeted requests (avoid duplicates)
-    const targetedIds = targetedRequests.map(r => r._id.toString());
-    finalRequests = [
-      ...targetedRequests,
-      ...filteredRequests.filter(r => !targetedIds.includes(r._id.toString()))
-    ];
-  }
-
-  res.status(200).json({
-    success: true,
-    requests: finalRequests,
-    debug: showAll ? {
-      totalRequests: finalRequests.length,
-      showAll: true,
-      message: "Showing all available requests in database"
-    } : {
-      totalRequests: finalRequests.length,
-      allWaitingRequests: allRequests.length,
-      filteredRequests: finalRequests.length,
-      targetedRequests: 0,
-      userId: req.user._id,
-      userRole: req.user.role,
-      userSkills: provider.skills || [],
-      providerRate: provider.serviceRate || 0,
-      availability: provider.isOnline ? "Available" : "Offline",
-      isOnline: provider.isOnline,
-      providerLocation: {
-        lat: req.query.lat || null,
-        lng: req.query.lng || null
-      },
-      maxDistanceKm: 3,
-      budgetRange: {
-        minRate: Math.max(0, (provider.serviceRate || 0) - 200),
-        maxRate: (provider.serviceRate || 0) + 200
-      },
-      sampleRequester: finalRequests[0]?.requester || null
-    }
-  });
-});
 
 
 
-export const getUserServiceRequests = catchAsyncError(async (req, res, next) => {
-  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-  const requests = await ServiceRequest.find({ requester: req.user._id })
-    .populate('serviceProvider', 'firstName lastName username phone profilePic')
-    .sort({ createdAt: -1 });
-  res.status(200).json({ success: true, requests });
-});
 
-export const getServiceRequest = catchAsyncError(async (req, res, next) => {
-  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-  const { id } = req.params;
 
-  // First check authorization without populate
-  const requestCheck = await ServiceRequest.findById(id);
-  if (!requestCheck) return next(new ErrorHandler("Service request not found", 404));
 
-  // Check if user is authorized to view this request
-  if (String(requestCheck.requester) !== String(req.user._id) &&
-      String(requestCheck.serviceProvider) !== String(req.user._id) &&
-      String(requestCheck.targetProvider) !== String(req.user._id) &&
-      req.user.role !== "admin") {
-    return next(new ErrorHandler("Not authorized to view this request", 403));
-  }
 
-  // Now populate and return
-  const request = await ServiceRequest.findById(id)
-    .populate('requester', 'firstName lastName username email phone')
-    .populate('serviceProvider', 'firstName lastName username email phone profilePic serviceRate')
-    .populate('targetProvider', 'firstName lastName username');
-
-  res.status(200).json({ success: true, request });
-});
 
 export const cancelServiceRequest = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
@@ -513,206 +335,9 @@ export const getBooking = catchAsyncError(async (req, res, next) => {
 
 
 
-export const getServiceProfile = catchAsyncError(async (req, res, next) => {
-  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
-  const user = await User.findById(req.user._id);
-  if (!user) return next(new ErrorHandler("User not found", 404));
 
-  const serviceProfile = {
-    service: user.service || '',
-    rate: user.serviceRate || '',
-    description: user.serviceDescription || '',
-    isOnline: user.isOnline !== false // default to true if not set
-  };
 
-  res.status(200).json({ success: true, data: serviceProfile });
-});
-
-export const updateServiceProfile = catchAsyncError(async (req, res, next) => {
-  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-
-  const { service, rate, description } = req.body;
-  const user = await User.findById(req.user._id);
-  if (!user) return next(new ErrorHandler("User not found", 404));
-
-  user.service = service || user.service;
-  user.serviceRate = rate || user.serviceRate;
-  user.serviceDescription = description || user.serviceDescription;
-
-  // Update skills array to include the selected service for matching
-  if (service) {
-    // Initialize skills array if it doesn't exist
-    if (!user.skills) {
-      user.skills = [];
-    }
-    // Add the service to skills if not already present
-    if (!user.skills.includes(service)) {
-      user.skills.push(service);
-    }
-  }
-
-  await user.save();
-
-  res.status(200).json({ success: true, message: "Service profile updated", data: { service, rate, description } });
-});
-
-export const updateServiceStatus = catchAsyncError(async (req, res, next) => {
-  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-
-  const { isOnline } = req.body;
-  const user = await User.findById(req.user._id);
-  if (!user) return next(new ErrorHandler("User not found", 404));
-
-  user.isOnline = isOnline;
-  await user.save();
-
-  res.status(200).json({ success: true, message: `Status updated to ${isOnline ? 'Online' : 'Offline'}` });
-});
-
-export const getMatchingRequests = catchAsyncError(async (req, res, next) => {
-  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-
-  const provider = await User.findById(req.user._id);
-  if (!provider || provider.role !== "Service Provider") return next(new ErrorHandler("Not a provider", 403));
-  if (!provider.isOnline) {
-    return res.status(200).json({
-      success: true,
-      requests: [],
-      message: "You are currently offline and cannot receive new requests."
-    });
-  }
-
-  // Get the selected service from query parameters
-  const selectedService = req.query.service || "";
-
-  // Get provider's current location from query parameters
-  const providerLat = req.query.lat ? parseFloat(req.query.lat) : null;
-  const providerLng = req.query.lng ? parseFloat(req.query.lng) : null;
-  const maxDistanceKm = 5; // Maximum distance in kilometers for location matching
-
-  // Get provider's service information
-  const providerService = provider.service || "";
-  const providerSkills = provider.skills || [];
-  const providerRate = provider.serviceRate || 0;
-  const rateTolerance = 200; // Allow ±200 peso tolerance for budget matching
-
-  // Get all active waiting requests
-  const activeRequestsFilter = getActiveRequestsFilter();
-  let query = {
-    ...activeRequestsFilter,
-    status: "Waiting"
-  };
-
-  // If a specific service is selected, filter requests by that service
-  if (selectedService) {
-    query.typeOfWork = { $regex: selectedService, $options: 'i' };
-  }
-
-  const allRequests = await ServiceRequest.find(query)
-    .populate({
-      path: 'requester',
-      select: 'firstName lastName username email phone',
-      model: 'User'
-    })
-    .sort({ createdAt: -1 });
-
-  // Helper function to calculate distance between two coordinates
-  const calculateDistance = (lat1, lng1, lat2, lng2) => {
-    const R = 6371; // Earth's radius in kilometers
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a =
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLng/2) * Math.sin(dLng/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
-
-  // Filter requests based on provider's skills, rate, and location
-  let matchingRequests = allRequests.filter(request => {
-    // Service/Skill Match: Check if provider's skills match the requested service
-    const skillMatch = providerSkills.length > 0
-      ? providerSkills.some(skill =>
-          request.typeOfWork?.toLowerCase().includes(skill.toLowerCase()) ||
-          skill.toLowerCase().includes(request.typeOfWork?.toLowerCase())
-        )
-      : true; // If provider has no skills listed, show all requests
-
-    // Rate Match: Check if request budget is within provider's rate tolerance
-    const rateMatch = (() => {
-      if (!request.budget || !providerRate) return true; // If no budget specified, consider it a match
-      const minRate = Math.max(0, providerRate - rateTolerance);
-      const maxRate = providerRate + rateTolerance;
-      return request.budget >= minRate && request.budget <= maxRate;
-    })();
-
-    // Location Match: Check if request location is within maximum distance
-    const locationMatch = (() => {
-      if (!providerLat || !providerLng || !request.location || !request.location.lat || !request.location.lng) {
-        return true; // If no location data available, consider it a match
-      }
-      const distance = calculateDistance(providerLat, providerLng, request.location.lat, request.location.lng);
-      return distance <= maxDistanceKm;
-    })();
-
-    return skillMatch && rateMatch && locationMatch;
-  });
-
-  // Also include requests specifically targeted to this provider (only if they match the selected service or no service is selected)
-  let targetedQuery = {
-    status: "Waiting",
-    targetProvider: req.user._id
-  };
-
-  if (selectedService) {
-    targetedQuery.typeOfWork = { $regex: selectedService, $options: 'i' };
-  }
-
-  const targetedRequests = await ServiceRequest.find(targetedQuery)
-  .populate({
-    path: 'requester',
-    select: 'firstName lastName username email phone',
-    model: 'User'
-  })
-  .sort({ createdAt: -1 });
-
-  // Combine matching requests with targeted requests (avoid duplicates)
-  const targetedIds = targetedRequests.map(r => r._id.toString());
-  const finalRequests = [
-    ...targetedRequests,
-    ...matchingRequests.filter(r => !targetedIds.includes(r._id.toString()))
-  ];
-
-  res.status(200).json({
-    success: true,
-    requests: finalRequests,
-    debug: {
-      totalRequests: allRequests.length,
-      matchingRequests: matchingRequests.length,
-      targetedRequests: targetedRequests.length,
-      finalRequests: finalRequests.length,
-      userId: req.user._id,
-      selectedService,
-      providerService,
-      providerSkills,
-      providerRate,
-      availability: provider.isOnline ? "Available" : "Offline",
-      isOnline: provider.isOnline,
-      providerLocation: {
-        lat: providerLat,
-        lng: providerLng
-      },
-      maxDistanceKm,
-      budgetRange: {
-        minRate: Math.max(0, providerRate - rateTolerance),
-        maxRate: providerRate + rateTolerance
-      },
-      message: selectedService ? `Returning requests filtered by service: ${selectedService}` : "Returning all matching requests"
-    }
-  });
-});
 
 export const getUserServices = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
@@ -723,59 +348,7 @@ export const getUserServices = catchAsyncError(async (req, res, next) => {
   res.json({ success: true, services: user.services });
 });
 
-export const updateServiceRequest = catchAsyncError(async (req, res, next) => {
-  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
-  const { id } = req.params;
-
-  const request = await ServiceRequest.findById(id);
-  if (!request) return next(new ErrorHandler("Service request not found", 404));
-
-  if (String(request.requester) !== String(req.user._id) && req.user.role !== "admin") {
-    return next(new ErrorHandler("Not authorized to update this request", 403));
-  }
-
-  // Only allow updates if status is Waiting (before acceptance)
-  if (request.status !== "Waiting") {
-    return next(new ErrorHandler("Cannot edit request that is in progress", 400));
-  }
-
-  const { name, address, phone, typeOfWork, preferredDate, time, budget, notes, location } = req.body;
-
-  request.name = name || request.name;
-  request.address = address || request.address;
-  request.phone = phone || request.phone;
-  request.typeOfWork = typeOfWork || request.typeOfWork;
-  request.preferredDate = preferredDate || request.preferredDate;
-  request.time = time || request.time;
-  request.budget = budget || request.budget;
-  request.notes = notes || request.notes;
-  request.location = location || request.location;
-
-  // Recalculate expiration date if preferredDate or time was updated
-  if (preferredDate || time) {
-    let expiresAt;
-    const dateToUse = preferredDate || request.preferredDate;
-    const timeToUse = time || request.time;
-
-    if (dateToUse) {
-      const [hours, minutes] = timeToUse.split(':').map(Number);
-      const expirationDate = new Date(dateToUse);
-      expirationDate.setHours(hours, minutes, 0, 0);
-      expiresAt = expirationDate;
-    } else {
-      expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    }
-    request.expiresAt = expiresAt;
-  }
-
-  await request.save();
-
-  // Emit socket event for real-time updates
-  io.emit("service-request-updated", { requestId: request._id, action: "updated" });
-
-  res.status(200).json({ success: true, request });
-});
 
 export const getChatHistory = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
@@ -1007,107 +580,48 @@ export const getServiceProviders = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
   try {
-    const { typeOfWork, budget, limit } = req.query;
-
-    // Build query with base filters for service providers (including inactive/offline)
-    let query = {
+    // Get all service providers with necessary data for client-side filtering
+    const workers = await User.find({
       role: "Service Provider",
-      banned: { $ne: true }
-    };
+      banned: { $ne: true },
+      _id: { $ne: req.user._id } // Exclude current user
+    })
+    .select("firstName lastName skills availability profilePic service serviceRate serviceDescription createdAt certificates services isOnline address birthdate employed")
+    .sort({ createdAt: -1 });
 
-    // Apply service type filter if provided
-    if (typeOfWork) {
-      // Normalize the typeOfWork for matching
-      const normalizedTypeOfWork = typeOfWork.toLowerCase().trim();
-
-      // Build comprehensive skill matching conditions
-      const skillMatchConditions = [];
-
-      // 1. Match the entire typeOfWork against skills
-      skillMatchConditions.push({
-        skills: {
-          $elemMatch: {
-            $regex: normalizedTypeOfWork,
-            $options: 'i'
-          }
-        }
-      });
-
-      // 2. Match individual significant words from typeOfWork
-      const searchWords = normalizedTypeOfWork.split(/\s+/).filter(word => word.length > 2);
-      searchWords.forEach(word => {
-        skillMatchConditions.push({
-          skills: {
-            $elemMatch: {
-              $regex: word,
-              $options: 'i'
-            }
-          }
-        });
-      });
-
-      // 3. Also check if the provider's service field matches
-      skillMatchConditions.push({
-        service: {
-          $regex: normalizedTypeOfWork,
-          $options: 'i'
-        }
-      });
-
-      query.$or = skillMatchConditions;
-    }
-
-    // Apply budget filter if provided
-    if (budget) {
-      const budgetNum = parseFloat(budget);
-      if (!isNaN(budgetNum)) {
-        query.$and = query.$and || [];
-        query.$and.push({
-          $or: [
-            { serviceRate: { $exists: false } },
-            { serviceRate: null },
-            {
-              serviceRate: {
-                $gte: budgetNum - 200,
-                $lte: budgetNum + 200
-              }
-            }
-          ]
-        });
-      }
-    }
-
-    // Filter results to ensure providers have necessary qualifications
-    let workersQuery = User.find(query)
-      .select("firstName lastName skills availability profilePic service serviceRate serviceDescription createdAt certificates services isOnline")
+    // Get reviews and ratings for each provider
+    const providerIds = workers.map(w => w._id);
+    const reviews = await Review.find({ reviewee: { $in: providerIds } })
+      .populate('reviewer', 'firstName lastName')
+      .select('reviewee rating comments createdAt reviewer')
       .sort({ createdAt: -1 });
 
-    // Apply limit if specified
-    if (limit) {
-      const limitNum = parseInt(limit);
-      if (!isNaN(limitNum) && limitNum > 0) {
-        workersQuery = workersQuery.limit(limitNum);
+    // Group reviews by provider
+    const reviewsByProvider = {};
+    reviews.forEach(review => {
+      const providerId = review.reviewee.toString();
+      if (!reviewsByProvider[providerId]) {
+        reviewsByProvider[providerId] = [];
       }
-    }
-
-    // Execute query first, then filter for complete profiles
-    let workers = await workersQuery;
-
-    // Filter to only include providers with:
-    // 1. Skills listed (at least one skill)
-    // 2. Service description
-    // 3. Service rate set
-    // 4. Exclude current user
-    workers = workers.filter(provider => {
-      const hasSkills = provider.skills && Array.isArray(provider.skills) && provider.skills.length > 0;
-      const hasServiceDescription = provider.serviceDescription && provider.serviceDescription.trim().length > 0;
-      const hasServiceRate = provider.serviceRate && provider.serviceRate > 0;
-      const isNotCurrentUser = String(provider._id) !== String(req.user._id);
-
-      return hasSkills && hasServiceDescription && hasServiceRate && isNotCurrentUser;
+      reviewsByProvider[providerId].push(review);
     });
 
-    res.json({ success: true, count: workers.length, workers });
+    // Calculate ratings and attach reviews to providers
+    const workersWithData = workers.map(provider => {
+      const providerReviews = reviewsByProvider[provider._id.toString()] || [];
+      const averageRating = providerReviews.length > 0
+        ? providerReviews.reduce((sum, r) => sum + r.rating, 0) / providerReviews.length
+        : 0;
+
+      return {
+        ...provider.toObject(),
+        reviews: providerReviews.slice(0, 5), // Include up to 5 recent reviews
+        averageRating: Math.round(averageRating * 10) / 10,
+        totalReviews: providerReviews.length
+      };
+    });
+
+    res.json({ success: true, count: workersWithData.length, workers: workersWithData });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: err.message });
@@ -1345,6 +859,37 @@ export const completeBooking = catchAsyncError(async (req, res, next) => {
 //   const result = await cloudinary.v2.uploader.upload(filePath, { folder });
 //   return result.secure_url;
 // };
+
+export const getServiceRequests = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  // For providers, return offered requests; for clients, return their own requests
+  let filter = {};
+  if (req.user.role === "Service Provider") {
+    filter = { status: "Offered", targetProvider: req.user._id };
+  } else {
+    filter = { requester: req.user._id };
+  }
+
+  const requests = await ServiceRequest.find(filter)
+    .populate('requester', 'firstName lastName email phone')
+    .populate('targetProvider', 'firstName lastName email phone')
+    .populate('serviceProvider', 'firstName lastName email phone')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({ success: true, requests });
+});
+
+export const getAvailableServiceRequests = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  // Return all waiting service requests for recommendations
+  const requests = await ServiceRequest.find({ status: 'Waiting' })
+    .populate('requester', 'firstName lastName')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({ success: true, requests });
+});
 
 export const reverseGeocode = catchAsyncError(async (req, res, next) => {
   const { lat, lon } = req.query;

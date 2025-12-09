@@ -13,7 +13,6 @@ import userFlowRouter from "./routes/userFlowRouter.js";
 import adminAuthRouter from "./routes/adminAuthRouter.js";
 import adminFlowRouter from "./routes/adminFlowRouter.js";
 import adminRouter from "./routes/adminRouter.js";
-import aiRouter from "./routes/aiRouter.js";
 import contactRoutes from "./routes/contact.js";
 import reportRoutes from "./routes/reportsRouter.js";
 import settingsRouter from "./routes/settingsRouter.js";
