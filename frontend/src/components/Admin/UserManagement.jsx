@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api.js";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-// Extract base URL without /api/v1 for static file serving
-const BASE_URL = API_BASE_URL.replace('/api/v1', '');
-
 const SERVICE_OPTIONS = [
   { name: "Plumbing", description: "Pipe installation, leak repair, and bathroom plumbing maintenance.", icon: "💧" },
   { name: "Electrical", description: "Wiring, lighting, and electrical appliance repair.", icon: "⚡" },
@@ -160,8 +156,9 @@ const UserManagement = () => {
   };
 
   const getProfileImageUrl = (profilePic) => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
     if (profilePic) {
-      return profilePic.startsWith('http') ? profilePic : `${BASE_URL}${profilePic}`;
+      return profilePic.startsWith('http') ? profilePic : `${API_BASE_URL}${profilePic}`;
     }
     return '/default-avatar.png';
   };

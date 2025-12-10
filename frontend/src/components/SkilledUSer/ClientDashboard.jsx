@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../api";
 import socket from "../../utils/socket";
-import "./dashboard-content.css";
+import BrowseProviders from "./BrowseProviders";
 
 const ClientDashboard = () => {
   const location = useLocation();
@@ -23,6 +23,17 @@ const ClientDashboard = () => {
     maxBudget: 10000,
     qualifications: ''
   });
+  const [selectedProviders, setSelectedProviders] = useState([]);
+  const [favoriteProviders, setFavoriteProviders] = useState([]);
+  const [postedJobs, setPostedJobs] = useState([]);
+  const [jobAnalytics, setJobAnalytics] = useState({
+    totalPosted: 0,
+    activeJobs: 0,
+    completedJobs: 0,
+    totalSpent: 0
+  });
+  const [contracts, setContracts] = useState([]);
+  const [reviews, setReviews] = useState([]);
 
   // Fetch all providers for client-side filtering
   const fetchAllProviders = async () => {
@@ -222,34 +233,147 @@ const ClientDashboard = () => {
     }
   };
 
+  const handleProviderSelect = (providerId) => {
+    setSelectedProviders(prev =>
+      prev.includes(providerId)
+        ? prev.filter(id => id !== providerId)
+        : [...prev, providerId]
+    );
+  };
+
+  const handleBulkOffer = async () => {
+    if (selectedProviders.length === 0) return alert("Please select providers to send offers to.");
+
+    try {
+      for (const providerId of selectedProviders) {
+        await api.post('/user/offer-to-provider', {
+          providerId,
+          requestId: currentRequest._id
+        });
+      }
+      alert(`Offers sent to ${selectedProviders.length} provider(s)!`);
+      setSelectedProviders([]);
+      const refreshResponse = await api.get(`/user/service-request/${currentRequest._id}`);
+      if (refreshResponse.data?.request) setCurrentRequest(refreshResponse.data.request);
+    } catch (err) {
+      console.error("Error sending bulk offers:", err);
+      alert("Failed to send some offers. Please try again.");
+    }
+  };
+
+  const handleToggleFavorite = (providerId) => {
+    setFavoriteProviders(prev =>
+      prev.includes(providerId)
+        ? prev.filter(id => id !== providerId)
+        : [...prev, providerId]
+    );
+  };
+
+  const handleViewProfile = (provider) => {
+    // For now, show a simple alert with provider details
+    // In a real app, this would navigate to a detailed profile page
+    alert(`Profile: ${provider.firstName} ${provider.lastName}\n\nSkills: ${provider.skills?.join(', ') || 'None'}\n\nRating: ${provider.averageRating || 0}/5\n\nAbout: ${provider.serviceDescription || 'No description'}`);
+  };
+
+  const handleMessageProvider = (provider) => {
+    // Navigate to chat or open chat modal
+    // For now, show placeholder - in real implementation, this would navigate to chat
+    alert(`Opening chat with ${provider.firstName} ${provider.lastName}...`);
+    // navigate('/chat', { state: { recipient: provider } });
+  };
+
   const renderStars = (rating) => {
     return "★".repeat(Math.round(rating)) + "☆".repeat(5 - Math.round(rating));
   };
 
   if (isLoading) {
     return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <h3>Loading your request...</h3>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <h3 className="text-xl font-semibold text-gray-700">Loading your request...</h3>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="error-container">
-        <h2>❌ Error</h2>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()}>🔄 Refresh Page</button>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center max-w-md w-full">
+          <h2 className="text-4xl text-red-500 mb-4">❌ Error</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+          >
+            🔄 Refresh Page
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="client-waiting-container">
-      <div className="waiting-header">
-        <h2>Waiting for Worker</h2>
-        <div className={`status-badge ${status.toLowerCase()}`}>
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
+      {/* JobStreet-style Analytics Dashboard */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <div className="text-3xl font-bold text-blue-600 mb-2">{jobAnalytics.totalPosted}</div>
+          <div className="text-gray-600">Jobs Posted</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <div className="text-3xl font-bold text-green-600 mb-2">{jobAnalytics.activeJobs}</div>
+          <div className="text-gray-600">Active Jobs</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <div className="text-3xl font-bold text-purple-600 mb-2">{jobAnalytics.completedJobs}</div>
+          <div className="text-gray-600">Completed Jobs</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6 text-center">
+          <div className="text-3xl font-bold text-orange-600 mb-2">₱{jobAnalytics.totalSpent.toLocaleString()}</div>
+          <div className="text-gray-600">Total Spent</div>
+        </div>
+      </div>
+
+      {/* Quick Actions - Like LinkedIn */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+            onClick={() => navigate('/user/service-request')}
+          >
+            📝 Post New Job
+          </button>
+          <button
+            className="bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+            onClick={() => navigate('/user/browse-providers')}
+          >
+            🔍 Browse Providers
+          </button>
+          <button
+            className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+            onClick={() => {/* View contracts */}}
+          >
+            📋 View Contracts
+          </button>
+        </div>
+      </div>
+
+      {/* Browse Providers Section */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Browse All Providers</h3>
+        <BrowseProviders />
+      </div>
+
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <h2 className="text-3xl font-bold text-gray-900">Waiting for Worker</h2>
+        <div className={`px-4 py-2 rounded-full text-sm font-semibold ${
+          status === "Found" ? "bg-green-100 text-green-800" :
+          status === "Offered" ? "bg-blue-100 text-blue-800" :
+          "bg-yellow-100 text-yellow-800"
+        }`}>
           {status === "Found" ? "Worker Assigned" : status === "Offered" ? "Offer Sent" : "Searching"}
         </div>
       </div>
@@ -282,32 +406,35 @@ const ClientDashboard = () => {
       </div>
 
       {/* Search Filters */}
-      <div className="filters-card">
-        <h3>Filter Workers</h3>
-        <div className="filters-grid">
-          <div className="filter-group">
-            <label>Name:</label>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Filter Workers</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Name:</label>
             <input
               type="text"
               placeholder="Search by name..."
               value={searchFilters.name}
               onChange={(e) => setSearchFilters(prev => ({ ...prev, name: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          <div className="filter-group">
-            <label>Services:</label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Services:</label>
             <input
               type="text"
               placeholder="Search by skills/services..."
               value={searchFilters.services}
               onChange={(e) => setSearchFilters(prev => ({ ...prev, services: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          <div className="filter-group">
-            <label>Min Rating:</label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Min Rating:</label>
             <select
               value={searchFilters.minRating}
               onChange={(e) => setSearchFilters(prev => ({ ...prev, minRating: parseFloat(e.target.value) }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value={0}>Any Rating</option>
               <option value={3}>3+ Stars</option>
@@ -315,94 +442,155 @@ const ClientDashboard = () => {
               <option value={4.5}>4.5+ Stars</option>
             </select>
           </div>
-          <div className="filter-group">
-            <label>Budget Range:</label>
-            <div className="budget-range">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Budget Range:</label>
+            <div className="flex gap-2">
               <input
                 type="number"
                 placeholder="Min"
                 value={searchFilters.minBudget || ''}
                 onChange={(e) => setSearchFilters(prev => ({ ...prev, minBudget: parseFloat(e.target.value) || 0 }))}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <span>to</span>
+              <span className="flex items-center text-gray-500">to</span>
               <input
                 type="number"
                 placeholder="Max"
                 value={searchFilters.maxBudget < 10000 ? searchFilters.maxBudget : ''}
                 onChange={(e) => setSearchFilters(prev => ({ ...prev, maxBudget: parseFloat(e.target.value) || 10000 }))}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
         </div>
       </div>
 
+      {/* Bulk Actions */}
+      {selectedProviders.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <span className="text-blue-800 font-medium">
+              {selectedProviders.length} provider{selectedProviders.length > 1 ? 's' : ''} selected
+            </span>
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+              onClick={handleBulkOffer}
+            >
+              Send Offers to Selected
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Available Providers */}
-      <div className="providers-section">
-        <h3>Available Workers ({matchedProviders.length})</h3>
+      <div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-6">Available Workers ({matchedProviders.length})</h3>
         {matchedProviders.length > 0 ? (
-          <div className="providers-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {matchedProviders.map((provider) => (
-              <div key={provider._id} className="provider-card">
-                <div className="provider-header">
+              <div key={provider._id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-200 relative">
+                {/* Checkbox for bulk selection */}
+                <div className="absolute top-4 left-4">
+                  <input
+                    type="checkbox"
+                    checked={selectedProviders.includes(provider._id)}
+                    onChange={() => handleProviderSelect(provider._id)}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Favorite button */}
+                <button
+                  className="absolute top-4 right-4 text-2xl"
+                  onClick={() => handleToggleFavorite(provider._id)}
+                >
+                  {favoriteProviders.includes(provider._id) ? '❤️' : '🤍'}
+                </button>
+
+                <div className="flex items-start space-x-4 mb-4 pt-8">
                   <img
                     src={provider.profilePic || "/default-profile.png"}
                     alt={`${provider.firstName} ${provider.lastName}`}
-                    className="provider-avatar"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
                   />
-                  <div className="provider-info">
-                    <h4>{provider.firstName} {provider.lastName}</h4>
-                    <div className="provider-rating">
-                      <span className="stars">{renderStars(provider.averageRating || 0)}</span>
-                      <span className="rating-count">({provider.totalReviews || 0})</span>
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold text-gray-900">{provider.firstName} {provider.lastName}</h4>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <span className="text-yellow-500">{renderStars(provider.averageRating || 0)}</span>
+                      <span className="text-sm text-gray-600">({provider.totalReviews || 0})</span>
                     </div>
-                    <div className="provider-rate">₱{provider.serviceRate || "N/A"}</div>
+                    <div className="text-lg font-bold text-green-600">₱{provider.serviceRate || "N/A"}</div>
                   </div>
-                  <div className={`status-indicator ${provider.isOnline ? 'online' : 'offline'}`}>
+                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    provider.isOnline ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                  }`}>
                     {provider.isOnline ? '● Online' : '● Offline'}
                   </div>
                 </div>
 
-                <div className="provider-details">
-                  <div className="detail-row">
-                    <span className="label">Skills:</span>
-                    <span className="value">{provider.skills?.join(", ") || "No skills listed"}</span>
+                <div className="space-y-3 mb-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-700">Skills:</span>
+                    <span className="text-sm text-gray-600 text-right">{provider.skills?.join(", ") || "No skills listed"}</span>
                   </div>
-                  <div className="detail-row">
-                    <span className="label">About:</span>
-                    <span className="value">{provider.serviceDescription || "No description"}</span>
+                  <div className="flex justify-between items-start">
+                    <span className="font-medium text-gray-700">About:</span>
+                    <span className="text-sm text-gray-600 text-right flex-1 ml-2">{provider.serviceDescription || "No description"}</span>
                   </div>
                   {provider.reviews?.length > 0 && (
-                    <div className="reviews-preview">
-                      <span className="label">Recent Reviews:</span>
-                      {provider.reviews.slice(0, 2).map((review, index) => (
-                        <div key={index} className="review-item">
-                          <span className="reviewer">{review.reviewer?.firstName} {review.reviewer?.lastName}:</span>
-                          <span className="review-text">"{review.comment?.substring(0, 50)}..."</span>
-                        </div>
-                      ))}
+                    <div>
+                      <span className="font-medium text-gray-700 block mb-2">Recent Reviews:</span>
+                      <div className="space-y-1">
+                        {provider.reviews.slice(0, 2).map((review, index) => (
+                          <div key={index} className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                            <span className="font-medium">{review.reviewer?.firstName} {review.reviewer?.lastName}:</span>
+                            <span> "{review.comment?.substring(0, 50)}..."</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
 
-                <button
-                  className="offer-button"
-                  onClick={() => offerRequestToProvider(provider._id)}
-                >
-                  Send Offer
-                </button>
+                {/* Action buttons */}
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      className="bg-gray-600 hover:bg-gray-700 text-white text-sm py-2 px-3 rounded-lg transition-colors duration-200"
+                      onClick={() => handleViewProfile(provider)}
+                    >
+                      View Profile
+                    </button>
+                    <button
+                      className="bg-purple-600 hover:bg-purple-700 text-white text-sm py-2 px-3 rounded-lg transition-colors duration-200"
+                      onClick={() => handleMessageProvider(provider)}
+                    >
+                      Message
+                    </button>
+                  </div>
+                  <button
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                    onClick={() => offerRequestToProvider(provider._id)}
+                  >
+                    Send Offer
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="no-providers">
-            <p>No workers match your current filters. Try adjusting your search criteria.</p>
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">No workers match your current filters. Try adjusting your search criteria.</p>
           </div>
         )}
       </div>
 
       {/* Cancel Button */}
-      <div className="action-buttons">
-        <button className="cancel-button" onClick={handleCancel}>
+      <div className="flex justify-center">
+        <button
+          className="bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-8 rounded-lg transition-colors duration-200"
+          onClick={handleCancel}
+        >
           Cancel Request
         </button>
       </div>

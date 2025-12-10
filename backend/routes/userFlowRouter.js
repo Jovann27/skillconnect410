@@ -18,7 +18,8 @@ import {
   getServiceRequest,
   cancelServiceRequest,
   acceptServiceRequest,
-  getMatchingRequests,
+  getAvailableServiceRequests,
+  getRecommendedJobs,
   getUserServices,
   updateServiceRequest,
   getServiceProviders,
@@ -178,6 +179,7 @@ router.post('/review', isUserAuthenticated, isUserVerified, leaveReview);
 // Service Request routes
 router.get('/service-requests', isUserAuthenticated, isUserVerified, getServiceRequests);
 router.get('/available-service-requests', isUserAuthenticated, isUserVerified, getAvailableServiceRequests);
+router.get('/recommended-jobs', isUserAuthenticated, isUserVerified, getRecommendedJobs);
 router.post('/post-service-request', isUserAuthenticated, isUserVerified, postServiceRequest);
 router.get('/user-service-requests', isUserAuthenticated, isUserVerified, getUserServiceRequests);
 router.get('/service-request/:id', isUserAuthenticated, isUserVerified, getServiceRequest);
@@ -203,8 +205,7 @@ router.get('/service-profile', isUserAuthenticated, isUserVerified, getServicePr
 router.post('/service-profile', isUserAuthenticated, isUserVerified, updateServiceProfile);
 router.put('/service-status', isUserAuthenticated, isUserVerified, updateServiceStatus);
 
-// Matching requests route
-router.get('/matching-requests', isUserAuthenticated, isUserVerified, getMatchingRequests);
+
 
 // User services route
 router.get('/services', isUserAuthenticated, isUserVerified, getUserServices);

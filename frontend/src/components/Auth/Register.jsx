@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useMainContext } from "../../mainContext";
 import api from "../../api";
 import { FaEye, FaEyeSlash, FaCheck, FaTimes, FaUpload, FaUser, FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import "./auth-styles.css";
+
 import skillconnectLogo from "../Home/images/1000205778-removebg-preview.png";
 
 const Register = () => {
@@ -283,91 +283,119 @@ const Register = () => {
       case 1:
         return (
           <>
-            <h3 className="step-title">Account Information</h3>
-            
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Account Information</h3>
+
             {/* Username */}
-            <div className="curved-input-group">
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                Username
+              </label>
               <input
                 type="text"
                 id="username"
                 name="username"
-                placeholder="Username"
+                placeholder="Enter your username"
                 value={formData.username}
                 onChange={handleChange}
                 required
-                className={`curved-input ${validationErrors.username ? 'error' : ''}`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                  validationErrors.username
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
               />
               {validationErrors.username && (
-                <span className="field-error">{validationErrors.username}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.username}</p>
               )}
             </div>
 
             {/* Email */}
-            <div className="curved-input-group">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
               <input
                 type="email"
                 id="email"
                 name="email"
-                placeholder="Email"
+                placeholder="your.email@example.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className={`curved-input ${validationErrors.email ? 'error' : ''}`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                  validationErrors.email
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
               />
               {validationErrors.email && (
-                <span className="field-error">{validationErrors.email}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
               )}
             </div>
 
             {/* Password */}
-            <div className="curved-input-group">
-              <div className="password-wrapper">
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
-                  placeholder="Password"
+                  placeholder="Create a strong password"
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className={`curved-input ${validationErrors.password ? 'error' : ''}`}
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                    validationErrors.password
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300'
+                  }`}
                 />
                 <button
                   type="button"
-                  className="curved-password-toggle"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
               {validationErrors.password && (
-                <span className="field-error">{validationErrors.password}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
               )}
             </div>
 
             {/* Confirm Password */}
-            <div className="curved-input-group">
-              <div className="password-wrapper">
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                Confirm Password
+              </label>
+              <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   id="confirmPassword"
                   name="confirmPassword"
-                  placeholder="Confirm Password"
+                  placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className={`curved-input ${validationErrors.confirmPassword ? 'error' : ''}`}
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                    validationErrors.confirmPassword
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300'
+                  }`}
                 />
                 <button
                   type="button"
-                  className="curved-password-toggle"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
               {validationErrors.confirmPassword && (
-                <span className="field-error">{validationErrors.confirmPassword}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.confirmPassword}</p>
               )}
             </div>
           </>
@@ -376,78 +404,109 @@ const Register = () => {
       case 2:
         return (
           <>
-            <h3 className="step-title">Personal Information</h3>
-            
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Personal Information</h3>
+
             {/* First Name */}
-            <div className="curved-input-group">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                First Name
+              </label>
               <input
                 type="text"
                 id="firstName"
                 name="firstName"
-                placeholder="First Name"
+                placeholder="Enter your first name"
                 value={formData.firstName}
                 onChange={handleChange}
                 required
-                className={`curved-input ${validationErrors.firstName ? 'error' : ''}`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                  validationErrors.firstName
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
               />
               {validationErrors.firstName && (
-                <span className="field-error">{validationErrors.firstName}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.firstName}</p>
               )}
             </div>
 
             {/* Last Name */}
-            <div className="curved-input-group">
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                Last Name
+              </label>
               <input
                 type="text"
                 id="lastName"
                 name="lastName"
-                placeholder="Last Name"
+                placeholder="Enter your last name"
                 value={formData.lastName}
                 onChange={handleChange}
                 required
-                className={`curved-input ${validationErrors.lastName ? 'error' : ''}`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                  validationErrors.lastName
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
               />
               {validationErrors.lastName && (
-                <span className="field-error">{validationErrors.lastName}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.lastName}</p>
               )}
             </div>
 
             {/* Phone */}
-            <div className="curved-input-group">
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
               <input
                 type="tel"
                 id="phone"
                 name="phone"
-                placeholder="Phone Number"
+                placeholder="+63XXXXXXXXXX or 0XXXXXXXXXX"
                 value={formData.phone}
                 onChange={handleChange}
                 required
-                className={`curved-input ${validationErrors.phone ? 'error' : ''}`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                  validationErrors.phone
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
               />
               {validationErrors.phone && (
-                <span className="field-error">{validationErrors.phone}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.phone}</p>
               )}
             </div>
 
             {/* Address */}
-            <div className="curved-input-group">
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+                Address
+              </label>
               <input
                 type="text"
                 id="address"
                 name="address"
-                placeholder="Address"
+                placeholder="Enter your complete address"
                 value={formData.address}
                 onChange={handleChange}
                 required
-                className={`curved-input ${validationErrors.address ? 'error' : ''}`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                  validationErrors.address
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
               />
               {validationErrors.address && (
-                <span className="field-error">{validationErrors.address}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.address}</p>
               )}
             </div>
 
             {/* Birthdate */}
-            <div className="curved-input-group">
+            <div>
+              <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 mb-2">
+                Date of Birth
+              </label>
               <input
                 type="date"
                 id="birthdate"
@@ -455,62 +514,83 @@ const Register = () => {
                 value={formData.birthdate}
                 onChange={handleChange}
                 required
-                className={`curved-input ${validationErrors.birthdate ? 'error' : ''}`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                  validationErrors.birthdate
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
                 max={new Date().toISOString().split('T')[0]}
               />
               {validationErrors.birthdate && (
-                <span className="field-error">{validationErrors.birthdate}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.birthdate}</p>
               )}
             </div>
 
             {/* Employment Status */}
-            <div className="curved-input-group">
+            <div>
+              <label htmlFor="employed" className="block text-sm font-medium text-gray-700 mb-2">
+                Employment Status
+              </label>
               <select
                 id="employed"
                 name="employed"
                 value={formData.employed}
                 onChange={handleChange}
                 required
-                className={`curved-input ${validationErrors.employed ? 'error' : ''}`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                  validationErrors.employed
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
               >
-                <option value="">Employment Status</option>
+                <option value="">Select employment status</option>
                 <option value="employed">Employed</option>
                 <option value="unemployed">Unemployed</option>
               </select>
               {validationErrors.employed && (
-                <span className="field-error">{validationErrors.employed}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.employed}</p>
               )}
             </div>
 
             {/* Role */}
-            <div className="curved-input-group">
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+                Account Type
+              </label>
               <select
                 id="role"
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
                 required
-                className={`curved-input ${validationErrors.role ? 'error' : ''}`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                  validationErrors.role
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-300'
+                }`}
               >
-                <option value="">Select your role</option>
+                <option value="">Choose your account type</option>
                 <option value="Community Member">Community Member</option>
                 <option value="Service Provider">Service Provider</option>
               </select>
               {validationErrors.role && (
-                <span className="field-error">{validationErrors.role}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.role}</p>
               )}
             </div>
 
             {/* Occupation (Optional) */}
-            <div className="curved-input-group">
+            <div>
+              <label htmlFor="occupation" className="block text-sm font-medium text-gray-700 mb-2">
+                Occupation <span className="text-gray-500 text-xs">(Optional)</span>
+              </label>
               <input
                 type="text"
                 id="occupation"
                 name="occupation"
-                placeholder="Occupation (Optional)"
+                placeholder="Enter your current occupation"
                 value={formData.occupation}
                 onChange={handleChange}
-                className="curved-input"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
               />
             </div>
           </>
@@ -519,52 +599,99 @@ const Register = () => {
       case 3:
         return (
           <>
-            <h3 className="step-title">Documents & Skills</h3>
-            
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Documents & Skills</h3>
+
             {/* Profile Picture */}
-            <div className="curved-file-group">
-              <label className="curved-file-label">Profile Picture (Optional)</label>
-              <input
-                type="file"
-                id="profilePic"
-                name="profilePic"
-                accept="image/*"
-                onChange={handleChange}
-                className="curved-file-input"
-              />
+            <div>
+              <label htmlFor="profilePic" className="block text-sm font-medium text-gray-700 mb-2">
+                Profile Picture <span className="text-gray-500 text-xs">(Optional)</span>
+              </label>
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-primary-400 transition-colors">
+                <div className="space-y-1 text-center">
+                  <FaUpload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="flex text-sm text-gray-600">
+                    <label
+                      htmlFor="profilePic"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none"
+                    >
+                      <span>Upload a file</span>
+                      <input
+                        id="profilePic"
+                        name="profilePic"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleChange}
+                        className="sr-only"
+                      />
+                    </label>
+                    <p className="pl-1">or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+                </div>
+              </div>
               {formData.profilePic && (
-                <div className="file-preview">
-                  <img src={URL.createObjectURL(formData.profilePic)} alt="Profile preview" />
+                <div className="mt-4">
+                  <img
+                    src={URL.createObjectURL(formData.profilePic)}
+                    alt="Profile preview"
+                    className="w-24 h-24 rounded-full object-cover mx-auto border-4 border-primary-200"
+                  />
                 </div>
               )}
             </div>
 
             {/* Valid ID */}
-            <div className="curved-file-group">
-              <label className="curved-file-label">Valid ID *</label>
-              <input
-                type="file"
-                id="validId"
-                name="validId"
-                accept="image/*"
-                onChange={handleChange}
-                className={`curved-file-input ${validationErrors.validId ? 'error' : ''}`}
-              />
+            <div>
+              <label htmlFor="validId" className="block text-sm font-medium text-gray-700 mb-2">
+                Valid ID <span className="text-red-500">*</span>
+              </label>
+              <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
+                validationErrors.validId ? 'border-red-300' : 'border-gray-300 hover:border-primary-400'
+              }`}>
+                <div className="space-y-1 text-center">
+                  <FaUser className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="flex text-sm text-gray-600">
+                    <label
+                      htmlFor="validId"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none"
+                    >
+                      <span>Upload ID</span>
+                      <input
+                        id="validId"
+                        name="validId"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleChange}
+                        className="sr-only"
+                      />
+                    </label>
+                    <p className="pl-1">or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+                </div>
+              </div>
               {validationErrors.validId && (
-                <span className="field-error">{validationErrors.validId}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.validId}</p>
               )}
               {formData.validId && (
-                <div className="file-preview">
-                  <img src={URL.createObjectURL(formData.validId)} alt="ID preview" />
+                <div className="mt-4">
+                  <img
+                    src={URL.createObjectURL(formData.validId)}
+                    alt="ID preview"
+                    className="w-full max-w-xs mx-auto rounded-lg border border-gray-300"
+                  />
                 </div>
               )}
             </div>
 
             {/* Skills for Service Provider */}
             {formData.role === "Service Provider" && (
-              <div className="curved-skills-group">
-                <label className="curved-file-label">Select Your Skills (1-3) *</label>
-                <div className="curved-skills-grid">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-4">
+                  Select Your Skills <span className="text-red-500">*</span>
+                  <span className="text-gray-500 text-xs ml-2">(Select 1-3 skills)</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
                   {[
                     "Pipe Installation", "Leak Repair", "Toilet Installation", "Drain Cleaning", "Water Heater Setup",
                     "Wiring Installation", "Lighting Repair", "Appliance Troubleshooting", "Outlet Installation", "Circuit Breaker Maintenance",
@@ -578,7 +705,18 @@ const Register = () => {
                     "Aircon Installation", "Aircon Cleaning", "HVAC Maintenance", "Filter Replacement", "Ventilation Setup",
                     "Washing Clothes", "Drying & Ironing", "Folding & Packaging", "Delicate Fabric Care", "Stain Removal"
                   ].map((skill) => (
-                    <label key={skill} className={`curved-skill-item ${formData.skills.includes(skill) ? 'selected' : ''}`}>
+                    <label
+                      key={skill}
+                      className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
+                        formData.skills.includes(skill)
+                          ? 'border-primary-500 bg-primary-50 text-primary-700'
+                          : 'border-gray-200 hover:border-primary-300'
+                      } ${
+                        !formData.skills.includes(skill) && formData.skills.length >= 3
+                          ? 'opacity-50 cursor-not-allowed'
+                          : ''
+                      }`}
+                    >
                       <input
                         type="checkbox"
                         checked={formData.skills.includes(skill)}
@@ -597,16 +735,17 @@ const Register = () => {
                           setFormData({ ...formData, skills: currentSkills });
                         }}
                         disabled={!formData.skills.includes(skill) && formData.skills.length >= 3}
+                        className="sr-only"
                       />
-                      <span>{skill}</span>
+                      <span className="text-sm">{skill}</span>
                     </label>
                   ))}
                 </div>
-                <div className="skills-counter">
+                <div className="mt-4 text-sm text-gray-600">
                   Selected: {formData.skills.length}/3 skills
                 </div>
                 {validationErrors.skills && (
-                  <span className="field-error">{validationErrors.skills}</span>
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.skills}</p>
                 )}
               </div>
             )}
@@ -616,30 +755,55 @@ const Register = () => {
       case 4: // Only for Service Providers
         return (
           <>
-            <h3 className="step-title">Certificates</h3>
-            
-            <div className="curved-file-group">
-              <label className="curved-file-label">Upload Certificates *</label>
-              <input
-                type="file"
-                id="certificates"
-                name="certificates"
-                accept="image/*,application/pdf"
-                multiple
-                onChange={handleChange}
-                className={`curved-file-input ${validationErrors.certificates ? 'error' : ''}`}
-              />
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Certificates</h3>
+
+            <div>
+              <label htmlFor="certificates" className="block text-sm font-medium text-gray-700 mb-2">
+                Upload Certificates <span className="text-red-500">*</span>
+              </label>
+              <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
+                validationErrors.certificates ? 'border-red-300' : 'border-gray-300 hover:border-primary-400'
+              }`}>
+                <div className="space-y-1 text-center">
+                  <FaUpload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="flex text-sm text-gray-600">
+                    <label
+                      htmlFor="certificates"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none"
+                    >
+                      <span>Upload certificates</span>
+                      <input
+                        id="certificates"
+                        name="certificates"
+                        type="file"
+                        accept="image/*,application/pdf"
+                        multiple
+                        onChange={handleChange}
+                        className="sr-only"
+                      />
+                    </label>
+                    <p className="pl-1">or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-gray-500">PNG, JPG, PDF up to 10MB each</p>
+                </div>
+              </div>
               {validationErrors.certificates && (
-                <span className="field-error">{validationErrors.certificates}</span>
+                <p className="mt-1 text-sm text-red-600">{validationErrors.certificates}</p>
               )}
               {formData.certificates.length > 0 && (
-                <div className="file-preview-grid">
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {formData.certificates.map((file, index) => (
-                    <div key={index} className="file-preview-item">
+                    <div key={index} className="border border-gray-200 rounded-lg p-3">
                       {file.type.startsWith("image/") ? (
-                        <img src={URL.createObjectURL(file)} alt={`Certificate ${index + 1}`} />
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Certificate ${index + 1}`}
+                          className="w-full h-24 object-cover rounded"
+                        />
                       ) : (
-                        <div className="file-name">{file.name}</div>
+                        <div className="w-full h-24 bg-gray-100 rounded flex items-center justify-center">
+                          <span className="text-xs text-gray-500 truncate px-2">{file.name}</span>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -655,89 +819,150 @@ const Register = () => {
   };
 
   return (
-    <div className="register-page">
-      <div className="register-wrapper">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 flex items-center justify-center p-4">
+      <div className="absolute inset-0 opacity-30 bg-gradient-to-br from-primary-100/50 to-primary-200/30"></div>
 
+      <div className="relative w-full max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden flex">
         {/* LEFT SIDE */}
-        <div className="register-left">
-          <img src={skillconnectLogo} alt="SkillConnect Logo" className="logo" />
-          <h1 className="join-title">Join SkillConnect</h1>
-          <p className="join-subtitle">
-            Connect with skilled workers, request services, or offer your expertise
-            in your local community.
-          </p>
-          <Link to="/home#about" className="about-btn">About Us</Link>
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 to-primary-800 p-12 flex-col justify-center items-center text-white relative overflow-hidden">
+          {/* Decorative Elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
+
+          <div className="relative z-10 text-center">
+            <img
+              src={skillconnectLogo}
+              alt="SkillConnect Logo"
+              className="w-24 h-24 mx-auto mb-8 drop-shadow-lg"
+            />
+            <h1 className="text-4xl font-bold mb-4 leading-tight">Join<br />SkillConnect</h1>
+            <p className="text-xl opacity-90 mb-8 leading-relaxed">
+              Connect with skilled workers, request services, or offer your expertise in your local community.
+            </p>
+            <Link
+              to="/home#about"
+              className="inline-flex items-center px-8 py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-white font-semibold hover:bg-white/30 transition-all duration-300 hover:shadow-lg"
+            >
+              About Us
+            </Link>
+          </div>
         </div>
 
         {/* RIGHT SIDE */}
-        <div className="register-right">
-          <h2 className="form-title">Create Your Account</h2>
-          {currentStep > 1 && (
-            <p className="step-info">Step {currentStep} of {totalSteps}</p>
-          )}
+        <div className="w-full lg:w-1/2 p-8 lg:p-12">
+          <div className="max-w-md mx-auto">
+            {/* Mobile Logo */}
+            <div className="lg:hidden text-center mb-8">
+              <img
+                src={skillconnectLogo}
+                alt="SkillConnect Logo"
+                className="w-16 h-16 mx-auto mb-4"
+              />
+            </div>
 
-          <div className="step-progress">
-            {[...Array(totalSteps)].map((_, i) => (
-              <div
-                key={i}
-                className={`step-bar ${i < currentStep ? "active" : ""}`}
-              ></div>
-            ))}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Your Account</h2>
+              {currentStep > 1 && (
+                <p className="text-gray-600">Step {currentStep} of {totalSteps}</p>
+              )}
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mb-8">
+              <div className="flex space-x-2">
+                {[...Array(totalSteps)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-2 flex-1 rounded-full transition-colors duration-300 ${
+                      i < currentStep ? 'bg-primary-600' : 'bg-gray-200'
+                    }`}
+                  ></div>
+                ))}
+              </div>
+            </div>
+
+            <form
+              onSubmit={
+                currentStep === totalSteps
+                  ? handleRegister
+                  : (e) => { e.preventDefault(); nextStep(); }
+              }
+              className="space-y-6"
+            >
+              <div className="min-h-[400px]">
+                {renderStep()}
+              </div>
+
+              {/* Navigation */}
+              <div className="flex justify-between pt-6">
+                {currentStep > 1 && (
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    className="flex items-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-300"
+                  >
+                    <FaArrowLeft className="mr-2" /> Previous
+                  </button>
+                )}
+                {currentStep < totalSteps ? (
+                  <button
+                    type="submit"
+                    className="flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-300 ml-auto"
+                  >
+                    Next <FaArrowRight className="ml-2" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="flex items-center px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg font-semibold hover:from-primary-700 hover:to-primary-800 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Creating Account...
+                      </>
+                    ) : (
+                      'Register'
+                    )}
+                  </button>
+                )}
+              </div>
+            </form>
+
+            <div className="mt-8 text-center">
+              <p className="text-gray-600">
+                Already have an account?{" "}
+                <Link to="/login" className="text-primary-600 hover:text-primary-500 font-semibold">
+                  Login
+                </Link>
+              </p>
+            </div>
           </div>
 
-          <form
-            onSubmit={
-              currentStep === totalSteps
-                ? handleRegister
-                : (e) => { e.preventDefault(); nextStep(); }
-            }
-            className="register-form"
-          >
-            <div className="step-content">
-              {renderStep()}
-            </div>
-
-            <div className="form-navigation">
-              {currentStep > 1 && (
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  className="nav-btn prev-btn"
-                >
-                  <FaArrowLeft /> Previous
-                </button>
-              )}
-              {currentStep < totalSteps ? (
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="nav-btn next-btn"
-                >
-                  Next <FaArrowRight />
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  className="submit-btn"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Creating Account..." : "Register"}
-                </button>
-              )}
-            </div>
-          </form>
-
-          <p className="login-link">
-            Already have an account? <Link to="/login">Login</Link>
+          <p className="mt-8 text-xs text-gray-500 text-center">
+            By registering, you agree to our{" "}
+            <a href="/terms" className="text-primary-600 hover:text-primary-500">Terms of Service</a>{" "}
+            and{" "}
+            <a href="/privacy" className="text-primary-600 hover:text-primary-500">Privacy Policy</a>
           </p>
         </div>
       </div>
 
+      {/* Success Popup */}
       {showPopup && (
-        <div className="popup-overlay">
-          <div className="popup-box">
-            <h3>Registration Successful 🎉</h3>
-            <p>Welcome to SkillConnect! Redirecting...</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful! 🎉</h3>
+            <p className="text-gray-600">Welcome to SkillConnect! Redirecting...</p>
           </div>
         </div>
       )}

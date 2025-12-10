@@ -9,17 +9,23 @@ const VerificationPending = () => {
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-4">
-      <div className="bg-white rounded-3xl p-10 shadow-2xl text-center max-w-md w-full">
-        <div className="text-6xl text-blue-500 mb-5 animate-pulse">
+      <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl text-center max-w-lg w-full">
+        <div className="text-6xl text-blue-500 mb-6 animate-pulse">
           <i className="fas fa-clock"></i>
         </div>
 
-        <h1 className="text-gray-800 mb-5 text-3xl font-semibold">Account Verification Pending</h1>
+        <h1 className="text-gray-900 mb-6 text-3xl md:text-4xl font-bold">Account Verification Pending</h1>
 
         <div className="mb-8 text-gray-600 leading-relaxed">
-          <p className="mb-2">Hello <strong className="text-gray-800">{user?.firstName} {user?.lastName}</strong>,</p>
-          <p className="mb-2">Your account is currently under review by our administrators.</p>
-          <p className="mb-2">You will receive access to the platform once your account has been verified.</p>
+          <p className="mb-3">
+            Hello <strong className="text-gray-900">{user?.firstName} {user?.lastName}</strong>,
+          </p>
+          <p className="mb-3">
+            Your account is currently under review by our administrators.
+          </p>
+          <p className="mb-3">
+            You will receive access to the platform once your account has been verified.
+          </p>
         </div>
 
         <div className="bg-gray-50 rounded-xl p-6 mb-8">
@@ -39,7 +45,7 @@ const VerificationPending = () => {
 
         <div className="mb-8">
           <button
-            className="bg-red-500 hover:bg-red-600 text-white border-none py-3 px-8 rounded-lg text-base font-medium cursor-pointer transition-all duration-300 inline-flex items-center gap-2 hover:-translate-y-1 hover:shadow-lg active:translate-y-0"
+            className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center gap-2 hover:-translate-y-1 hover:shadow-lg"
             onClick={handleLogout}
           >
             <i className="fas fa-sign-out-alt"></i>

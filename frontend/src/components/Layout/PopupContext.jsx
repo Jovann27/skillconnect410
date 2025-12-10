@@ -39,9 +39,9 @@ const PopupProvider = ({ children }) => {
     // Simple input popup implementation
     const value = prompt(title + (placeholder ? `\n${placeholder}` : ''));
     if (value !== null) {
-      onSubmit && onSubmit(value);
+      onSubmit?.(value);
     } else {
-      onCancel && onCancel();
+      onCancel?.();
     }
   };
 

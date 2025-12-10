@@ -7,7 +7,6 @@ import {
   FaDownload,
   FaSync,
 } from "react-icons/fa";
-import './SystemAnalytics.css';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -617,16 +616,16 @@ The following sections provide detailed analysis and visualizations of these met
 
   if (loading) {
     return (
-      <div className="analytics-container">
-        <div className="analytics-header">
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1>System Analytics</h1>
-            <p className="header-description">Loading analytics data...</p>
+            <h1 className="text-3xl font-bold text-gray-800">System Analytics</h1>
+            <p className="text-gray-600 mt-1">Loading analytics data...</p>
           </div>
         </div>
-        <div className="analytics-card loading-card">
-          <div className="loading-wrapper">
-            <div className="loader"></div>
+        <div className="bg-white rounded-lg shadow-sm p-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           </div>
         </div>
       </div>
@@ -635,21 +634,21 @@ The following sections provide detailed analysis and visualizations of these met
 
   if (error) {
     return (
-      <div className="analytics-container">
-        <div className="analytics-header">
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1>System Analytics</h1>
-            <p className="header-description">Error loading analytics data</p>
+            <h1 className="text-3xl font-bold text-gray-800">System Analytics</h1>
+            <p className="text-gray-600 mt-1">Error loading analytics data</p>
           </div>
         </div>
-        <div className="analytics-card error-card">
-          <div className="error-message">
-            <h3>⚠️ Error Loading Data</h3>
-            <p>{error}</p>
+        <div className="bg-white rounded-lg shadow-sm p-8">
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-red-600 mb-4">⚠️ Error Loading Data</h3>
+            <p className="text-gray-700 mb-4">{error}</p>
             {error.includes("Cannot connect to the server") && (
-              <div className="connection-help">
-                <p><strong>Troubleshooting steps:</strong></p>
-                <ul>
+              <div className="bg-gray-50 p-4 rounded-md mb-4 text-left">
+                <p className="font-semibold text-gray-800 mb-2">Troubleshooting steps:</p>
+                <ul className="list-disc list-inside text-gray-700 text-sm space-y-1">
                   <li>Ensure the backend server is running on port 4000</li>
                   <li>Check if the server address (192.168.1.3:4000) is correct</li>
                   <li>Verify your network connection</li>
@@ -657,8 +656,12 @@ The following sections provide detailed analysis and visualizations of these met
                 </ul>
               </div>
             )}
-            <button onClick={fetchAnalyticsData} className="retry-btn">
-              <FaSync /> Retry
+            <button
+              onClick={fetchAnalyticsData}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto"
+            >
+              <FaSync />
+              Retry
             </button>
           </div>
         </div>
@@ -724,23 +727,27 @@ The following sections provide detailed analysis and visualizations of these met
   };
 
   return (
-    <div className="analytics-container">
-      <div className="analytics-header">
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1>System Analytics Dashboard</h1>
-          <p className="header-description">Real-time insights from database analytics</p>
+          <h1 className="text-3xl font-bold text-gray-800">System Analytics Dashboard</h1>
+          <p className="text-gray-600 mt-1">Real-time insights from database analytics</p>
         </div>
-        <div className="header-actions">
+        <div className="flex items-center gap-4">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="time-select"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
           >
             <option value="6">📅 Last 6 months</option>
             <option value="12">📅 Last 12 months</option>
             <option value="24">📅 Last 24 months</option>
           </select>
-          <button onClick={fetchAnalyticsData} className="refresh-btn" title="Refresh data">
+          <button
+            onClick={fetchAnalyticsData}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center gap-2"
+            title="Refresh data"
+          >
             <FaSync /> Refresh
           </button>
         </div>

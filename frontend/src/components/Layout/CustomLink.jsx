@@ -19,7 +19,12 @@ const CustomLink = ({ to, children, ...props }) => {
   };
 
   return (
-    <Link to={to} onClick={handleClick} {...props}>
+    <Link
+      to={to}
+      onClick={handleClick}
+      className="transition-colors duration-200 hover:text-blue-600"
+      {...props}
+    >
       {children}
     </Link>
   );

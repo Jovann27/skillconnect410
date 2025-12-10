@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import socket from "../utils/socket";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 export default function NotificationListener({ user }) {
     const navigate = useNavigate();

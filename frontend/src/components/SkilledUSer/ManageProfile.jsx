@@ -125,16 +125,16 @@ const ManageProfile = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2" />
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Profile Not Found</h2>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center max-w-md w-full">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Profile Not Found</h2>
           <p className="text-gray-600">Unable to load your profile data.</p>
         </div>
       </div>
@@ -144,209 +144,244 @@ const ManageProfile = () => {
   const bioText = user.serviceDescription || '“Reliable and detail-oriented worker.”';
 
   return (
-    <div className="main-content manage-profile-shell">
-      <div className="profile-wrapper profile-overview">
-        <div className="profile-layout-grid">
-          <aside className="profile-summary-card">
-            <div className="summary-avatar">
-              {user.profilePic ? (
-                <img src={getImageUrl(user.profilePic)} alt="Profile" />
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <aside className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="text-center mb-6">
+                {user.profilePic ? (
+                  <img
+                    src={getImageUrl(user.profilePic)}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full mx-auto object-cover border-4 border-blue-100"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full mx-auto bg-blue-100 flex items-center justify-center text-2xl font-bold text-blue-600 border-4 border-blue-200">
+                    {user.firstName?.charAt(0) || user.lastName?.charAt(0) || 'S'}
+                  </div>
+                )}
+              </div>
+
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">{`${user.firstName || ''} ${user.lastName || ''}`.trim()}</h2>
+                <p className="text-gray-600">{user.occupation || 'Independent Specialist'}</p>
+                <p className="text-sm text-gray-500">{formatAddress(user.address)}</p>
+              </div>
+
+              <div className="flex justify-between items-center mb-6 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <span className="text-2xl font-bold text-yellow-500">
+                    {reviewStats.averageRating ? reviewStats.averageRating.toFixed(1) : '0.0'}
+                  </span>
+                  <span className="text-sm text-gray-600">/ 5 rating</span>
+                </div>
+                <div className="text-right">
+                  <span className="block text-sm text-gray-600">{reviewStats.totalReviews || 0} Reviews</span>
+                  <span className="block text-sm text-gray-600">{user.bookings?.length || 0} Jobs</span>
+                </div>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-700">Email</span>
+                  <strong className="text-sm text-gray-900">{maskEmail(user.email)}</strong>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-700">Phone</span>
+                  <strong className="text-sm text-gray-900">{maskPhone(user.phone)}</strong>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-700">Skills</span>
+                  <strong className="text-sm text-gray-900">{displaySkills}</strong>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-700">Services</span>
+                  <strong className="text-sm text-gray-900">{user.services?.length ? `${user.services.length} Listed` : 'Not set'}</strong>
+                </div>
+              </div>
+
+              <blockquote className="text-center text-gray-600 italic mb-6 p-4 bg-gray-50 rounded-lg">
+                {bioText}
+              </blockquote>
+
+              <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+                *If the individual user views the skilled user their email and phone number will be hidden
+                <br />
+                ex: ju****@gmail.com, 09*****65
+              </p>
+
+              <button
+                type="button"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                onClick={() => navigate('/user/general-settings')}
+              >
+                Edit Profile
+              </button>
+            </div>
+          </aside>
+
+          <section className="lg:col-span-2 space-y-8">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div>
+                  <p className="text-sm text-gray-500 uppercase tracking-wide">Performance Snapshot</p>
+                  <h1 className="text-2xl font-bold text-gray-900">All Reviews</h1>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-bold text-yellow-500">
+                    {reviewStats.averageRating ? reviewStats.averageRating.toFixed(1) : '0.0'} ★
+                  </span>
+                  <span className="block text-sm text-gray-600">{reviewStats.totalReviews || 0} total reviews</span>
+                </div>
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                  {error}
+                </div>
+              )}
+
+              {reviewsLoading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading feedback…</p>
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-600 text-lg mb-2">No reviews yet</p>
+                  <small className="text-gray-500">Completed jobs will automatically appear here when clients leave feedback.</small>
+                </div>
               ) : (
-                <div className="avatar-placeholder-large">
-                  {user.firstName?.charAt(0) || user.lastName?.charAt(0) || 'S'}
+                <div className="space-y-6">
+                  {reviews.map((review) => (
+                    <article key={review.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                        <div>
+                          <p className="text-sm text-blue-600 font-medium">Client Review</p>
+                          <h3 className="text-lg font-semibold text-gray-900">{review.clientName || 'Anonymous Client'}</h3>
+                          <p className="text-sm text-gray-600">
+                            Service Needed: <span className="font-medium">{review.service || 'Service Request'}</span>
+                          </p>
+                        </div>
+                        <span className="text-sm text-gray-500">{formatDate(review.createdAt)}</span>
+                      </header>
+
+                      <div className="mb-4">
+                        <span className="font-medium text-gray-700">Comment:</span>
+                        <span className="text-gray-600 ml-2">{review.comment || 'No comment was provided.'}</span>
+                      </div>
+
+                      {review.images && review.images.length > 0 && (
+                        <div className="mb-4">
+                          <span className="font-medium text-gray-700">Proof Work:</span>
+                          <div className="grid grid-cols-3 gap-2 mt-2">
+                            {review.images.map((img, idx) => (
+                              <img
+                                key={idx}
+                                src={getImageUrl(img)}
+                                alt={`Proof ${idx + 1}`}
+                                className="w-full h-20 object-cover rounded-lg border border-gray-200"
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-700">Rating:</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="flex">
+                            {renderStars(review.rating)}
+                          </div>
+                          <strong className="text-gray-900">{review.rating?.toFixed(1) || '0.0'}</strong>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
                 </div>
               )}
             </div>
 
-            <div className="summary-details">
-              <h2>{`${user.firstName || ''} ${user.lastName || ''}`.trim()}</h2>
-              <p className="summary-role">{user.occupation || 'Independent Specialist'}</p>
-              <p className="summary-location">{formatAddress(user.address)}</p>
-            </div>
-
-            <div className="summary-rating-row">
-              <div>
-                <span className="rating-value">
-                  {reviewStats.averageRating ? reviewStats.averageRating.toFixed(1) : '0.0'}
-                </span>
-                <span className="rating-label">/ 5 rating</span>
-              </div>
-              <div className="rating-meta">
-                <span>{reviewStats.totalReviews || 0} Reviews</span>
-                <span>{user.bookings?.length || 0} Jobs</span>
-              </div>
-            </div>
-
-            <div className="summary-info-grid">
-              <div className="info-line">
-                <span>Email</span>
-                <strong>{maskEmail(user.email)}</strong>
-              </div>
-              <div className="info-line">
-                <span>Phone</span>
-                <strong>{maskPhone(user.phone)}</strong>
-              </div>
-              <div className="info-line">
-                <span>Skills</span>
-                <strong>{displaySkills}</strong>
-              </div>
-              <div className="info-line">
-                <span>Services</span>
-                <strong>{user.services?.length ? `${user.services.length} Listed` : 'Not set'}</strong>
-              </div>
-            </div>
-
-            <blockquote className="profile-quote">{bioText}</blockquote>
-
-            <p className="privacy-note">
-              *If the individual user views the skilled user their email and phone number will be hidden
-              <br />
-              ex: ju****@gmail.com, 09*****65
-            </p>
-
-            <button
-              type="button"
-              className="btn-outline profile-edit-btn"
-              onClick={() => navigate('/user/general-settings')}
-            >
-              Edit Profile
-            </button>
-          </aside>
-
-          <section className="profile-reviews-panel">
-            <div className="reviews-header">
-              <div>
-                <p className="eyebrow-text">Performance Snapshot</p>
-                <h1 className="page-title">All Reviews</h1>
-              </div>
-              <div className="reviews-header-meta">
-                <span>{reviewStats.averageRating ? reviewStats.averageRating.toFixed(1) : '0.0'} ★</span>
-                <span>{reviewStats.totalReviews || 0} total reviews</span>
-              </div>
-            </div>
-
-            {error && <div className="error-message">{error}</div>}
-
-            {reviewsLoading ? (
-              <div className="reviews-loading">Loading feedback…</div>
-            ) : reviews.length === 0 ? (
-              <div className="reviews-empty">
-                <p>No reviews yet</p>
-                <small>Completed jobs will automatically appear here when clients leave feedback.</small>
-              </div>
-            ) : (
-              <div className="reviews-stack">
-                {reviews.map((review) => (
-                  <article className="review-card" key={review.id}>
-                    <header className="review-card-header">
-                      <div>
-                        <p className="review-type">Client Review</p>
-                        <h3>{review.clientName || 'Anonymous Client'}</h3>
-                        <p className="review-service-label">
-                          Service Needed:&nbsp;
-                          <span>{review.service || 'Service Request'}</span>
-                        </p>
-                      </div>
-                      <span className="review-date">{formatDate(review.createdAt)}</span>
-                    </header>
-
-                    <div className="review-comment">
-                      <span>Comment:</span> {review.comment || 'No comment was provided.'}
-                    </div>
-
-                    <div className="review-proof">
-                      <span>Proof Work:</span>
-                      <div className="proof-grid">
-                        {(review.images?.length ? review.images : placeholderProofs).map((img, idx) =>
-                          img ? (
-                            <img src={getImageUrl(img)} alt={`Proof ${idx + 1}`} key={idx} />
-                          ) : (
-                            <div className="proof-placeholder" key={idx} aria-hidden="true" />
-                          )
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="review-rating-row">
-                      <span>Rating:</span>
-                      <div className="stars-row">
-                        {renderStars(review.rating)}
-                        <strong>{review.rating?.toFixed(1) || '0.0'}</strong>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-
             {/* Completed Jobs Section - Only for Service Providers */}
             {user.role === 'Service Provider' && (
-              <>
-                <div className="reviews-header" style={{ marginTop: '2rem' }}>
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                   <div>
-                    <p className="eyebrow-text">Work History</p>
-                    <h1 className="page-title">Completed Jobs</h1>
+                    <p className="text-sm text-gray-500 uppercase tracking-wide">Work History</p>
+                    <h1 className="text-2xl font-bold text-gray-900">Completed Jobs</h1>
                   </div>
-                  <div className="reviews-header-meta">
-                    <span>{completedJobs.length} completed jobs</span>
+                  <div className="text-right">
+                    <span className="block text-sm text-gray-600">{completedJobs.length} completed jobs</span>
                   </div>
                 </div>
 
                 {completedJobsLoading ? (
-                  <div className="reviews-loading">Loading completed jobs…</div>
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading completed jobs…</p>
+                  </div>
                 ) : completedJobs.length === 0 ? (
-                  <div className="reviews-empty">
-                    <p>No completed jobs yet</p>
-                    <small>Jobs you complete will appear here.</small>
+                  <div className="text-center py-12">
+                    <p className="text-gray-600 text-lg mb-2">No completed jobs yet</p>
+                    <small className="text-gray-500">Jobs you complete will appear here.</small>
                   </div>
                 ) : (
-                  <div className="reviews-stack">
+                  <div className="space-y-6">
                     {completedJobs.map((job) => (
-                      <article className="review-card" key={job._id}>
-                        <header className="review-card-header">
+                      <article key={job._id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                           <div>
-                            <p className="review-type">Completed Job</p>
-                            <h3>
+                            <p className="text-sm text-green-600 font-medium">Completed Job</p>
+                            <h3 className="text-lg font-semibold text-gray-900">
                               {job.requester?.firstName || 'Unknown'} {job.requester?.lastName || 'Client'}
                             </h3>
-                            <p className="review-service-label">
-                              Service:&nbsp;
-                              <span>{job.typeOfWork || 'Service Request'}</span>
+                            <p className="text-sm text-gray-600">
+                              Service: <span className="font-medium">{job.typeOfWork || 'Service Request'}</span>
                             </p>
                           </div>
-                          <span className="review-date">{formatDate(job.updatedAt)}</span>
+                          <span className="text-sm text-gray-500">{formatDate(job.updatedAt)}</span>
                         </header>
 
-                        <div className="review-comment">
-                          <span>Budget:</span> ₱{job.budget || 0}
+                        <div className="mb-4">
+                          <span className="font-medium text-gray-700">Budget:</span>
+                          <span className="text-gray-600 ml-2">₱{job.budget || 0}</span>
                         </div>
 
                         {job.completionNotes && (
-                          <div className="review-comment">
-                            <span>Completion Notes:</span> {job.completionNotes}
+                          <div className="mb-4">
+                            <span className="font-medium text-gray-700">Completion Notes:</span>
+                            <span className="text-gray-600 ml-2">{job.completionNotes}</span>
                           </div>
                         )}
 
                         {job.proofOfWork && job.proofOfWork.length > 0 && (
-                          <div className="review-proof">
-                            <span>Proof of Work:</span>
-                            <div className="proof-grid">
+                          <div className="mb-4">
+                            <span className="font-medium text-gray-700">Proof of Work:</span>
+                            <div className="grid grid-cols-3 gap-2 mt-2">
                               {job.proofOfWork.map((img, idx) => (
-                                <img src={getImageUrl(img)} alt={`Proof ${idx + 1}`} key={idx} />
+                                <img
+                                  key={idx}
+                                  src={getImageUrl(img)}
+                                  alt={`Proof ${idx + 1}`}
+                                  className="w-full h-20 object-cover rounded-lg border border-gray-200"
+                                />
                               ))}
                             </div>
                           </div>
                         )}
 
-                        <div className="review-rating-row">
-                          <span>Status:</span>
-                          <span className="status-completed">Completed</span>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-700">Status:</span>
+                          <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                            Completed
+                          </span>
                         </div>
                       </article>
                     ))}
                   </div>
                 )}
-              </>
+              </div>
             )}
           </section>
         </div>

@@ -22,7 +22,6 @@ import {
 } from 'react-icons/fa';
 import api from '../../api';
 import toast from 'react-hot-toast';
-import './AdminSettings.css';
 
 const AdminSettings = () => {
   const navigate = useNavigate();

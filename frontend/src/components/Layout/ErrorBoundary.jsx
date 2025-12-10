@@ -1,6 +1,5 @@
 import React from 'react';
 import { FaExclamationTriangle, FaRedo, FaHome } from 'react-icons/fa';
-import "./layout-styles.css";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -32,16 +31,20 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       // Custom error UI
       return (
-        <div className="error-boundary">
-          <FaExclamationTriangle className="error-boundary-icon" />
-          <h2>Oops! Something went wrong</h2>
-          <p>
+        <div className="flex flex-col items-center justify-center min-h-[400px] p-10 text-center bg-pink-50 border-2 border-dashed border-pink-500 rounded-2xl">
+          <div className="text-6xl text-pink-500 mb-5 opacity-80">
+            <FaExclamationTriangle />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">
+            Oops! Something went wrong
+          </h2>
+          <p className="text-gray-600 text-lg mb-6 max-w-md">
             We're sorry, but something unexpected happened. Don't worry, our team has been notified.
           </p>
 
-          <div className="error-boundary-buttons">
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <button
-              className="error-boundary-button"
+              className="flex-1 bg-gradient-to-r from-pink-500 to-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-pink-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 transform hover:-translate-y-1"
               onClick={this.handleRetry}
               aria-label="Try loading the page again"
             >
@@ -49,7 +52,7 @@ class ErrorBoundary extends React.Component {
               Try Again
             </button>
             <button
-              className="error-boundary-button error-boundary-button-secondary"
+              className="flex-1 bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 transform hover:-translate-y-1"
               onClick={this.handleGoHome}
               aria-label="Go back to home page"
             >
@@ -59,21 +62,23 @@ class ErrorBoundary extends React.Component {
           </div>
 
           {import.meta.env.DEV && this.state.error && (
-            <details className="error-boundary-details">
-              <summary>Error Details (Development Only)</summary>
-              <pre className="error-boundary-stack">
+            <details className="mb-8 text-left bg-gray-100 p-4 rounded-lg">
+              <summary className="cursor-pointer font-semibold text-gray-800 mb-2">
+                Error Details (Development Only)
+              </summary>
+              <pre className="text-sm text-gray-700 whitespace-pre-wrap overflow-auto max-h-48 border border-gray-300 rounded p-2">
                 {this.state.error.toString()}
                 {this.state.errorInfo.componentStack}
               </pre>
             </details>
           )}
 
-          <div className="error-boundary-help">
-            <p>If the problem persists, please try:</p>
-            <ul>
-              <li>Refreshing the page</li>
-              <li>Clearing your browser cache</li>
-              <li>Contacting support if the issue continues</li>
+          <div className="text-left bg-pink-100 p-4 rounded-lg max-w-md">
+            <p className="font-semibold text-gray-800 mb-2">If the problem persists, please try:</p>
+            <ul className="text-gray-600 space-y-1">
+              <li>• Refreshing the page</li>
+              <li>• Clearing your browser cache</li>
+              <li>• Contacting support if the issue continues</li>
             </ul>
           </div>
         </div>

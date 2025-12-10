@@ -45,17 +45,18 @@ const JobFairCreate = () => {
   };
 
   return (
-    <div className="container">
-      <div className="analytics-header">
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="mb-8">
         <div>
-          <h1>Create Job Fair</h1>
-          <p className="header-description">Set up a new job fair event</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Job Fair</h1>
+          <p className="text-gray-600 text-lg">Set up a new job fair event</p>
         </div>
       </div>
-      <div className="form-container">
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Title</label>
+
+      <div className="bg-white rounded-lg shadow-md p-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
             <input
               type="text"
               name="title"
@@ -63,10 +64,12 @@ const JobFairCreate = () => {
               onChange={handleChange}
               autoComplete="off"
               required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          <div className="form-group">
-            <label>Description</label>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
             <textarea
               name="description"
               value={form.description}
@@ -74,58 +77,71 @@ const JobFairCreate = () => {
               rows="3"
               autoComplete="off"
               required
-            />
-          </div>
-          <div className="form-group">
-            <label>Date</label>
-            <input
-              type="date"
-              name="date"
-              value={form.date}
-              onChange={handleChange}
-              autoComplete="off"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Start Time</label>
-            <input
-              type="time"
-              name="startTime"
-              value={form.startTime}
-              onChange={handleChange}
-              autoComplete="off"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>End Time</label>
-            <input
-              type="time"
-              name="endTime"
-              value={form.endTime}
-              onChange={handleChange}
-              autoComplete="off"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Location</label>
-            <input
-              type="text"
-              name="location"
-              value={form.location}
-              onChange={handleChange}
-              autoComplete="address-level2"
-              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
-          <div className="actions-section">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+                autoComplete="off"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+              <input
+                type="text"
+                name="location"
+                value={form.location}
+                onChange={handleChange}
+                autoComplete="address-level2"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+              <input
+                type="time"
+                name="startTime"
+                value={form.startTime}
+                onChange={handleChange}
+                autoComplete="off"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+              <input
+                type="time"
+                name="endTime"
+                value={form.endTime}
+                onChange={handleChange}
+                autoComplete="off"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end">
             <button
               type="submit"
               disabled={loading}
-              className="export-btn"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Creating..." : "Create Job Fair"}
             </button>

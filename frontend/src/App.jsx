@@ -45,16 +45,11 @@ import Residents from "./components/Admin/Residents";
 
 
 // User pages
-import MyService from "./components/SkilledUSer/MyService";
-import ServiceRequest from "./components/SkilledUSer/ServiceRequest";
-import UserWorkRecord from "./components/SkilledUSer/UserRecords";
-import UserRequest from "./components/SkilledUSer/UsersRequest";
+import ProviderDashboard from "./components/SkilledUSer/ProviderDashboard";
+import ClientDashboard from "./components/SkilledUSer/ClientDashboard";
+import BrowseProviders from "./components/SkilledUSer/BrowseProviders";
+import BrowseJobs from "./components/SkilledUSer/BrowseJobs";
 import ManageProfile from "./components/SkilledUSer/ManageProfile";
-import WaitingForWorkerPage from "./components/WaitingForWorkerPage";
-import AcceptedRequest from "./components/SkilledUSer/AcceptedRequest";
-import ClientAccepted from "./components/SkilledUSer/ClientAccepted";
-import AcceptedOrderPage from "./components/SkilledUSer/AcceptedOrderPage";
-import Clients from "./components/SkilledUSer/Clients";
 import Settings from "./components/SkilledUSer/Settings";
 import VerificationPending from "./components/VerificationPending";
 import AccountBanned from "./components/AccountBanned";
@@ -97,6 +92,20 @@ const AccountStatusGuard = ({ children }) => {
   }
 
   return children;
+};
+
+// User Dashboard component that renders appropriate dashboard based on role
+const UserDashboard = () => {
+  const { user } = useMainContext();
+  const userRole = user?.role;
+
+  // Service Providers get ProviderDashboard, Community Members get ClientDashboard
+  if (userRole === "Service Provider") {
+    return <ProviderDashboard />;
+  } else {
+    // Community Member or any other role defaults to ClientDashboard
+    return <ClientDashboard />;
+  }
 };
 
 const AppContent = () => {
@@ -157,17 +166,9 @@ const AppContent = () => {
           if (lastPath && lastPath.startsWith("/user/")) {
             navigateWithLoader(lastPath, { replace: true });
           } else {
-            // Navigate based on user role
-            // Service Provider → /user/my-service
-            // Community Member → /user/service-request
-            if (userRole === "Service Provider") {
-              navigateWithLoader("/user/my-service", { replace: true });
-              localStorage.setItem("userLastPath", "/user/my-service");
-            } else {
-              // Community Member
-              navigateWithLoader("/user/service-request", { replace: true });
-              localStorage.setItem("userLastPath", "/user/service-request");
-            }
+            // Navigate to dashboard - UserDashboard component will show appropriate dashboard based on role
+            navigateWithLoader("/user/dashboard", { replace: true });
+            localStorage.setItem("userLastPath", "/user/dashboard");
           }
         }
       }
@@ -216,18 +217,11 @@ const AppContent = () => {
             )
           }
         >
+          {/* Default route - shows appropriate dashboard based on user role */}
+          <Route index element={<UserDashboard />} />
+          <Route path="dashboard" element={<UserDashboard />} />
+
           {/* Routes available to all authenticated users */}
-          <Route index element={<MyService />} />
-          <Route path="dashboard" element={<MyService />} />
-          <Route
-            path="my-service"
-            element={
-              <RoleGuard allowedRoles={["Service Provider"]}>
-                <MyService />
-              </RoleGuard>
-            }
-          />
-          <Route path="my-service" element={<MyService />} />
           <Route path="manage-profile" element={<ManageProfile />} />
           <Route path="general-settings" element={<Settings />} />
 
@@ -236,15 +230,7 @@ const AppContent = () => {
             path="service-request"
             element={
               <RoleGuard allowedRoles={["Community Member", "Service Provider"]}>
-                <ServiceRequest />
-              </RoleGuard>
-            }
-          />
-          <Route
-            path="records"
-            element={
-              <RoleGuard allowedRoles={["Community Member", "Service Provider"]}>
-                <UserWorkRecord />
+                <ClientDashboard />
               </RoleGuard>
             }
           />
@@ -252,7 +238,7 @@ const AppContent = () => {
             path="waiting-for-worker"
             element={
               <RoleGuard allowedRoles={["Community Member", "Service Provider"]}>
-                <WaitingForWorkerPage />
+                <ClientDashboard />
               </RoleGuard>
             }
           />
@@ -260,42 +246,82 @@ const AppContent = () => {
             path="accepted-order"
             element={
               <RoleGuard allowedRoles={["Community Member", "Service Provider"]}>
-                <AcceptedOrderPage />
+                <ClientDashboard />
               </RoleGuard>
             }
           />
 
+          {/* Browse Providers Page for Clients */}
+          <Route
+            path="browse-providers"
+            element={
+              <RoleGuard allowedRoles={["Community Member", "Service Provider"]}>
+                <BrowseProviders />
+              </RoleGuard>
+            }
+          />
+
+          {/* Browse Jobs Page for Providers */}
+          <Route
+            path="browse-jobs"
+            element={
+              <RoleGuard allowedRoles={["Service Provider"]}>
+                <BrowseJobs />
+              </RoleGuard>
+            }
+          />
 
           {/* Routes for Service Providers only */}
           <Route
-            path="users-request"
+            path="my-service"
             element={
               <RoleGuard allowedRoles={["Service Provider"]}>
-                <UserRequest />
+                <ProviderDashboard />
               </RoleGuard>
             }
+          />
+
+
+          {/* Additional Service Provider routes */}
+          <Route
+            path="users-request"
+            element={(
+              <RoleGuard allowedRoles={["Service Provider"]}>
+                <ProviderDashboard />
+              </RoleGuard>
+            )}
           />
           <Route
             path="accepted-request"
-            element={
+            element={(
               <RoleGuard allowedRoles={["Service Provider"]}>
-                <AcceptedRequest />
+                <ProviderDashboard />
               </RoleGuard>
-            }
+            )}
           />
           <Route
             path="client-accepted"
-            element={
+            element={(
               <RoleGuard allowedRoles={["Service Provider"]}>
-                <ClientAccepted />
+                <ProviderDashboard />
               </RoleGuard>
-            }
+            )}
           />
           <Route
             path="clients"
+            element={(
+              <RoleGuard allowedRoles={["Service Provider"]}>
+                <ProviderDashboard />
+              </RoleGuard>
+            )}
+          />
+
+          {/* Fallback route for unmatched user routes - use ProviderDashboard as fallback */}
+          <Route
+            path="*"
             element={
               <RoleGuard allowedRoles={["Service Provider"]}>
-                <Clients />
+                <ProviderDashboard />
               </RoleGuard>
             }
           />

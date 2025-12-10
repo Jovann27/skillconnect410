@@ -9,183 +9,55 @@ const AccountBanned = () => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
-      padding: '20px'
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '20px',
-        padding: '40px',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
-        textAlign: 'center',
-        maxWidth: '500px',
-        width: '100%'
-      }}>
-        <div style={{
-          fontSize: '4rem',
-          color: '#dc3545',
-          marginBottom: '20px'
-        }}>
-          <i className="fas fa-ban" style={{
-            animation: 'shake 0.5s ease-in-out'
-          }}></i>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-500 to-red-700 p-4">
+      <div className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl text-center max-w-lg w-full">
+        <div className="text-6xl text-red-500 mb-6 animate-bounce">
+          <i className="fas fa-ban"></i>
         </div>
 
-        <h1 style={{
-          color: '#333',
-          marginBottom: '20px',
-          fontSize: '2rem',
-          fontWeight: '600'
-        }}>Account Suspended</h1>
+        <h1 className="text-gray-900 mb-6 text-3xl font-bold">Account Suspended</h1>
 
-        <div style={{ marginBottom: '30px' }}>
-          <p style={{ marginBottom: '10px', color: '#666', lineHeight: '1.6' }}>
-            Hello <strong style={{ color: '#333' }}>{user?.firstName} {user?.lastName}</strong>,
+        <div className="mb-8 text-gray-600 leading-relaxed">
+          <p className="mb-3">
+            Hello <strong className="text-gray-900">{user?.firstName} {user?.lastName}</strong>,
           </p>
-          <p style={{ marginBottom: '10px', color: '#666', lineHeight: '1.6' }}>
+          <p className="mb-3">
             Your account has been suspended due to violation of our community guidelines.
           </p>
-          <p style={{ margin: '0', color: '#666', lineHeight: '1.6' }}>
+          <p className="mb-0">
             If you believe this suspension was made in error, please contact our support team for assistance.
           </p>
         </div>
 
-        <div style={{
-          background: '#f8f9fa',
-          borderRadius: '12px',
-          padding: '25px',
-          marginBottom: '30px'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '15px',
-            color: '#555'
-          }}>
-            <i className="fas fa-envelope" style={{
-              color: '#dc3545',
-              marginRight: '12px',
-              fontSize: '1.1rem',
-              width: '20px'
-            }}></i>
-            <span style={{ fontSize: '0.95rem' }}>Contact support for account reinstatement</span>
+        <div className="bg-gray-50 rounded-xl p-6 mb-8">
+          <div className="flex items-center mb-4 text-gray-700">
+            <i className="fas fa-envelope text-red-500 mr-3 text-lg w-5"></i>
+            <span className="text-sm">Contact support for account reinstatement</span>
           </div>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '15px',
-            color: '#555'
-          }}>
-            <i className="fas fa-shield-alt" style={{
-              color: '#dc3545',
-              marginRight: '12px',
-              fontSize: '1.1rem',
-              width: '20px'
-            }}></i>
-            <span style={{ fontSize: '0.95rem' }}>Review our community guidelines</span>
+          <div className="flex items-center mb-4 text-gray-700">
+            <i className="fas fa-shield-alt text-red-500 mr-3 text-lg w-5"></i>
+            <span className="text-sm">Review our community guidelines</span>
           </div>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '0',
-            color: '#555'
-          }}>
-            <i className="fas fa-question-circle" style={{
-              color: '#dc3545',
-              marginRight: '12px',
-              fontSize: '1.1rem',
-              width: '20px'
-            }}></i>
-            <span style={{ fontSize: '0.95rem' }}>Need help? Reach out to our support team</span>
+          <div className="flex items-center text-gray-700">
+            <i className="fas fa-question-circle text-red-500 mr-3 text-lg w-5"></i>
+            <span className="text-sm">Need help? Reach out to our support team</span>
           </div>
         </div>
 
-        <div style={{ marginBottom: '30px' }}>
+        <div className="mb-8">
           <button
-            style={{
-              background: '#dc3545',
-              color: 'white',
-              border: 'none',
-              padding: '12px 30px',
-              borderRadius: '8px',
-              fontSize: '1rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
+            className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center gap-2 hover:-translate-y-1 hover:shadow-lg"
             onClick={handleLogout}
-            onMouseOver={(e) => {
-              e.target.style.background = '#c82333';
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 4px 12px rgba(220, 53, 69, 0.3)';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background = '#dc3545';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
-            }}
           >
             <i className="fas fa-sign-out-alt"></i>
             Logout
           </button>
         </div>
 
-        <div style={{
-          color: '#888',
-          fontSize: '0.9rem',
-          fontStyle: 'italic'
-        }}>
-          <p style={{ margin: '0' }}>We appreciate your understanding.</p>
+        <div className="text-gray-500 text-sm italic">
+          <p>We appreciate your understanding.</p>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
-        }
-
-        @media (max-width: 768px) {
-          .account-banned-container {
-            padding: 15px !important;
-          }
-
-          .account-banned-card {
-            padding: 30px 20px !important;
-          }
-
-          .banned-icon {
-            font-size: 3rem !important;
-          }
-
-          .account-banned-card h1 {
-            font-size: 1.5rem !important;
-          }
-
-          .banned-details {
-            padding: 20px !important;
-          }
-
-          .detail-item {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            text-align: left !important;
-          }
-
-          .detail-item i {
-            margin-bottom: 5px !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

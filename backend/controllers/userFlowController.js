@@ -44,49 +44,7 @@ const uploadToMongoDB = async (filePath, folder) => {
 
 
 
-export const applyProvider = catchAsyncError(async (req, res, next) => {
-  const { skills, certificates } = req.body;
 
-  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-
-  const user = await User.findById(req.user._id);
-  if (!user) return next(new ErrorHandler("User not found", 404));
-
-  user.isApplyingProvider = true;
-
-  // Handle skills
-  if (skills) {
-    user.skills = Array.isArray(skills)
-      ? skills
-      : skills.toString().split(",").map(s => s.trim());
-  }
-
-  // Handle certificates
-  if (certificates) {
-    user.certificates = Array.isArray(certificates)
-      ? certificates
-      : [certificates];
-  }
-
-  // Assign temporary provider role (unverified)
-  user.role = "Service Provider"; // ✅ no extra space
-
-  await user.save();
-
-  // Notify user
-  await sendNotification(
-    user._id,
-    "Provider Application Received",
-    "Your application to become a Service Provider was received. An admin will review it soon.",
-    { type: "apply-provider" }
-  );
-
-  res.status(200).json({
-    success: true,
-    message: "Applied to become provider",
-    user,
-  });
-});
 
 
 
@@ -348,7 +306,83 @@ export const getUserServices = catchAsyncError(async (req, res, next) => {
   res.json({ success: true, services: user.services });
 });
 
+export const getServiceProfile = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
+  const user = await User.findById(req.user._id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  res.status(200).json({
+    success: true,
+    profile: {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      skills: user.skills,
+      serviceDescription: user.serviceDescription,
+      serviceRate: user.serviceRate,
+      certificates: user.certificates,
+      profilePic: user.profilePic,
+      isOnline: user.isOnline
+    }
+  });
+});
+
+export const updateServiceProfile = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { skills, serviceDescription, serviceRate, certificates } = req.body;
+
+  const user = await User.findById(req.user._id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  if (skills !== undefined) {
+    user.skills = Array.isArray(skills)
+      ? skills
+      : skills.toString().split(",").map(s => s.trim());
+  }
+
+  if (serviceDescription !== undefined) {
+    user.serviceDescription = serviceDescription;
+  }
+
+  if (serviceRate !== undefined) {
+    user.serviceRate = serviceRate;
+  }
+
+  if (certificates !== undefined) {
+    user.certificates = Array.isArray(certificates)
+      ? certificates
+      : [certificates];
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Profile updated successfully",
+    user
+  });
+});
+
+export const updateServiceStatus = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { isOnline } = req.body;
+
+  const user = await User.findById(req.user._id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  user.isOnline = isOnline;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Status updated successfully",
+    isOnline: user.isOnline
+  });
+});
 
 export const getChatHistory = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
@@ -575,6 +609,10 @@ export const markMessagesAsSeen = catchAsyncError(async (req, res, next) => {
     message: "Messages marked as seen"
   });
 });
+
+
+
+
 
 export const getServiceProviders = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
@@ -860,6 +898,71 @@ export const completeBooking = catchAsyncError(async (req, res, next) => {
 //   return result.secure_url;
 // };
 
+export const getServiceRequest = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { id } = req.params;
+
+  const request = await ServiceRequest.findById(id)
+    .populate('requester', 'firstName lastName email phone')
+    .populate('targetProvider', 'firstName lastName email phone')
+    .populate('serviceProvider', 'firstName lastName email phone');
+
+  if (!request) return next(new ErrorHandler("Service request not found", 404));
+
+  // Check if user is authorized (requester, target provider, service provider, or admin)
+  const authorized = [
+    String(request.requester),
+    String(request.targetProvider),
+    String(request.serviceProvider)
+  ].includes(String(req.user._id)) || req.user.role === "admin";
+
+  if (!authorized) {
+    return next(new ErrorHandler("Not authorized", 403));
+  }
+
+  res.status(200).json({ success: true, request });
+});
+
+export const updateServiceRequest = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { id } = req.params;
+  const updates = req.body;
+
+  const request = await ServiceRequest.findById(id);
+  if (!request) return next(new ErrorHandler("Service request not found", 404));
+
+  // Only the requester can update
+  if (String(request.requester) !== String(req.user._id)) {
+    return next(new ErrorHandler("Not authorized to update this request", 403));
+  }
+
+  // Prevent updating certain fields
+  delete updates.requester;
+  delete updates.status;
+  delete updates.serviceProvider;
+  delete updates.targetProvider;
+
+  Object.assign(request, updates);
+  await request.save();
+
+  res.status(200).json({ success: true, request });
+});
+
+export const getUserServiceRequests = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  // Return all service requests where the user is the requester
+  const requests = await ServiceRequest.find({ requester: req.user._id })
+    .populate('requester', 'firstName lastName email phone')
+    .populate('targetProvider', 'firstName lastName email phone')
+    .populate('serviceProvider', 'firstName lastName email phone')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({ success: true, requests });
+});
+
 export const getServiceRequests = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
@@ -889,6 +992,64 @@ export const getAvailableServiceRequests = catchAsyncError(async (req, res, next
     .sort({ createdAt: -1 });
 
   res.status(200).json({ success: true, requests });
+});
+
+export const getRecommendedJobs = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  // Get user profile for ranking
+  const user = await User.findById(req.user._id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  // Get all waiting service requests
+  const jobs = await ServiceRequest.find({ status: 'Waiting' })
+    .populate('requester', 'firstName lastName')
+    .sort({ createdAt: -1 });
+
+  // Rank jobs based on CBF and CF
+  const rankedJobs = jobs.map(job => {
+    let score = 0;
+
+    // Content-Based Filtering (CBF): Recommends jobs based on what the provider is like.
+    // Uses: Skills added, service description.
+    // Techniques used: Keyword matching (similar to TF-IDF similarity)
+    const jobService = job.typeOfWork.toLowerCase();
+    const providerSkills = (user.skills || []).map(s => s.toLowerCase());
+    const providerDesc = (user.serviceDescription || '').toLowerCase();
+
+    // Exact skill match
+    if (providerSkills.some(skill => skill.includes(jobService))) {
+      score += 10;
+    }
+
+    // Partial match
+    if (providerSkills.some(skill => jobService.includes(skill))) {
+      score += 5;
+    }
+
+    // Service description match
+    if (providerDesc.includes(jobService)) {
+      score += 3;
+    }
+
+    // Collaborative Filtering (CF): Recommends jobs based on what similar providers do.
+    // Types: Item-based CF - jobs with budgets within provider's acceptable range are boosted.
+    // Uses: Service rate, job budget range.
+    const providerRate = user.serviceRate || 0;
+    const jobBudget = job.budget || 0;
+    // Boost if job budget is within 20% range of provider's rate
+    const rangeMin = providerRate * 0.8;
+    const rangeMax = providerRate * 1.2;
+    if (jobBudget >= rangeMin && jobBudget <= rangeMax) {
+      score += 2;
+    }
+
+    return { ...job.toObject(), recommendationScore: score };
+  }).filter(job => job.recommendationScore > 0)
+    .sort((a, b) => b.recommendationScore - a.recommendationScore)
+    .slice(0, 5); // Return top 5
+
+  res.status(200).json({ success: true, jobs: rankedJobs });
 });
 
 export const reverseGeocode = catchAsyncError(async (req, res, next) => {

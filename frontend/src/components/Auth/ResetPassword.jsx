@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Lock, ArrowLeft, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
-import "../Css/ResetPassword.css";
 
 const ResetPassword = () => {
   const [formData, setFormData] = useState({

@@ -41,611 +41,74 @@ const ChatIcon = () => {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  const styles = {
-    navbarIconBtn: {
-      position: 'relative',
-      width: '40px',
-      height: '40px',
-      display: 'flex',
-      padding: '3px 2px 0 2px',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      borderRadius: '20px',
-      transition: 'all 0.3s ease',
-      marginRight: '10px',
-      color: '#ffffff',
-      fontSize: '20px',
-      border: 'none',
-      background: 'transparent'
-    },
-    navbarIconBtnHover: {
-      transform: 'scale(1.1)',
-      background: '#e4e3e3',
-      color: '#111111',
-      boxShadow: '0 6px 25px rgba(0, 0, 0, 0.2)'
-    },
-    chatBadge: {
-      position: 'absolute',
-      top: '-5px',
-      right: '-5px',
-      background: '#ff4757',
-      color: 'white',
-      borderRadius: '50%',
-      width: '25px',
-      height: '25px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '14px',
-      fontWeight: 'bold'
-    },
-    chatPanel: {
-      position: 'fixed',
-      top: '70px',
-      right: '0',
-      width: '520px',
-      height: '616px',
-      background: '#f3cde3',
-      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)',
-      display: 'flex',
-      flexDirection: 'column',
-      zIndex: '1001',
-      overflow: 'hidden'
-    },
-    chatHeader: {
-      background: 'linear-gradient(135deg, #ea6692 0%, #e667c6 100%)',
-      color: 'white',
-      padding: '12px 15px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      gap: '10px',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-    },
-    backButton: {
-      background: 'none',
-      border: 'none',
-      color: 'white',
-      fontSize: '20px',
-      cursor: 'pointer',
-      padding: '4px 6px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'all 0.2s'
-    },
-    backButtonHover: {
-      transform: 'scale(1.15)'
-    },
-    headerTitleSection: {
-      flex: '1',
-      textAlign: 'center'
-    },
-    chatHeaderTitle: {
-      margin: '0',
-      fontSize: '16px',
-      fontWeight: '600'
-    },
-    chatHeaderActions: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px'
-    },
-    statusBadge: {
-      fontSize: '12px',
-      padding: '4px 10px',
-      borderRadius: '12px',
-      backgroundColor: '#FFA500',
-      fontWeight: '600',
-      textTransform: 'capitalize',
-      color: 'white'
-    },
-    statusBadgeAvailable: {
-      backgroundColor: '#4CAF50'
-    },
-    statusBadgeWorking: {
-      backgroundColor: '#FFA500'
-    },
-    statusBadgeComplete: {
-      backgroundColor: '#2196F3'
-    },
-    statusBadgeCancelled: {
-      backgroundColor: '#f44336'
-    },
-    userMenuBtn: {
-      background: 'none',
-      border: 'none',
-      color: 'white',
-      cursor: 'pointer',
-      padding: '6px 8px',
-      borderRadius: '4px',
-      transition: 'all 0.2s',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '18px'
-    },
-    userMenuBtnHover: {
-      background: 'rgba(255, 255, 255, 0.15)',
-      transform: 'scale(1.05)'
-    },
-    headerActions: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px'
-    },
-    helpHeaderBtn: {
-      border: 'none',
-      color: 'white',
-      cursor: 'pointer',
-      padding: '8px',
-      borderRadius: '50%',
-      width: '35px',
-      height: '35px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'all 0.2s',
-      background: 'rgba(255, 255, 255, 0.1)'
-    },
-    helpHeaderBtnHover: {
-      transform: 'scale(1.1)',
-      background: 'rgba(255, 255, 255, 0.2)'
-    },
-    closeHeaderBtn: {
-      border: 'none',
-      color: 'white',
-      cursor: 'pointer',
-      padding: '8px',
-      fontWeight: '600',
-      borderRadius: '50%',
-      width: '35px',
-      height: '35px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'all 0.2s',
-      background: 'rgba(255, 255, 255, 0.1)'
-    },
-    closeHeaderBtnHover: {
-      transform: 'scale(1.1)',
-      background: 'rgba(255, 255, 255, 0.2)'
-    },
-    userMenuDropdown: {
-      position: 'absolute',
-      top: '65px',
-      right: '0px',
-      background: 'white',
-      borderRadius: '8px',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-      border: '1px solid #e2e8f0',
-      zIndex: '1002',
-      minWidth: '180px',
-      overflow: 'hidden'
-    },
-    userMenuItem: {
-      width: '100%',
-      padding: '12px 16px',
-      background: 'none',
-      border: 'none',
-      textAlign: 'left',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500',
-      color: '#374151',
-      transition: 'background-color 0.2s',
-      borderBottom: '1px solid #f3f4f6'
-    },
-    userMenuItemLast: {
-      width: '100%',
-      padding: '12px 16px',
-      background: 'none',
-      border: 'none',
-      textAlign: 'left',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500',
-      color: '#374151',
-      transition: 'background-color 0.2s'
-    },
-    userMenuItemHover: {
-      background: '#f9fafb',
-      color: '#1f2937'
-    },
-    userMenuItemActive: {
-      background: '#f3f4f6'
-    },
-    messagesContainer: {
-      flex: '1',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
-    },
-    loadingText: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '12px',
-      padding: '20px'
-    },
-    errorText: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '8px',
-      padding: '20px'
-    },
-    chatList: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-      padding: '15px',
-      overflowY: 'auto',
-      height: '100%'
-    },
-    chatItem: {
-      padding: '15px',
-      border: '1px solid #e0e0e0',
-      borderRadius: '12px',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      background: '#fafafa',
-      position: 'relative'
-    },
-    chatItemHover: {
-      background: '#f0f0f0',
-      borderColor: '#667eea',
-      transform: 'translateY(-2px)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-    },
-    chatItemHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '8px'
-    },
-    chatItemHeaderH4: {
-      margin: '0',
-      fontSize: '16px',
-      fontWeight: '600',
-      color: '#333'
-    },
-    chatItemHeaderSmall: {
-      fontSize: '14px',
-      color: '#666'
-    },
-    chatItemContent: {
-      marginBottom: '5px'
-    },
-    serviceName: {
-      fontSize: '14px',
-      color: '#667eea',
-      fontWeight: '500',
-      margin: '0 0 5px 0'
-    },
-    lastMessage: {
-      fontSize: '15px',
-      color: '#666',
-      margin: '0',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap'
-    },
-    noMessages: {
-      fontSize: '15px',
-      color: '#999',
-      fontStyle: 'italic',
-      margin: '0'
-    },
-    unreadBadge: {
-      position: 'absolute',
-      top: '10px',
-      right: '10px',
-      background: '#ff4757',
-      color: 'white',
-      borderRadius: '50%',
-      width: '20px',
-      height: '20px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '13px',
-      fontWeight: 'bold'
-    },
-    chatMessages: {
-      flex: '1',
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%'
-    },
-    messagesContainerInner: {
-      flex: '1',
-      overflowY: 'auto',
-      display: 'flex',
-      flexDirection: 'column',
-      background: '#dd8bbb4b'
-    },
-    error: {
-      color: '#ff6b6b',
-      textAlign: 'center',
-      padding: '10px',
-      background: '#2c2c2c',
-      borderRadius: '8px',
-      margin: '15px',
-      fontSize: '14px',
-      border: '1px solid #ff4757'
-    },
-    messageWrapper: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start'
-    },
-    messageWrapperOwn: {
-      alignItems: 'flex-end'
-    },
-    messageTimestamp: {
-      fontSize: '12px',
-      color: '#999',
-      marginBottom: '6px',
-      textAlign: 'right',
-      marginRight: '8px'
-    },
-    message: {
-      display: 'flex',
-      alignItems: 'flex-end',
-      maxWidth: '75%',
-      animation: 'messageSlideIn 0.3s ease-out'
-    },
-    messageOwn: {
-      flexDirection: 'row-reverse'
-    },
-    messageOther: {
-      flexDirection: 'row'
-    },
-    messageAvatar: {
-      width: '32px',
-      height: '32px',
-      borderRadius: '50%',
-      margin: '0 8px',
-      objectFit: 'cover',
-      border: '2px solid #E0E0E0'
-    },
-    messageContent: {
-      padding: '10px 14px',
-      borderRadius: '18px',
-      maxWidth: '220px',
-      wordWrap: 'break-word',
-      position: 'relative',
-      fontSize: '14px',
-      lineHeight: '1.4'
-    },
-    messageContentOwn: {
-      background: 'linear-gradient(135deg, #007AFF 0%, #0056CC 100%)',
-      color: 'white',
-      borderBottomRightRadius: '4px',
-      boxShadow: '0 2px 8px rgba(0, 122, 255, 0.2)'
-    },
-    messageContentOther: {
-      background: '#FFFFFF',
-      color: '#000',
-      borderBottomLeftRadius: '4px',
-      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
-    },
-    messageStatus: {
-      position: 'absolute',
-      bottom: '-2px',
-      right: '-2px',
-      fontSize: '14px',
-      color: '#ccc'
-    },
-    typingIndicator: {
-      padding: '8px 12px',
-      background: '#e5e5ea',
-      borderRadius: '18px',
-      borderBottomLeftRadius: '4px',
-      alignSelf: 'flex-start',
-      fontStyle: 'italic',
-      color: '#666',
-      fontSize: '15px'
-    },
-    messageInputSection: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-      padding: '12px 15px',
-      borderTop: '1px solid rgba(0, 0, 0, 0.1)',
-      background: 'linear-gradient(135deg, #ea6692 0%, #e667c6 100%)'
-    },
-    messageInput: {
-      flex: '1',
-      padding: '12px 16px',
-      border: '1px solid #141313',
-      borderRadius: '24px',
-      outline: 'none',
-      fontSize: '14px',
-      background: '#F5F5F5',
-      color: '#000',
-      transition: 'all 0.2s',
-      fontFamily: 'inherit'
-    },
-    messageInputFocus: {
-      borderColor: '#DD8BBB',
-      background: '#FFFFFF',
-      boxShadow: '0 0 0 3px rgb(56, 48, 53)'
-    },
-    messageInputPlaceholder: {
-      color: '#313131'
-    },
-    sendButton: {
-      background: 'linear-gradient(135deg, #DD5A9F 0%, #E8579B 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '50%',
-      width: '42px',
-      height: '42px',
-      cursor: 'pointer',
-      fontSize: '16px',
-      transition: 'all 0.2s',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: '0',
-      boxShadow: '0 2px 8px rgba(221, 139, 187, 0.3)'
-    },
-    sendButtonHover: {
-      transform: 'scale(1.05)',
-      boxShadow: '0 4px 12px rgba(221, 139, 187, 0.4)'
-    },
-    sendButtonDisabled: {
-      opacity: '0.5',
-      cursor: 'not-allowed'
-    },
-    helpTopicsView: {
-      flex: '1',
-      padding: '15px',
-      overflowY: 'auto',
-      background: '#dd8bbb4b'
-    },
-    categorySection: {
-      marginBottom: '25px'
-    },
-    categoryTitle: {
-      fontSize: '18px',
-      fontWeight: '700',
-      color: '#333',
-      marginBottom: '15px',
-      paddingBottom: '8px',
-      borderBottom: '2px solid #667eea'
-    },
-    helpTopicItem: {
-      background: '#ffffff',
-      padding: '15px',
-      marginBottom: '10px',
-      borderRadius: '12px',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      border: '1px solid #e0e0e0',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between'
-    },
-    helpTopicItemHover: {
-      background: '#f8f9fa',
-      borderColor: '#667eea',
-      transform: 'translateY(-2px)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-    },
-    helpTopicContent: {
-      flex: '1'
-    },
-    helpTopicTitle: {
-      fontSize: '16px',
-      fontWeight: '600',
-      color: '#333',
-      margin: '0 0 5px 0'
-    },
-    helpTopicDesc: {
-      fontSize: '14px',
-      color: '#666',
-      margin: '0',
-      lineHeight: '1.4'
-    },
-    helpTopicArrow: {
-      fontSize: '18px',
-      color: '#999',
-      fontWeight: 'bold'
-    },
-    quickActions: {
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '8px',
-      marginTop: '10px'
-    },
-    quickActionButton: {
-      background: '#667eea',
-      color: 'white',
-      border: 'none',
-      padding: '8px 12px',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500',
-      transition: 'background-color 0.2s'
-    },
-    quickActionButtonHover: {
-      background: '#5a67d8'
-    },
-    browseTopicsButton: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#f8f9fa',
-      padding: '12px 20px',
-      borderRadius: '8px',
-      marginTop: '15px',
-      border: '1px solid #e9ecef',
-      cursor: 'pointer',
-      transition: 'all 0.2s'
-    },
-    browseTopicsButtonHover: {
-      background: '#e9ecef',
-      borderColor: '#667eea'
-    },
-    browseTopicsText: {
-      color: '#c20884',
-      fontSize: '14px',
-      fontWeight: '600',
-      marginLeft: '8px'
-    },
-    messageInputSupport: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-      padding: '10px 15px',
-      borderTop: '1px solid #333',
-      background: '#dd8bbbad'
-    },
-    messageInputSupportInput: {
-      flex: '1',
-      padding: '10px 15px',
-      border: '1px solid #555',
-      borderRadius: '20px',
-      outline: 'none',
-      fontSize: '14px',
-      background: '#c9c9c9',
-      color: '#000000',
-      transition: 'border-color 0.2s'
-    },
-    messageInputSupportInputFocus: {
-      borderColor: '#000000'
-    },
-    messageInputSupportInputPlaceholder: {
-      color: '#474646'
-    },
-    sendBtn: {
-      background: '#007aff',
-      color: 'white',
-      border: 'none',
-      borderRadius: '50%',
-      width: '40px',
-      height: '40px',
-      cursor: 'pointer',
-      fontSize: '16px',
-      transition: 'all 0.2s',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    sendBtnHover: {
-      background: '#0056cc',
-      transform: 'scale(1.05)'
-    },
-    sendBtnDisabled: {
-      opacity: '0.5',
-      cursor: 'not-allowed',
-      transform: 'none'
-    }
+  // Tailwind CSS classes defined as constants for better organization
+  const chatIconClasses = {
+    chatIcon: "relative w-10 h-10 flex items-center justify-center p-[3px_2px_0_2px] cursor-pointer rounded-full transition-all duration-300 mr-2.5 text-white text-xl hover:scale-110 hover:bg-gray-200 hover:text-gray-900 shadow-2xl",
+    chatBadge: "absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold",
+    chatPanel: "fixed top-[70px] right-0 w-[520px] h-[616px] bg-pink-100 shadow-2xl flex flex-col z-[1001] overflow-hidden",
+    chatHeader: "bg-gradient-to-br from-pink-500 to-pink-600 text-white p-3 flex justify-between items-center gap-2.5 border-b border-white/10",
+    backButton: "bg-none border-none text-white text-xl cursor-pointer p-1 flex items-center justify-center transition-all duration-200 hover:scale-115",
+    headerTitleSection: "flex-1 text-center",
+    chatHeaderTitle: "m-0 text-base font-semibold",
+    chatHeaderActions: "flex items-center gap-2",
+    statusBadge: "text-xs py-1 px-2.5 rounded-xl bg-orange-500 font-semibold capitalize text-white",
+    statusBadgeAvailable: "bg-green-500",
+    statusBadgeWorking: "bg-orange-500",
+    statusBadgeComplete: "bg-blue-500",
+    statusBadgeCancelled: "bg-red-500",
+    userMenuBtn: "bg-none border-none text-white cursor-pointer p-1.5 rounded hover:bg-white/15 transition-all duration-200 hover:scale-105 flex items-center justify-center text-lg",
+    headerActions: "flex items-center gap-2.5",
+    helpHeaderBtn: "border-none text-white cursor-pointer p-2 rounded-full w-9 h-9 flex items-center justify-center transition-all duration-200 bg-white/10 hover:scale-110 hover:bg-white/20",
+    closeHeaderBtn: "border-none text-white cursor-pointer p-2 font-semibold rounded-full w-9 h-9 flex items-center justify-center transition-all duration-200 bg-white/10 hover:scale-110 hover:bg-white/20",
+    userMenuDropdown: "absolute top-[65px] right-0 bg-white rounded-lg shadow-xl border border-gray-200 z-[1002] min-w-[180px] overflow-hidden",
+    userMenuItem: "w-full p-3 bg-none border-none text-left cursor-pointer text-sm font-medium text-gray-700 transition-colors duration-200 border-b border-gray-100 hover:bg-gray-50 hover:text-gray-900",
+    userMenuItemLast: "w-full p-3 bg-none border-none text-left cursor-pointer text-sm font-medium text-gray-700 transition-colors duration-200 hover:bg-gray-50 hover:text-gray-900",
+    messagesContainer: "flex-1 flex flex-col overflow-hidden",
+    loadingText: "flex items-center justify-center gap-3 p-5",
+    errorText: "flex flex-col items-center gap-2 p-5",
+    chatList: "flex flex-col gap-3 p-3.5 overflow-y-auto h-full",
+    chatItem: "p-3.5 border border-gray-300 rounded-xl cursor-pointer transition-all duration-300 bg-gray-50 relative hover:bg-gray-100 hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg",
+    chatItemHeader: "flex justify-between items-center mb-2",
+    chatItemHeaderH4: "m-0 text-base font-semibold text-gray-800",
+    chatItemHeaderSmall: "text-sm text-gray-600",
+    chatItemContent: "mb-1.5",
+    serviceName: "text-sm text-blue-600 font-medium m-0 mb-1.5",
+    lastMessage: "text-base text-gray-600 m-0 overflow-hidden text-ellipsis whitespace-nowrap",
+    noMessages: "text-base text-gray-500 italic m-0",
+    unreadBadge: "absolute top-2.5 right-2.5 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold",
+    chatMessages: "flex-1 flex flex-col h-full",
+    messagesContainerInner: "flex-1 overflow-y-auto flex flex-col bg-pink-100/30",
+    error: "text-red-400 text-center p-2.5 bg-gray-800 rounded-lg m-3.5 text-sm border border-red-500",
+    messageWrapper: "flex flex-col items-start",
+    messageWrapperOwn: "items-end",
+    messageTimestamp: "text-xs text-gray-500 mb-1.5 text-right mr-2",
+    message: "flex items-end max-w-[75%] animate-[messageSlideIn_0.3s_ease-out]",
+    messageOwn: "flex-row-reverse",
+    messageOther: "flex-row",
+    messageAvatar: "w-8 h-8 rounded-full mx-2 object-cover border-2 border-gray-200",
+    messageContent: "p-2.5 pr-3.5 rounded-[18px] max-w-[220px] break-words relative text-sm leading-5",
+    messageContentOwn: "bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-br",
+    messageContentOther: "bg-white text-black rounded-bl",
+    messageStatus: "absolute -bottom-0.5 -right-0.5 text-sm text-gray-400",
+    typingIndicator: "p-2 pr-3 rounded-[18px] bg-gray-300 self-start italic text-gray-600 text-base rounded-bl",
+    messageInputSection: "flex items-center gap-2.5 p-3 border-t border-black/10 bg-gradient-to-br from-pink-500 to-pink-600",
+    messageInput: "flex-1 p-3 pr-4 border border-gray-900 rounded-3xl outline-none text-sm bg-gray-100 text-black transition-all duration-200 font-inherit focus:border-pink-400 focus:bg-white focus:shadow-[0_0_0_3px_rgba(56,48,53,0.5)] placeholder:text-gray-500",
+    sendButton: "bg-gradient-to-br from-pink-600 to-pink-700 text-white border-none rounded-full w-[42px] h-[42px] cursor-pointer text-base transition-all duration-200 flex items-center justify-center flex-shrink-0 shadow-lg hover:scale-105 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed",
+    helpTopicsView: "flex-1 p-3.5 overflow-y-auto bg-pink-100/30",
+    categorySection: "mb-6",
+    categoryTitle: "text-lg font-bold text-gray-800 mb-3.5 pb-2 border-b-2 border-blue-600",
+    helpTopicItem: "bg-white p-3.5 mb-2.5 rounded-xl cursor-pointer transition-all duration-300 border border-gray-300 flex items-center justify-between hover:bg-gray-50 hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg",
+    helpTopicContent: "flex-1",
+    helpTopicTitle: "text-base font-semibold text-gray-800 m-0 mb-1",
+    helpTopicDesc: "text-sm text-gray-600 m-0 leading-5",
+    helpTopicArrow: "text-lg text-gray-500 font-bold",
+    quickActions: "flex flex-wrap gap-2 mt-2.5",
+    quickActionButton: "bg-blue-600 text-white border-none py-2 px-3 rounded cursor-pointer text-sm font-medium transition-colors duration-200 hover:bg-blue-700",
+    browseTopicsButton: "flex items-center justify-center bg-gray-50 p-3 rounded-lg mt-3.5 border border-gray-200 cursor-pointer transition-all duration-200 hover:bg-gray-100 hover:border-blue-500",
+    browseTopicsText: "text-pink-700 text-sm font-semibold ml-2",
+    messageInputSupport: "flex items-center gap-2.5 p-2.5 pr-3.5 border-t border-gray-800 bg-pink-200/70",
+    messageInputSupportInput: "flex-1 p-2.5 pr-3.5 border border-gray-600 rounded-2xl outline-none text-sm bg-gray-300 text-black transition-colors duration-200 focus:border-black placeholder:text-gray-700",
+    sendBtn: "bg-blue-500 text-white border-none rounded-full w-10 h-10 cursor-pointer text-base transition-all duration-200 flex items-center justify-center hover:bg-blue-700 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
   };
 
   // Functions used in useEffect
@@ -1236,36 +699,32 @@ const ChatIcon = () => {
     <>
       {/* Chat Icon */}
       <button
-        style={styles.navbarIconBtn}
+        className={chatIconClasses.chatIcon}
         onClick={toggleChat}
-        onMouseEnter={(e) => e.target.style = {...styles.navbarIconBtn, ...styles.navbarIconBtnHover}}
-        onMouseLeave={(e) => e.target.style = styles.navbarIconBtn}
       >
         <FaFacebookMessenger size={24} />
         {totalUnreadCount > 0 && (
-          <span style={styles.chatBadge}>{totalUnreadCount}</span>
+          <span className={chatIconClasses.chatBadge}>{totalUnreadCount}</span>
         )}
       </button>
 
-
-
       {/* Chat Panel */}
       {isOpen && (
-        <div className="chat-panel">
-          <div className="chat-header">
+        <div className={chatIconClasses.chatPanel}>
+          <div className={chatIconClasses.chatHeader}>
             {view === 'chat' ? (
               <>
-                <button className="back-button" onClick={backToList}>
+                <button className={chatIconClasses.backButton} onClick={backToList}>
                   <i className="fas fa-chevron-left"></i>
                 </button>
-                <div className="header-title-section">
-                  <h2 className="chat-header-title">
+                <div className={chatIconClasses.headerTitleSection}>
+                  <h2 className={chatIconClasses.chatHeaderTitle}>
                     {selectedChat?.otherUser?.firstName} {selectedChat?.otherUser?.lastName}
                   </h2>
                 </div>
-                <div className="chat-header-actions">
+                <div className={chatIconClasses.chatHeaderActions}>
                   <button
-                    className={`status-badge ${selectedChat?.status?.toLowerCase()}`}
+                    className={`${chatIconClasses.statusBadge} ${chatIconClasses[`statusBadge${selectedChat?.status?.toLowerCase() === 'available' ? 'Available' : selectedChat?.status?.toLowerCase() === 'working' ? 'Working' : selectedChat?.status?.toLowerCase() === 'complete' ? 'Complete' : selectedChat?.status?.toLowerCase() === 'cancelled' ? 'Cancelled' : ''}`]}`}
                     onClick={() => {
                       if (selectedChat?.serviceRequest) {
                         const isProvider = selectedChat.serviceRequest.provider._id === user._id;
@@ -1281,7 +740,7 @@ const ChatIcon = () => {
                     {selectedChat?.status}
                   </button>
                   <button
-                    className="user-menu-btn"
+                    className={chatIconClasses.userMenuBtn}
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     title="User options"
                   >
@@ -1291,22 +750,22 @@ const ChatIcon = () => {
               </>
             ) : view === 'help' ? (
               <>
-                <button className="back-button" onClick={() => setView('list')}><i className="fas fa-chevron-left"></i></button>
+                <button className={chatIconClasses.backButton} onClick={() => setView('list')}><i className="fas fa-chevron-left"></i></button>
                 <h2>Help Center</h2>
               </>
             ) : view === 'help-topics' ? (
               <>
-                <button className="back-button" onClick={() => setView('help')}><i className="fas fa-chevron-left"></i></button>
+                <button className={chatIconClasses.backButton} onClick={() => setView('help')}><i className="fas fa-chevron-left"></i></button>
                 <h2>Help Topics</h2>
               </>
             ) : (
               <>
                 <h2>Messages</h2>
-                <div className="header-actions">
-                  <button className="help-header-btn" onClick={() => setView('help')} title="Help">
+                <div className={chatIconClasses.headerActions}>
+                  <button className={chatIconClasses.helpHeaderBtn} onClick={() => setView('help')} title="Help">
                     ?
                   </button>
-                  <button className="close-header-btn" onClick={toggleChat}><MdClose size={20} /></button>
+                  <button className={chatIconClasses.closeHeaderBtn} onClick={toggleChat}><MdClose size={20} /></button>
                 </div>
               </>
             )}
@@ -1314,9 +773,9 @@ const ChatIcon = () => {
 
           {/* User Menu Dropdown */}
           {showUserMenu && selectedChat && (
-            <div className="user-menu-dropdown">
+            <div className={chatIconClasses.userMenuDropdown}>
               <button
-                className="user-menu-item"
+                className={chatIconClasses.userMenuItem}
                 onClick={() => {
                   setShowUserMenu(false);
                   handleReportUser();
@@ -1325,7 +784,7 @@ const ChatIcon = () => {
                 🚨 Report User
               </button>
               <button
-                className="user-menu-item"
+                className={chatIconClasses.userMenuItem}
                 onClick={() => {
                   setShowUserMenu(false);
                   handleBlockUser();
@@ -1335,7 +794,7 @@ const ChatIcon = () => {
               </button>
               {user?.role !== 'Service Provider' && (
                 <button
-                  className="user-menu-item"
+                  className={chatIconClasses.userMenuItemLast}
                   onClick={() => {
                     setShowUserMenu(false);
                     handleRateUser();
@@ -1347,104 +806,87 @@ const ChatIcon = () => {
             </div>
           )}
 
-          <div className="messages-container">
+          <div className={chatIconClasses.messagesContainer}>
             {view === 'list' ? (
               loading ? (
-                <div className="loading-text">
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-                    <div style={{
-                      width: '20px',
-                      height: '20px',
-                      border: '2px solid #c20884',
-                      borderTop: '2px solid transparent',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite'
-                    }}></div>
-                    Loading conversations...
-                  </div>
-                  <style>{`
-                    @keyframes spin {
-                      0% { transform: rotate(0deg); }
-                      100% { transform: rotate(360deg); }
-                    }
-                  `}</style>
+                <div className={chatIconClasses.loadingText}>
+                  <div className="w-5 h-5 border-2 border-pink-700 border-t-transparent rounded-full animate-spin"></div>
+                  Loading conversations...
                 </div>
               ) : error ? (
-                <div className="error-text">
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '24px' }}>⚠️</span>
-                    {error}
-                  </div>
+                <div className={chatIconClasses.errorText}>
+                  <span className="text-2xl">⚠️</span>
+                  {error}
                 </div>
               ) : (
-                <div className="chat-list">
-                  <div className="chat-item" onClick={() => setView('help')}>
-                    <div className="chat-item-header">
-                      <h4>Help Center</h4>
-                      <small>Support</small>
+                <div className={chatIconClasses.chatList}>
+                  <div className={chatIconClasses.chatItem} onClick={() => setView('help')}>
+                    <div className={chatIconClasses.chatItemHeader}>
+                      <h4 className={chatIconClasses.chatItemHeaderH4}>Help Center</h4>
+                      <small className={chatIconClasses.chatItemHeaderSmall}>Support</small>
                     </div>
-                    <p className="last-message">Get help with your questions</p>
+                    <p className={chatIconClasses.lastMessage}>Get help with your questions</p>
                   </div>
                   {tokenType === 'user' && chatList.map((chat) => (
                     <div
                       key={chat.appointmentId}
-                      className="chat-item"
+                      className={chatIconClasses.chatItem}
                       onClick={() => openChat(chat)}
                     >
-                      <div className="chat-item-header">
-                        <h4>
+                      <div className={chatIconClasses.chatItemHeader}>
+                        <h4 className={chatIconClasses.chatItemHeaderH4}>
                           {chat.otherUser?.firstName} {chat.otherUser?.lastName}
                         </h4>
                         {chat.lastMessage && (
-                          <small>{formatTime(chat.lastMessage.timestamp)}</small>
+                          <small className={chatIconClasses.chatItemHeaderSmall}>{formatTime(chat.lastMessage.timestamp)}</small>
                         )}
                       </div>
-                      <div className="chat-item-content">
-                        <p className="service-name">{chat.serviceRequest?.name}</p>
+                      <div className={chatIconClasses.chatItemContent}>
+                        <p className={chatIconClasses.serviceName}>{chat.serviceRequest?.name}</p>
                         {chat.lastMessage ? (
-                          <p className="last-message">
+                          <p className={chatIconClasses.lastMessage}>
                             <strong>{chat.lastMessage.sender?.firstName}:</strong> {chat.lastMessage.message}
                           </p>
                         ) : (
-                          <p className="no-messages">No messages yet</p>
+                          <p className={chatIconClasses.noMessages}>No messages yet</p>
                         )}
                       </div>
                       {unreadCounts[chat.appointmentId] > 0 && (
-                        <span className="unread-badge">{unreadCounts[chat.appointmentId]}</span>
+                        <span className={chatIconClasses.unreadBadge}>{unreadCounts[chat.appointmentId]}</span>
                       )}
                     </div>
                   ))}
                 </div>
               )
             ) : view === 'chat' ? (
-              <div className="chat-messages">
-                  {error && <p className="error">{error}</p>}
+              <div className={chatIconClasses.chatMessages}>
+                  {error && <p className={chatIconClasses.error}>{error}</p>}
 
-                  <div className="messages-container">
+                  <div className={chatIconClasses.messagesContainerInner}>
                   {messages.map((msg) => (
                     <div
                       key={msg.id || msg._id}
-                      className={`message-wrapper ${msg.sender._id === user._id ? 'own' : 'other'}`}
+                      className={`${chatIconClasses.messageWrapper} ${msg.sender._id === user._id ? chatIconClasses.messageWrapperOwn : ''}`}
                     >
-                      <div className="message-timestamp">
+                      <div className={chatIconClasses.messageTimestamp}>
                         <small>{formatTime(msg.timestamp)}</small>
                       </div>
-                      <div className={`message ${msg.sender._id === user._id ? 'own' : 'other'}`}>
+                      <div className={`${chatIconClasses.message} ${msg.sender._id === user._id ? chatIconClasses.messageOwn : chatIconClasses.messageOther}`}>
                         {msg.sender._id !== user._id && (
                           <img
                             src={getProfileImageUrl(msg.sender.profilePic)}
                             alt={`${msg.sender.firstName} ${msg.sender.lastName}`}
-                            className="message-avatar"
+                            className={chatIconClasses.messageAvatar}
                             onError={(e) => {
                               e.target.src = '/default-profile.png';
                             }}
                           />
                         )}
-                        <div className="message-content">
+                        <div className={`${chatIconClasses.messageContent} ${msg.sender._id === user._id ? chatIconClasses.messageContentOwn : chatIconClasses.messageContentOther}`}>
                           <span>{msg.message}</span>
                         </div>
                         {msg.sender._id === user._id && (
-                          <span className={`message-status ${msg.status}`}>
+                          <span className={`${chatIconClasses.messageStatus} text-${msg.status === 'seen' ? 'green' : 'gray'}-400`}>
                             {getMessageStatusIcon(msg.status)}
                           </span>
                         )}
@@ -1453,7 +895,7 @@ const ChatIcon = () => {
                   ))}
 
                   {typingUsers.size > 0 && (
-                    <div className="typing-indicator">
+                    <div className={chatIconClasses.typingIndicator}>
                       <span>Someone is typing...</span>
                     </div>
                   )}
@@ -1461,7 +903,7 @@ const ChatIcon = () => {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="message-input-section">
+                <div className={chatIconClasses.messageInputSection}>
                   <input
                     type="text"
                     value={newMessage}
@@ -1472,10 +914,10 @@ const ChatIcon = () => {
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                     placeholder="Type a message..."
                     disabled={loading}
-                    className="message-input"
+                    className={chatIconClasses.messageInput}
                   />
                   <button
-                    className="send-button"
+                    className={chatIconClasses.sendButton}
                     onClick={sendMessage}
                     disabled={!newMessage.trim() || loading}
                     title="Send message"
@@ -1485,14 +927,14 @@ const ChatIcon = () => {
                 </div>
               </div>
             ) : view === 'help-topics' ? (
-              <div className="help-topics-view">
+              <div className={chatIconClasses.helpTopicsView}>
                 {helpCategories.map(([category, topics]) => (
-                  <div key={category} className="category-section">
-                    <h4 className="category-title">{category}</h4>
+                  <div key={category} className={chatIconClasses.categorySection}>
+                    <h4 className={chatIconClasses.categoryTitle}>{category}</h4>
                     {topics.map((topic) => (
                       <div
                         key={topic.id}
-                        className="help-topic-item"
+                        className={chatIconClasses.helpTopicItem}
                         onClick={() => {
                           setView('help');
                           // Add user message about the selected topic
@@ -1506,23 +948,23 @@ const ChatIcon = () => {
                           }, 1000);
                         }}
                       >
-                        <div className="help-topic-content">
-                          <h5 className="help-topic-title">{topic.title}</h5>
-                          <p className="help-topic-desc">{topic.description}</p>
+                        <div className={chatIconClasses.helpTopicContent}>
+                          <h5 className={chatIconClasses.helpTopicTitle}>{topic.title}</h5>
+                          <p className={chatIconClasses.helpTopicDesc}>{topic.description}</p>
                         </div>
-                        <span className="help-topic-arrow">›</span>
+                        <span className={chatIconClasses.helpTopicArrow}>›</span>
                       </div>
                     ))}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="chat-messages">
-                <div className="messages-container">
+              <div className={chatIconClasses.chatMessages}>
+                <div className={chatIconClasses.messagesContainerInner}>
                   {supportMessages.map((msg, index) => (
-                    <div key={index} className={`message-wrapper ${msg.sender === 'user' ? 'own' : 'other'}`}>
-                      <div className={`message ${msg.sender === 'user' ? 'own' : 'other'}`}>
-                        <div className="message-content">
+                    <div key={index} className={`${chatIconClasses.messageWrapper} ${msg.sender === 'user' ? chatIconClasses.messageWrapperOwn : ''}`}>
+                      <div className={`${chatIconClasses.message} ${msg.sender === 'user' ? chatIconClasses.messageOwn : chatIconClasses.messageOther}`}>
+                        <div className={`${chatIconClasses.messageContent} ${msg.sender === 'user' ? chatIconClasses.messageContentOwn : chatIconClasses.messageContentOther}`}>
                           <span>{msg.message}</span>
                         </div>
                       </div>
@@ -1530,26 +972,26 @@ const ChatIcon = () => {
                   ))}
 
                   {supportLoading && (
-                    <div className="typing-indicator">
+                    <div className={chatIconClasses.typingIndicator}>
                       <span>Support is typing...</span>
                     </div>
                   )}
 
                   {supportMessages.length === 0 && !supportLoading && (
-                    <div className="message-wrapper other">
-                      <div className="message other">
-                        <div className="message-content">
+                    <div className={`${chatIconClasses.messageWrapper}`}>
+                      <div className={`${chatIconClasses.message} ${chatIconClasses.messageOther}`}>
+                        <div className={chatIconClasses.messageContentOther}>
                           <span>Welcome to Help Center! How can we assist you today?</span>
-                          <div className="quick-actions">
-                            <button className="quick-action-button" onClick={() => handleSupportOption('password')}>Password Reset</button>
-                            <button className="quick-action-button" onClick={() => handleSupportOption('booking')}>Booking Help</button>
-                            <button className="quick-action-button" onClick={() => handleSupportOption('account')}>Account Issues</button>
-                            <button className="quick-action-button" onClick={() => handleSupportOption('technical')}>Technical Issues</button>
-                            <button className="quick-action-button" onClick={() => handleSupportOption('other')}>Other</button>
+                          <div className={chatIconClasses.quickActions}>
+                            <button className={chatIconClasses.quickActionButton} onClick={() => handleSupportOption('password')}>Password Reset</button>
+                            <button className={chatIconClasses.quickActionButton} onClick={() => handleSupportOption('booking')}>Booking Help</button>
+                            <button className={chatIconClasses.quickActionButton} onClick={() => handleSupportOption('account')}>Account Issues</button>
+                            <button className={chatIconClasses.quickActionButton} onClick={() => handleSupportOption('technical')}>Technical Issues</button>
+                            <button className={chatIconClasses.quickActionButton} onClick={() => handleSupportOption('other')}>Other</button>
                           </div>
-                          <div className="browse-topics-button">
+                          <div className={chatIconClasses.browseTopicsButton} onClick={() => setView('help-topics')}>
                             <span>📋</span>
-                            <span className="browse-topics-text">Browse Help Topics</span>
+                            <span className={chatIconClasses.browseTopicsText}>Browse Help Topics</span>
                           </div>
                         </div>
                       </div>
@@ -1557,16 +999,16 @@ const ChatIcon = () => {
                   )}
 
                   {supportMessages.length > 0 && supportMessages[supportMessages.length - 1].sender === 'support' && !supportLoading && (
-                    <div className="message-wrapper other">
-                      <div className="message other">
-                        <div className="message-content">
+                    <div className={`${chatIconClasses.messageWrapper}`}>
+                      <div className={`${chatIconClasses.message} ${chatIconClasses.messageOther}`}>
+                        <div className={chatIconClasses.messageContentOther}>
                           <span>Is there anything else I can help you with?</span>
-                          <div className="quick-actions">
-                            <button className="quick-action-button" onClick={() => handleSupportOption('password')}>Password Reset</button>
-                            <button className="quick-action-button" onClick={() => handleSupportOption('booking')}>Booking Help</button>
-                            <button className="quick-action-button" onClick={() => handleSupportOption('account')}>Account Issues</button>
-                            <button className="quick-action-button" onClick={() => handleSupportOption('technical')}>Technical Issues</button>
-                            <button className="quick-action-button" onClick={() => handleSupportOption('other')}>Other</button>
+                          <div className={chatIconClasses.quickActions}>
+                            <button className={chatIconClasses.quickActionButton} onClick={() => handleSupportOption('password')}>Password Reset</button>
+                            <button className={chatIconClasses.quickActionButton} onClick={() => handleSupportOption('booking')}>Booking Help</button>
+                            <button className={chatIconClasses.quickActionButton} onClick={() => handleSupportOption('account')}>Account Issues</button>
+                            <button className={chatIconClasses.quickActionButton} onClick={() => handleSupportOption('technical')}>Technical Issues</button>
+                            <button className={chatIconClasses.quickActionButton} onClick={() => handleSupportOption('other')}>Other</button>
                           </div>
                         </div>
                       </div>
@@ -1576,7 +1018,7 @@ const ChatIcon = () => {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="message-input">
+                <div className={chatIconClasses.messageInputSupport}>
                   <input
                     type="text"
                     value={supportMessage}
@@ -1584,9 +1026,10 @@ const ChatIcon = () => {
                     onKeyPress={(e) => e.key === 'Enter' && sendSupportMessage()}
                     placeholder="Type your message to support..."
                     disabled={supportLoading}
+                    className={chatIconClasses.messageInputSupportInput}
                   />
                   <button
-                    className="send-btn"
+                    className={chatIconClasses.sendBtn}
                     onClick={sendSupportMessage}
                     disabled={!supportMessage.trim() || supportLoading}
                   >
