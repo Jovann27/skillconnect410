@@ -296,6 +296,209 @@ export const getBooking = catchAsyncError(async (req, res, next) => {
 
 
 
+<<<<<<< HEAD
+=======
+  res.status(200).json({ success: true, data: serviceProfile });
+});
+
+export const updateServiceProfile = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { service, rate, description } = req.body;
+  const user = await User.findById(req.user._id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  user.service = service || user.service;
+  user.serviceRate = rate || user.serviceRate;
+  user.serviceDescription = description || user.serviceDescription;
+
+  // Update skills array to include the selected service for matching
+  if (service && typeof service === 'string' && service.trim()) {
+    try {
+      // Ensure skills is an array
+      if (!Array.isArray(user.skills)) {
+        user.skills = [];
+      }
+
+      const trimmedService = service.trim();
+
+      // Add the service to skills if not already present and if we have space
+      if (!user.skills.includes(trimmedService)) {
+        // For service providers, limit to 3 skills max
+        if (user.role === "Service Provider" && user.skills.length >= 3) {
+          // If skills are full, remove the oldest one and add new one
+          user.skills.shift();
+        }
+        user.skills.push(trimmedService);
+      }
+    } catch (skillsError) {
+      console.error("Error updating user skills:", skillsError);
+      // Continue with the update even if skills update fails
+    }
+  }
+
+  await user.save();
+
+  res.status(200).json({ success: true, message: "Service profile updated", data: { service, rate, description } });
+});
+
+export const updateServiceStatus = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { isOnline } = req.body;
+  const user = await User.findById(req.user._id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  user.isOnline = isOnline;
+  await user.save();
+
+  res.status(200).json({ success: true, message: `Status updated to ${isOnline ? 'Online' : 'Offline'}` });
+});
+
+export const getMatchingRequests = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const provider = await User.findById(req.user._id);
+  if (!provider || provider.role !== "Service Provider") return next(new ErrorHandler("Not a provider", 403));
+  if (!provider.isOnline) {
+    return res.status(200).json({
+      success: true,
+      requests: [],
+      message: "You are currently offline and cannot receive new requests."
+    });
+  }
+
+  // Get the selected service from query parameters
+  const selectedService = req.query.service || "";
+
+  // Get provider's current location from query parameters
+  const providerLat = req.query.lat ? parseFloat(req.query.lat) : null;
+  const providerLng = req.query.lng ? parseFloat(req.query.lng) : null;
+  const maxDistanceKm = 5; // Maximum distance in kilometers for location matching
+
+  // Get provider's service information
+  const providerService = provider.service || "";
+  const providerSkills = provider.skills || [];
+  const providerRate = provider.serviceRate || 0;
+  const rateTolerance = 200; // Allow ±200 peso tolerance for budget matching
+
+  // Get all active waiting requests
+  const activeRequestsFilter = getActiveRequestsFilter();
+  let query = {
+    ...activeRequestsFilter,
+    status: "Waiting"
+  };
+
+  // If a specific service is selected, filter requests by that service
+  if (selectedService) {
+    query.typeOfWork = { $regex: selectedService, $options: 'i' };
+  }
+
+  const allRequests = await ServiceRequest.find(query)
+    .populate({
+      path: 'requester',
+      select: 'firstName lastName username email phone',
+      model: 'User'
+    })
+    .sort({ createdAt: -1 });
+
+  // Helper function to calculate distance between two coordinates
+  const calculateDistance = (lat1, lng1, lat2, lng2) => {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  // Filter requests based on provider's skills, rate, and location
+  let matchingRequests = allRequests.filter(request => {
+    // Service/Skill Match: Check if provider's skills match the requested service
+    const skillMatch = providerSkills.length > 0
+      ? providerSkills.some(skill =>
+          request.typeOfWork?.toLowerCase().includes(skill.toLowerCase()) ||
+          skill.toLowerCase().includes(request.typeOfWork?.toLowerCase())
+        )
+      : true; // If provider has no skills listed, show all requests
+
+    // Rate Match: Check if request budget is within provider's rate tolerance
+    const rateMatch = (() => {
+      if (!request.budget || !providerRate) return true; // If no budget specified, consider it a match
+      const minRate = Math.max(0, providerRate - rateTolerance);
+      const maxRate = providerRate + rateTolerance;
+      return request.budget >= minRate && request.budget <= maxRate;
+    })();
+
+    // Location Match: Check if request location is within maximum distance
+    const locationMatch = (() => {
+      if (!providerLat || !providerLng || !request.location || !request.location.lat || !request.location.lng) {
+        return true; // If no location data available, consider it a match
+      }
+      const distance = calculateDistance(providerLat, providerLng, request.location.lat, request.location.lng);
+      return distance <= maxDistanceKm;
+    })();
+
+    return skillMatch && rateMatch && locationMatch;
+  });
+
+  // Also include requests specifically targeted to this provider (only if they match the selected service or no service is selected)
+  let targetedQuery = {
+    status: "Waiting",
+    targetProvider: req.user._id
+  };
+
+  if (selectedService) {
+    targetedQuery.typeOfWork = { $regex: selectedService, $options: 'i' };
+  }
+
+  const targetedRequests = await ServiceRequest.find(targetedQuery)
+  .populate({
+    path: 'requester',
+    select: 'firstName lastName username email phone',
+    model: 'User'
+  })
+  .sort({ createdAt: -1 });
+
+  // Combine matching requests with targeted requests (avoid duplicates)
+  const targetedIds = targetedRequests.map(r => r._id.toString());
+  const finalRequests = [
+    ...targetedRequests,
+    ...matchingRequests.filter(r => !targetedIds.includes(r._id.toString()))
+  ];
+
+  res.status(200).json({
+    success: true,
+    requests: finalRequests,
+    debug: {
+      totalRequests: allRequests.length,
+      matchingRequests: matchingRequests.length,
+      targetedRequests: targetedRequests.length,
+      finalRequests: finalRequests.length,
+      userId: req.user._id,
+      selectedService,
+      providerService,
+      providerSkills,
+      providerRate,
+      availability: provider.isOnline ? "Available" : "Offline",
+      isOnline: provider.isOnline,
+      providerLocation: {
+        lat: providerLat,
+        lng: providerLng
+      },
+      maxDistanceKm,
+      budgetRange: {
+        minRate: Math.max(0, providerRate - rateTolerance),
+        maxRate: providerRate + rateTolerance
+      },
+      message: selectedService ? `Returning requests filtered by service: ${selectedService}` : "Returning all matching requests"
+    }
+  });
+});
+>>>>>>> 9ddca972151145bd70e11127887db575864c43c2
 
 export const getUserServices = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
@@ -898,6 +1101,7 @@ export const completeBooking = catchAsyncError(async (req, res, next) => {
 //   return result.secure_url;
 // };
 
+<<<<<<< HEAD
 export const getServiceRequest = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
@@ -1050,6 +1254,40 @@ export const getRecommendedJobs = catchAsyncError(async (req, res, next) => {
     .slice(0, 5); // Return top 5
 
   res.status(200).json({ success: true, jobs: rankedJobs });
+=======
+export const getCompletedJobsByProvider = catchAsyncError(async (req, res, next) => {
+  const { providerId } = req.params;
+
+  if (!providerId) {
+    return next(new ErrorHandler("Provider ID is required", 400));
+  }
+
+  try {
+    // Get completed service requests where this user was the service provider
+    const completedRequests = await ServiceRequest.find({
+      serviceProvider: providerId,
+      status: 'Complete'
+    })
+    .populate('requester', 'firstName lastName username email phone profilePic')
+    .sort({ updatedAt: -1 })
+    .limit(50); // Limit to prevent performance issues
+
+    res.status(200).json({
+      success: true,
+      requests: completedRequests,
+      debug: {
+        totalCompletedJobs: completedRequests.length,
+        providerId: providerId
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching completed jobs:", error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch completed jobs'
+    });
+  }
+>>>>>>> 9ddca972151145bd70e11127887db575864c43c2
 });
 
 export const reverseGeocode = catchAsyncError(async (req, res, next) => {
