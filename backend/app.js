@@ -8,8 +8,8 @@ import rateLimit from "express-rate-limit";
 
 // import "./config/cloudinaryConfig.js";
 
-import userRouter from "./routes/userRouter.js";
 import userFlowRouter from "./routes/userFlowRouter.js";
+import userAuthRouter from "./routes/userAuthRouter.js";
 import adminAuthRouter from "./routes/adminAuthRouter.js";
 import adminFlowRouter from "./routes/adminFlowRouter.js";
 import adminRouter from "./routes/adminRouter.js";
@@ -48,7 +48,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
@@ -85,8 +85,9 @@ app.use(fileUpload({
   abortOnLimit: true
 }));
 
-app.use("/api/v1/user", userRouter);
-app.use("/api/v1/user", userFlowRouter);
+// Mount routers
+app.use("/api/v1/user", userAuthRouter); // User authentication routes (register, login)
+app.use("/api/v1/user", userFlowRouter); // User flow routes (dashboard, bookings, etc.)
 app.use("/api/v1/admin/auth", adminAuthRouter);
 app.use("/api/v1/admin", adminFlowRouter);
 app.use("/api/v1/admin", adminRouter);

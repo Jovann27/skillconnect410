@@ -1,259 +1,208 @@
-import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
-import api from "./api";
-import toast from "react-hot-toast";
-import { updateSocketToken, clearSocket } from "./utils/socket";
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import api from './api';
+import toast from 'react-hot-toast';
+import { updateSocketToken } from './utils/socket';
 
 const MainContext = createContext();
 
+export const useMainContext = () => {
+  const context = useContext(MainContext);
+  if (!context) {
+    throw new Error('useMainContext must be used within a MainProvider');
+  }
+  return context;
+};
+
 export const MainProvider = ({ children }) => {
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [authLoaded, setAuthLoaded] = useState(false);
-  const [tokenType, setTokenType] = useState(null);
+  // State management
   const [user, setUser] = useState(null);
   const [admin, setAdmin] = useState(null);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [isUserVerified, setIsUserVerified] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [tokenType, setTokenType] = useState(null);
+  const [authLoaded, setAuthLoaded] = useState(false);
   const [navigationLoading, setNavigationLoading] = useState(false);
-  const [openChatAppointmentId, setOpenChatAppointmentId] = useState(null);
 
-  const initialized = useRef(false);
+  // Authentication helpers
+  const setAuthToken = (token) => {
+    if (token) {
+      localStorage.setItem('token', token);
+      updateSocketToken(token);
+    }
+  };
 
-  const fetchProfile = useCallback(async (navigate = null) => {
-    if (isLoading) return;
-    setIsLoading(true);
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('admin');
+    localStorage.removeItem('isAuthorized');
+    localStorage.removeItem('tokenType');
+    localStorage.removeItem('userLastPath');
+    localStorage.removeItem('adminLastPath');
+    
+    setUser(null);
+    setAdmin(null);
+    setIsAuthorized(false);
+    setIsUserVerified(false);
+    setTokenType(null);
+    
+    updateSocketToken(null);
+  }, []);
 
+  const fetchProfile = useCallback(async (redirect = true, navigate = null) => {
+    if (navigationLoading) return;
+    setNavigationLoading(true);
     try {
-      const storedTokenType = localStorage.getItem("tokenType");
-      const storedAdmin = JSON.parse(localStorage.getItem("admin") || "null");
-      const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+      const tokenType = localStorage.getItem("tokenType");
+      const admin = JSON.parse(localStorage.getItem("admin") || "null");
+      const user = JSON.parse(localStorage.getItem("user") || "null");
 
-      let data;
-      if (storedTokenType === "admin") {
-        // Only fetch admin data if we have a stored admin token
-        if (storedAdmin) {
-          const response = await api.get("/admin/auth/me");
-          data = response.data;
+      let profile;
+      if (tokenType === "admin") {
+        if (admin) {
+          profile = (await api.get("/admin/auth/me")).data;
         }
-      } else {
-        // Only fetch user data if we have a stored user token
-        if (storedUser) {
-          try {
-            const response = await api.get("/user/me");
-            data = response.data;
-          } catch (error) {
-            // Handle verification error
-            if (error.response?.data?.code === "ACCOUNT_NOT_VERIFIED") {
-              // User is authenticated but not verified
-              setUser(storedUser);
-              setIsAuthorized(true);
-              setTokenType("user");
-              setAdmin(null);
-              setIsUserVerified(false);
-              localStorage.setItem("user", JSON.stringify(storedUser));
-              toast.error("Account not verified. Please wait for admin verification.");
-              return;
-            }
-            throw error;
+      } else if (user) {
+        try {
+          profile = (await api.get("/user/me")).data;
+        } catch (err) {
+          if (err.response?.data?.code === "ACCOUNT_NOT_VERIFIED") {
+            setUser(user);
+            setIsAuthorized(false);
+            setTokenType("user");
+            setAdmin(null);
+            setIsUserVerified(false);
+            localStorage.setItem("user", JSON.stringify(user));
+            toast.error("Account not verified. Please wait for admin verification.");
+            return;
           }
+          throw err;
         }
       }
 
-      if (data && data.success && data.user) {
-        const userData = data.user;
-
-        if (userData.type === "admin" || userData.role === "Admin") {
-          setAdmin(userData);
+      if (profile && profile.success && profile.user) {
+        const user = profile.user;
+        if (user.type === "admin" || user.role === "Admin") {
+          setAdmin(user);
           setIsAuthorized(true);
           setTokenType("admin");
           setUser(null);
-          localStorage.setItem("admin", JSON.stringify(userData));
+          localStorage.setItem("admin", JSON.stringify(user));
         } else {
-          // Check if user is banned
-          if (userData.banned) {
-            // Logout banned user
+          if (user.banned) {
             localStorage.clear();
-            clearSocket();
+            logout();
             setUser(null);
             setAdmin(null);
+            setIsAuthorized(false);
             setIsUserVerified(false);
             setIsAuthorized(false);
             setTokenType(null);
             toast.error("Your account has been banned");
             return;
           }
-          setUser(userData);
+          setUser(user);
           setIsAuthorized(true);
           setTokenType("user");
           setAdmin(null);
-          setIsUserVerified(userData.verified || false);
-          localStorage.setItem("user", JSON.stringify(userData));
+          setIsUserVerified(user.verified || false);
+          localStorage.setItem("user", JSON.stringify(user));
         }
 
         const token = localStorage.getItem("token");
-        if (token) updateSocketToken(token);
+        if (token) {
+          setAuthToken(token);
+        }
 
-        if (navigate) {
-          if (storedTokenType === "admin") {
-            const adminLastPath = localStorage.getItem("adminLastPath");
-            if (adminLastPath && adminLastPath.startsWith("/admin/")) {
-              navigate(adminLastPath, { replace: true });
+        if (redirect && navigate) {
+          if (tokenType === "admin") {
+            const lastPath = localStorage.getItem("adminLastPath");
+            if (lastPath && lastPath.startsWith("/admin/")) {
+              navigate(lastPath, { replace: true });
             } else {
               navigate("/admin/analytics", { replace: true });
             }
           } else {
-            // Navigate based on user role (for refresh scenarios, check last path first)
-            const userLastPath = localStorage.getItem("userLastPath");
-            if (userLastPath && userLastPath.startsWith("/user/")) {
-              navigate(userLastPath, { replace: true });
-            } else if (userData.role === "Service Provider") {
-              navigate("/user/my-service", { replace: true });
-              localStorage.setItem("userLastPath", "/user/my-service");
+            const lastPath = localStorage.getItem("userLastPath");
+            if (lastPath && lastPath.startsWith("/user/")) {
+              navigate(lastPath, { replace: true });
             } else {
-              // Community Member
-              navigate("/user/service-request", { replace: true });
-              localStorage.setItem("userLastPath", "/user/service-request");
+              // Navigate to dashboard - UserDashboard component will show appropriate dashboard based on role
+              navigate("/user/dashboard", { replace: true });
+              localStorage.setItem("userLastPath", "/user/dashboard");
             }
           }
         }
         return;
       }
-      } catch (err) {
-        console.warn("Authentication failed:", err.message);
-        // Clear invalid tokens and socket connections
-        localStorage.removeItem("token");
-        clearSocket();
+    } catch (error) {
+      console.warn("Authentication failed:", error.message);
+      localStorage.removeItem("token");
+      logout();
 
-        // If API call fails, try to use stored data
-        try {
-          const storedTokenType = localStorage.getItem("tokenType");
-          if (storedTokenType === "admin") {
-            const storedAdmin = JSON.parse(localStorage.getItem("admin") || "null");
-            if (storedAdmin) {
-              setAdmin(storedAdmin);
-              setIsAuthorized(true);
-              setTokenType("admin");
-              setUser(null);
-              return;
-            }
-          } else {
-            const storedUser = JSON.parse(localStorage.getItem("user") || "null");
-            if (storedUser) {
-              setUser(storedUser);
-              setIsAuthorized(true);
-              setTokenType("user");
-              setAdmin(null);
-              setIsUserVerified(storedUser.verified || false);
-              return;
-            }
+      try {
+        if (localStorage.getItem("tokenType") === "admin") {
+          const admin = JSON.parse(localStorage.getItem("admin") || "null");
+          if (admin) {
+            setAdmin(admin);
+            setIsAuthorized(true);
+            setTokenType("admin");
+            setUser(null);
+            return;
           }
-        } catch {
-          // Both endpoints failed and no stored data
-          localStorage.clear();
-          clearSocket();
-          setUser(null);
-          setAdmin(null);
-          setIsAuthorized(false);
-          setTokenType(null);
+        } else {
+          const user = JSON.parse(localStorage.getItem("user") || "null");
+          if (user) {
+            setUser(user);
+            setIsAuthorized(true);
+            setTokenType("user");
+            setAdmin(null);
+            setIsUserVerified(user.verified || false);
+            return;
+          }
         }
+      } catch {
+        localStorage.clear();
+        logout();
+        setUser(null);
+        setAdmin(null);
+        setIsAuthorized(false);
+        setTokenType(null);
+      }
     } finally {
-      setIsLoading(false);
+      setNavigationLoading(false);
       setAuthLoaded(true);
     }
-  }, [isLoading, setIsLoading, setUser, setIsAuthorized, setTokenType, setAdmin, setIsUserVerified]);
+  }, [logout, navigationLoading, setNavigationLoading]);
 
-  const logout = async () => {
-    try {
-      await Promise.all([
-        api.get("/user/logout", { withCredentials: true }),
-        api.get("/admin/auth/logout", { withCredentials: true })
-      ]);
-    } catch {
-      console.warn("Logout request failed, clearing local data anyway.");
-    }
-
-    localStorage.clear();
-    clearSocket();
-    setUser(null);
-    setAdmin(null);
-    setIsUserVerified(false);
-    setIsAuthorized(false);
-    setTokenType(null);
-    toast.success("Logged out successfully");
-  };
-
-  useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
-
-    const storedUser = JSON.parse(localStorage.getItem("user") || "null");
-    const storedAdmin = JSON.parse(localStorage.getItem("admin") || "null");
-    const isAuth = localStorage.getItem("isAuthorized") === "true";
-    const type = localStorage.getItem("tokenType");
-    const token = localStorage.getItem("token");
-
-    // For admins: restore from localStorage and fetch fresh data
-    if (storedAdmin && isAuth && type === "admin" && token) {
-      setAdmin(storedAdmin);
-      setIsAuthorized(true);
-      setTokenType("admin");
-      setUser(null);
-      setAuthLoaded(true);
-      // Update socket token for existing session
-      updateSocketToken(token);
-      // Fetch fresh admin data
-      fetchProfile();
-      return;
-    }
-
-    // For users: restore from localStorage and fetch fresh data
-    if (storedUser && isAuth && type === "user" && token) {
-      setUser(storedUser);
-      setIsAuthorized(true);
-      setTokenType("user");
-      setAdmin(null);
-      setIsUserVerified(storedUser.verified || false);
-      setAuthLoaded(true);
-      // Update socket token for existing session
-      updateSocketToken(token);
-      // Fetch fresh user data
-      fetchProfile();
-    } else {
-      // No stored data, try to fetch from API
-      fetchProfile();
-    }
-  }, [fetchProfile]);
-
-  const openChat = (appointmentId) => {
-    setOpenChatAppointmentId(appointmentId);
+  const value = {
+    // State
+    user,
+    admin,
+    isAuthorized,
+    isUserVerified,
+    tokenType,
+    authLoaded,
+    navigationLoading,
+    
+    // State setters
+    setUser,
+    setAdmin,
+    setIsAuthorized,
+    setIsUserVerified,
+    setTokenType,
+    setAuthLoaded,
+    setNavigationLoading,
+    
+    // Helpers
+    setAuthToken,
+    logout,
+    fetchProfile,
   };
 
   return (
-    <MainContext.Provider
-      value={{
-        isAuthorized,
-        setIsAuthorized,
-        authLoaded,
-        tokenType,
-        setTokenType,
-        user,
-        setUser,
-        admin,
-        setAdmin,
-        isUserVerified,
-        setIsUserVerified,
-        navigationLoading,
-        setNavigationLoading,
-        fetchProfile,
-        logout,
-        openChatAppointmentId,
-        setOpenChatAppointmentId,
-        openChat,
-      }}
-    >
+    <MainContext.Provider value={value}>
       {children}
     </MainContext.Provider>
   );
 };
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useMainContext = () => useContext(MainContext);

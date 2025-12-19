@@ -253,12 +253,6 @@ const Navbar = () => {
         label: "Browse Providers",
         helper: "Find skilled service providers"
       });
-      links.push({
-        to: "/user/service-request",
-        icon: <FaCartPlus />,
-        label: "Request Service",
-        helper: "Create or track service requests"
-      });
     } else if (user?.role === 'Service Provider') {
       links.push({
         to: "/user/my-service",

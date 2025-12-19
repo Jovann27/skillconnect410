@@ -251,14 +251,9 @@ const Register = () => {
       setIsAuthorized(true);
       setTokenType("user");
 
-      // Navigate based on user role
-      if (data.user.role === "Service Provider") {
-        navigate("/user/my-service", { replace: true });
-        localStorage.setItem("userLastPath", "/user/my-service");
-      } else {
-        navigate("/user/service-request", { replace: true });
-        localStorage.setItem("userLastPath", "/user/service-request");
-      }
+      // Navigate to dashboard - UserDashboard component will show appropriate dashboard based on role
+      navigate("/user/dashboard", { replace: true });
+      localStorage.setItem("userLastPath", "/user/dashboard");
 
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("isAuthorized", "true");

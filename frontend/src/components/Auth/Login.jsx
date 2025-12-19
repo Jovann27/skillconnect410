@@ -83,17 +83,9 @@ const Login = () => {
       setIsUserVerified(storedUser.role === "Service Provider" || false);
       updateSocketToken(storedToken);
 
-      // Navigate based on user role (for stored session check)
-      // Service Provider → /user/my-service
-      // Community Member → /user/service-request
-      if (storedUser.role === "Service Provider") {
-        navigate("/user/my-service", { replace: true });
-        localStorage.setItem("userLastPath", "/user/my-service");
-      } else {
-        // Community Member
-        navigate("/user/service-request", { replace: true });
-        localStorage.setItem("userLastPath", "/user/service-request");
-      }
+      // Navigate to dashboard - UserDashboard component will show appropriate dashboard based on role
+      navigate("/user/dashboard", { replace: true });
+      localStorage.setItem("userLastPath", "/user/dashboard");
     }
   }, [navigate, setUser, setIsAuthorized, setTokenType, setIsUserVerified]);
 
@@ -154,17 +146,9 @@ const Login = () => {
       setFormData({ email: "", password: "" });
       setErrors({});
 
-      // Navigate based on user role (ignore last path on fresh login)
-      // Service Provider → /user/my-service
-      // Community Member → /user/service-request
-      if (data.user.role === "Service Provider") {
-        navigate("/user/my-service", { replace: true });
-        localStorage.setItem("userLastPath", "/user/my-service");
-      } else {
-        // Community Member
-        navigate("/user/service-request", { replace: true });
-        localStorage.setItem("userLastPath", "/user/service-request");
-      }
+      // Navigate to dashboard - UserDashboard component will show appropriate dashboard based on role
+      navigate("/user/dashboard", { replace: true });
+      localStorage.setItem("userLastPath", "/user/dashboard");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
       toast.error(errorMessage);

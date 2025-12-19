@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -47,8 +47,6 @@ import Residents from "./components/Admin/Residents";
 // User pages
 import ProviderDashboard from "./components/SkilledUSer/ProviderDashboard";
 import ClientDashboard from "./components/SkilledUSer/ClientDashboard";
-import BrowseProviders from "./components/SkilledUSer/BrowseProviders";
-import BrowseJobs from "./components/SkilledUSer/BrowseJobs";
 import ManageProfile from "./components/SkilledUSer/ManageProfile";
 import Settings from "./components/SkilledUSer/Settings";
 import VerificationPending from "./components/VerificationPending";
@@ -71,7 +69,7 @@ const RoleGuard = ({ allowedRoles, children, fallback = null }) => {
   const isRoleAllowed = allowedRoles.includes(userRole);
 
   if (!isRoleAllowed) {
-    return fallback || <Navigate to="/user/service-request" />;
+    return fallback || <Navigate to="/user/dashboard" />;
   }
 
   return children;
@@ -97,14 +95,19 @@ const AccountStatusGuard = ({ children }) => {
 // User Dashboard component that renders appropriate dashboard based on role
 const UserDashboard = () => {
   const { user } = useMainContext();
+  const navigate = useNavigate();
   const userRole = user?.role;
 
-  // Service Providers get ProviderDashboard, Community Members get ClientDashboard
+  // Service Providers get ProviderDashboard, Community Members redirect to browse-providers
   if (userRole === "Service Provider") {
     return <ProviderDashboard />;
   } else {
-    // Community Member or any other role defaults to ClientDashboard
-    return <ClientDashboard />;
+    // Community Member or any other role redirects to browse-providers
+    React.useEffect(() => {
+      navigate("/user/browse-providers", { replace: true });
+    }, [navigate]);
+    
+    return <div>Redirecting to browse providers...</div>;
   }
 };
 
@@ -227,14 +230,6 @@ const AppContent = () => {
 
           {/* Routes for Community Members and Service Providers */}
           <Route
-            path="service-request"
-            element={
-              <RoleGuard allowedRoles={["Community Member", "Service Provider"]}>
-                <ClientDashboard />
-              </RoleGuard>
-            }
-          />
-          <Route
             path="waiting-for-worker"
             element={
               <RoleGuard allowedRoles={["Community Member", "Service Provider"]}>
@@ -256,20 +251,11 @@ const AppContent = () => {
             path="browse-providers"
             element={
               <RoleGuard allowedRoles={["Community Member", "Service Provider"]}>
-                <BrowseProviders />
+                <ClientDashboard />
               </RoleGuard>
             }
           />
 
-          {/* Browse Jobs Page for Providers */}
-          <Route
-            path="browse-jobs"
-            element={
-              <RoleGuard allowedRoles={["Service Provider"]}>
-                <BrowseJobs />
-              </RoleGuard>
-            }
-          />
 
           {/* Routes for Service Providers only */}
           <Route

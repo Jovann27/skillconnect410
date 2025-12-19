@@ -1,7 +1,11 @@
 import express from "express";
 import { isUserAuthenticated, isUserVerified } from "../middlewares/auth.js";
+import { catchAsyncError } from "../middlewares/catchAsyncError.js";
+import ErrorHandler from "../middlewares/error.js";
+import User from "../models/userSchema.js";
 import ServiceRequest from '../models/serviceRequest.js';
 import Review from '../models/review.js';
+import Notification from '../models/notification.js';
 
 import {
   getBookings,
@@ -9,29 +13,76 @@ import {
   updateBookingStatus,
   completeBooking,
   leaveReview,
-  getServiceRequests,
   postServiceRequest,
   getServiceProfile,
   updateServiceProfile,
   updateServiceStatus,
-  getUserServiceRequests,
   getServiceRequest,
   cancelServiceRequest,
   acceptServiceRequest,
   getAvailableServiceRequests,
-  getRecommendedJobs,
   getUserServices,
-  updateServiceRequest,
   getServiceProviders,
   offerToProvider,
   acceptOffer,
   rejectOffer,
   reverseGeocode,
-  getCompletedJobsByProvider
+  getChatHistory,
+  sendMessage,
+  getChatList,
+  markMessagesAsSeen
 } from '../controllers/userFlowController.js';
 import { getServices } from '../controllers/adminFlowController.js';
 
 const router = express.Router();
+
+// User profile route
+router.get('/me', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const user = await User.findById(req.user._id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  res.status(200).json({
+    success: true,
+    profile: {
+      _id: user._id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      birthdate: user.birthdate,
+      occupation: user.occupation,
+      employed: user.employed,
+      role: user.role,
+      skills: user.skills,
+      profilePic: user.profilePic,
+      verified: user.verified,
+      verifiedBy: user.verifiedBy,
+      availability: user.availability,
+      acceptedWork: user.acceptedWork,
+      service: user.service,
+      serviceRate: user.serviceRate,
+      serviceDescription: user.serviceDescription,
+      isOnline: user.isOnline,
+      services: user.services,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    }
+  });
+}));
+
+// Password length route for Settings component
+router.get('/me/password', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res) => {
+  // Return a dummy response since we don't want to expose password info
+  res.status(200).json({
+    success: true,
+    hasPassword: true,
+    message: "Password change available"
+  });
+}));
 
 // Dashboard routes
 router.get('/dashboard/stats', isUserAuthenticated, isUserVerified, async (req, res) => {
@@ -170,24 +221,6 @@ router.get('/dashboard/recent-activity', isUserAuthenticated, isUserVerified, as
   }
 });
 
-// Booking routes
-router.get('/bookings', isUserAuthenticated, isUserVerified, getBookings);
-router.get('/booking/:id', isUserAuthenticated, isUserVerified, getBooking);
-router.put('/booking/:id/status', isUserAuthenticated, isUserVerified, updateBookingStatus);
-router.put('/booking/:id/complete', isUserAuthenticated, isUserVerified, completeBooking);
-router.post('/review', isUserAuthenticated, isUserVerified, leaveReview);
-
-// Service Request routes
-router.get('/service-requests', isUserAuthenticated, isUserVerified, getServiceRequests);
-router.get('/available-service-requests', isUserAuthenticated, isUserVerified, getAvailableServiceRequests);
-router.get('/recommended-jobs', isUserAuthenticated, isUserVerified, getRecommendedJobs);
-router.post('/post-service-request', isUserAuthenticated, isUserVerified, postServiceRequest);
-router.get('/user-service-requests', isUserAuthenticated, isUserVerified, getUserServiceRequests);
-router.get('/service-request/:id', isUserAuthenticated, isUserVerified, getServiceRequest);
-router.delete('/service-request/:id/cancel', isUserAuthenticated, isUserVerified, cancelServiceRequest);
-router.put('/service-request/:id/update', isUserAuthenticated, isUserVerified, updateServiceRequest);
-router.post('/service-request/:id/accept', isUserAuthenticated, isUserVerified, acceptServiceRequest);
-
 // Helper function to calculate time ago
 function getTimeAgo(date) {
   const now = new Date();
@@ -201,12 +234,119 @@ function getTimeAgo(date) {
   return date.toLocaleDateString();
 }
 
+// NEW ENDPOINTS FOR PROVIDER DASHBOARD
+// Service Requests route - for fetching offers
+router.get('/service-requests', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  try {
+    // Get service requests where this user has been offered a job
+    const offers = await ServiceRequest.find({
+      $or: [
+        { targetProvider: req.user._id, status: 'Offered' },
+        { serviceProvider: req.user._id }
+      ]
+    })
+    .populate('requester', 'firstName lastName email')
+    .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      requests: offers
+    });
+  } catch (error) {
+    console.error('Error fetching service requests:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch service requests'
+    });
+  }
+}));
+
+// Recommended Jobs route - for fetching recommended jobs
+router.get('/recommended-jobs', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+
+    // Get available service requests that match user's skills and services
+    const availableRequests = await ServiceRequest.find({
+      status: 'Available',
+      $or: [
+        { category: { $in: user.skills || [] } },
+        { typeOfWork: { $in: user.services || [] } },
+        { service: user.service }
+      ]
+    })
+    .populate('requester', 'firstName lastName email')
+    .sort({ createdAt: -1 })
+    .limit(20);
+
+    // Add recommendation score based on various factors
+    const scoredRequests = availableRequests.map(request => {
+      let score = 0;
+
+      // Score based on skill matching
+      if (user.skills?.includes(request.category)) score += 10;
+      if (user.services?.includes(request.typeOfWork)) score += 8;
+      if (user.service === request.service) score += 12;
+
+      // Score based on budget (prefer reasonable budgets)
+      if (request.budget >= 1000 && request.budget <= 5000) score += 5;
+      else if (request.budget > 5000) score += 3;
+
+      // Score based on recency
+      const daysSincePosted = (new Date() - request.createdAt) / (1000 * 60 * 60 * 24);
+      if (daysSincePosted < 1) score += 7;
+      else if (daysSincePosted < 3) score += 5;
+      else if (daysSincePosted < 7) score += 3;
+
+      // Score based on urgency
+      if (request.urgency === 'Urgent') score += 4;
+      else if (request.urgency === 'High') score += 2;
+
+      return {
+        ...request.toObject(),
+        recommendationScore: score
+      };
+    });
+
+    // Sort by recommendation score
+    scoredRequests.sort((a, b) => b.recommendationScore - a.recommendationScore);
+
+    res.status(200).json({
+      success: true,
+      jobs: scoredRequests
+    });
+  } catch (error) {
+    console.error('Error fetching recommended jobs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch recommended jobs'
+    });
+  }
+}));
+
+// Booking routes
+router.get('/bookings', isUserAuthenticated, isUserVerified, getBookings);
+router.get('/booking/:id', isUserAuthenticated, isUserVerified, getBooking);
+router.put('/booking/:id/status', isUserAuthenticated, isUserVerified, updateBookingStatus);
+router.put('/booking/:id/complete', isUserAuthenticated, isUserVerified, completeBooking);
+router.post('/review', isUserAuthenticated, isUserVerified, leaveReview);
+
+// Service Request routes
+router.get('/available-service-requests', isUserAuthenticated, isUserVerified, getAvailableServiceRequests);
+router.post('/post-service-request', isUserAuthenticated, isUserVerified, postServiceRequest);
+router.get('/service-request/:id', isUserAuthenticated, isUserVerified, getServiceRequest);
+router.delete('/service-request/:id/cancel', isUserAuthenticated, isUserVerified, cancelServiceRequest);
+router.post('/service-request/:id/accept', isUserAuthenticated, isUserVerified, acceptServiceRequest);
+
 // Service Profile routes
 router.get('/service-profile', isUserAuthenticated, isUserVerified, getServiceProfile);
 router.post('/service-profile', isUserAuthenticated, isUserVerified, updateServiceProfile);
 router.put('/service-status', isUserAuthenticated, isUserVerified, updateServiceStatus);
-
-
 
 // User services route
 router.get('/services', isUserAuthenticated, isUserVerified, getUserServices);
@@ -215,15 +355,51 @@ router.get('/predefined-services', isUserAuthenticated, isUserVerified, getServi
 // Service Providers route
 router.get('/service-providers', isUserAuthenticated, isUserVerified, getServiceProviders);
 
-// Public route to get completed jobs by provider (for profile viewing)
-router.get('/provider/:providerId/completed-jobs', getCompletedJobsByProvider);
-
 // Offer routes
 router.post('/offer-to-provider', isUserAuthenticated, isUserVerified, offerToProvider);
 router.post('/offer/:requestId/accept', isUserAuthenticated, isUserVerified, acceptOffer);
 router.post('/offer/:requestId/reject', isUserAuthenticated, isUserVerified, rejectOffer);
 
-// Offer routes (notify-provider replaced with offer-to-provider above)
+// Chat routes
+router.get("/chat-history", isUserAuthenticated, isUserVerified, getChatHistory);
+router.get("/chat-list", isUserAuthenticated, isUserVerified, getChatList);
+router.post("/send-message", isUserAuthenticated, isUserVerified, sendMessage);
+router.put("/chat/:appointmentId/mark-seen", isUserAuthenticated, isUserVerified, markMessagesAsSeen);
+
+// Notification routes
+router.get('/notifications', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res) => {
+  const userId = req.user._id;
+  const notifications = await Notification.find({ user: userId })
+    .sort({ createdAt: -1 })
+    .limit(50);
+  res.status(200).json({ success: true, notifications });
+}));
+
+router.get('/notifications/unread-count', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res) => {
+  const userId = req.user._id;
+  const count = await Notification.countDocuments({ user: userId, read: false });
+  res.status(200).json({ success: true, unreadCount: count });
+}));
+
+router.put('/notifications/mark-all-read', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res) => {
+  const userId = req.user._id;
+  await Notification.updateMany({ user: userId, read: false }, { read: true });
+  res.status(200).json({ success: true, message: "All notifications marked as read" });
+}));
+
+// Notification preferences route (placeholder)
+router.get('/notification-preferences', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res) => {
+  // Return default preferences
+  res.status(200).json({
+    success: true,
+    preferences: {
+      email: true,
+      sms: false,
+      push: true,
+      marketing: true
+    }
+  });
+}));
 
 // Reverse geocoding route
 router.get('/reverse-geocode', isUserAuthenticated, isUserVerified, reverseGeocode);
