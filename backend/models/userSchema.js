@@ -9,15 +9,12 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true, trim: true, minLength: 2, maxLength: 30 },
   email: { type: String, required: true, unique: true, lowercase: true, validate: [validator.isEmail, "Invalid email"] },
   phone: { type: String, required: true },
-  otherContact: { type: String, default: "" },
   address: { type: String, required: true },
   birthdate: { type: Date, required: true },
-  occupation: { type: String, default: "" },
 
-  employed: { type: String, required: true },
+  role: { type: String, required: true, enum: ["Community Member", "Service Provider", "Admin"], default: "Community Member" },
 
-  role: { type: String, required: true, enum: ["Community Member", "Service Provider"], default: "Community Member" },
-
+  // Service Provider specific fields
   skills: {
     type: [String],
     validate: {
@@ -25,22 +22,25 @@ const userSchema = new mongoose.Schema({
         if (this.role === "Community Member") {
           return true;
         } else {
-        return skills.length >= 1 && skills.length <= 3;
+          return skills.length >= 1 && skills.length <= 3;
         }
       },
-      message: 'You must select between 1 and 3 skills'
+      message: 'Service providers must select between 1 and 3 skills'
     },
     default: []
   },
-  certificates: { type: [String], default: [] },
+  certificates: [{ type: mongoose.Schema.Types.ObjectId, ref: "Certificate" }],
+  workProof: [{ type: mongoose.Schema.Types.ObjectId, ref: "WorkProof" }],
   profilePic: { type: String, default: "" },
   validId: { type: String, required: true },
-  verified: { type: Boolean, default: false },
+  
+  // Credential-based verification
+  isVerified: { type: Boolean, default: false },
   verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
-
+  verificationDate: { type: Date },
+  
+  // Service Provider availability and services
   availability: { type: String, enum: ["Available", "Currently Working", "Not Available"], default: "Not Available" },
-  acceptedWork: { type: Boolean, default: false },
-
   service: {
     type: String,
     enum: [
