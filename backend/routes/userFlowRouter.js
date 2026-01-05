@@ -23,6 +23,7 @@ import {
   getAvailableServiceRequests,
   getUserServices,
   getServiceProviders,
+  getRecommendedProviders,
   offerToProvider,
   acceptOffer,
   rejectOffer,
@@ -30,7 +31,13 @@ import {
   getChatHistory,
   sendMessage,
   getChatList,
-  markMessagesAsSeen
+  markMessagesAsSeen,
+  getProviderOffers,
+  getProviderApplications,
+  respondToServiceOffer,
+  respondToApplication,
+  applyToServiceRequest,
+  updateProfilePicture
 } from '../controllers/userFlowController.js';
 import { getServices } from '../controllers/adminFlowController.js';
 
@@ -355,6 +362,9 @@ router.get('/predefined-services', isUserAuthenticated, isUserVerified, getServi
 // Service Providers route
 router.get('/service-providers', isUserAuthenticated, isUserVerified, getServiceProviders);
 
+// Recommended Providers route
+router.get('/recommended-providers', isUserAuthenticated, isUserVerified, getRecommendedProviders);
+
 // Offer routes
 router.post('/offer-to-provider', isUserAuthenticated, isUserVerified, offerToProvider);
 router.post('/offer/:requestId/accept', isUserAuthenticated, isUserVerified, acceptOffer);
@@ -403,5 +413,13 @@ router.get('/notification-preferences', isUserAuthenticated, isUserVerified, cat
 
 // Reverse geocoding route
 router.get('/reverse-geocode', isUserAuthenticated, isUserVerified, reverseGeocode);
+
+// Provider Dashboard routes
+router.get('/provider-offers', isUserAuthenticated, isUserVerified, getProviderOffers);
+router.get('/provider-applications', isUserAuthenticated, isUserVerified, getProviderApplications);
+router.post('/apply-to-request/:requestId', isUserAuthenticated, isUserVerified, applyToServiceRequest);
+router.post('/respond-to-offer/:offerId', isUserAuthenticated, isUserVerified, respondToServiceOffer);
+router.post('/respond-to-application/:bookingId', isUserAuthenticated, isUserVerified, respondToApplication);
+router.post('/update-profile-picture', isUserAuthenticated, isUserVerified, updateProfilePicture);
 
 export default router;

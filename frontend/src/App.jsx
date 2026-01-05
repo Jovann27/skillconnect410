@@ -18,8 +18,6 @@ import "react-toastify/dist/ReactToastify.css";
 // Layout
 import Navbar from "./components/Layout/Navbar";
 import Footer from "./components/Layout/Footer";
-
-// Home pages
 import Home from "./components/Home/Home";
 
 // Auth pages
@@ -54,6 +52,7 @@ import AccountBanned from "./components/AccountBanned";
 
 import ErrorBoundary from "./components/Layout/ErrorBoundary";
 import PopupProvider from "./components/Layout/PopupContext";
+import ImageTest from "./components/ImageTest";
 
 // Role-based access guard component
 const RoleGuard = ({ allowedRoles, children, fallback = null }) => {
@@ -65,13 +64,36 @@ const RoleGuard = ({ allowedRoles, children, fallback = null }) => {
     return children;
   }
 
+  // Check if user is authenticated
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   // Check if user's role matches allowed roles
   const isRoleAllowed = allowedRoles.includes(userRole);
 
   if (!isRoleAllowed) {
-    return fallback || <Navigate to="/user/dashboard" />;
+    console.warn(`Access denied: User role "${userRole}" not allowed for this route. Allowed roles: ${allowedRoles.join(', ')}`);
+    
+    // Default fallback: redirect to appropriate dashboard based on role
+    if (userRole === "Service Provider") {
+      return fallback || <Navigate to="/user/my-service" replace />;
+    } else {
+      return fallback || <Navigate to="/user/browse-providers" replace />;
+    }
   }
 
+  return children;
+};
+
+// Admin-only guard component
+const AdminGuard = ({ children, fallback = null }) => {
+  const { user, tokenType } = useMainContext();
+  
+  if (!user || tokenType !== "admin") {
+    return fallback || <Navigate to="/admin/login" replace />;
+  }
+  
   return children;
 };
 
@@ -205,6 +227,7 @@ const AppContent = () => {
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/image-test" element={<ImageTest />} />
 
 
         {/* User Routes */}

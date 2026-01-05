@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { FaStar, FaRegStar } from 'react-icons/fa';
+import { FaStar, FaRegStar, FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import { getImageUrl } from '../../utils/imageUtils';
@@ -13,6 +13,9 @@ const ManageProfile = () => {
   const [reviewStats, setReviewStats] = useState({ averageRating: 0, totalReviews: 0 });
   const [completedJobs, setCompletedJobs] = useState([]);
   const [completedJobsLoading, setCompletedJobsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('reviews');
+  const [certificates, setCertificates] = useState([]);
+  const [workProof, setWorkProof] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +25,8 @@ const ManageProfile = () => {
   useEffect(() => {
     if (user?._id) {
       fetchUserInsights(user._id);
+      fetchCertificates();
+      fetchWorkProof();
       // Fetch completed jobs if user is a service provider
       if (user.role === 'Service Provider') {
         fetchCompletedJobs();
@@ -78,6 +83,44 @@ const ManageProfile = () => {
     }
   };
 
+  const fetchCertificates = async () => {
+    try {
+      const response = await api.get('/certificate/my-certificates');
+      if (response.data.success) {
+        setCertificates(response.data.certificates || []);
+      }
+    } catch (error) {
+      console.error('Error fetching certificates:', error);
+    }
+  };
+
+  const fetchWorkProof = async () => {
+    try {
+      const response = await api.get('/work-proof/my');
+      if (response.data.success) {
+        setWorkProof(response.data.workProof || []);
+      }
+    } catch (error) {
+      console.error('Error fetching work proof:', error);
+    }
+  };
+
+  const handleProfilePictureUpload = async (file) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('profilePic', file);
+    try {
+      const response = await api.post('/user/upload-profile-pic', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (response.data.success) {
+        setUser(prev => ({ ...prev, profilePic: response.data.profilePic }));
+      }
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+    }
+  };
+
   const maskEmail = (email) => {
     if (!email) return '';
     const [userPart, domain] = email.split('@');
@@ -120,8 +163,6 @@ const ManageProfile = () => {
       );
     });
 
-  const placeholderProofs = ['', '', ''];
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -130,18 +171,9 @@ const ManageProfile = () => {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center max-w-md w-full">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Profile Not Found</h2>
-          <p className="text-gray-600">Unable to load your profile data.</p>
-        </div>
-      </div>
-    );
-  }
 
-  const bioText = user.serviceDescription || '“Reliable and detail-oriented worker.”';
+
+  const bioText = user?.serviceDescription || '“Reliable and detail-oriented worker.”';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -150,7 +182,7 @@ const ManageProfile = () => {
           <aside className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="text-center mb-6">
-                {user.profilePic ? (
+                {user?.profilePic ? (
                   <img
                     src={getImageUrl(user.profilePic)}
                     alt="Profile"
@@ -221,8 +253,25 @@ const ManageProfile = () => {
             </div>
           </aside>
 
-          <section className="lg:col-span-2 space-y-8">
-            <div className="bg-white rounded-lg shadow-md p-6">
+          <section className="lg:col-span-2">
+            <div className="flex space-x-4 mb-6">
+              <button
+                onClick={() => setActiveTab('reviews')}
+                className={`px-4 py-2 rounded-lg ${activeTab === 'reviews' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                Reviews
+              </button>
+              <button
+                onClick={() => setActiveTab('credentials')}
+                className={`px-4 py-2 rounded-lg ${activeTab === 'credentials' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+              >
+                Credentials
+              </button>
+            </div>
+
+            {activeTab === 'reviews' && (
+              <div className="space-y-8">
+                <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
                   <p className="text-sm text-gray-500 uppercase tracking-wide">Performance Snapshot</p>
@@ -381,6 +430,95 @@ const ManageProfile = () => {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+              </div>
+            )}
+
+            {activeTab === 'credentials' && (
+              <div className="space-y-8">
+                {/* Profile Picture Upload */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <FaUser className="mr-2 text-purple-600" />
+                    Update Profile Picture
+                  </h3>
+                  <div className="flex items-center space-x-6">
+                    <div className="flex-shrink-0">
+                      <img
+                        src={getImageUrl(user?.profilePic) || '/default-profile.png'}
+                        alt="Profile"
+                        className="w-20 h-20 rounded-full object-cover border-4 border-gray-200"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 mb-4">
+                        Upload a new profile picture. This will be visible to clients and doesn't require verification.
+                      </p>
+                      <div className="flex items-center space-x-4">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleProfilePictureUpload(e.target.files[0])}
+                          className="hidden"
+                          id="profile-pic-upload"
+                        />
+                        <label
+                          htmlFor="profile-pic-upload"
+                          className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors cursor-pointer"
+                        >
+                          Choose Image
+                        </label>
+                        <span className="text-sm text-gray-500">PNG, JPG up to 5MB</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Certificates List */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Certificates</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {certificates.map((cert) => (
+                      <div key={cert._id} className="border border-gray-200 rounded-lg p-4">
+                        <h4 className="font-semibold text-gray-900 mb-2">{cert.title}</h4>
+                        <p className="text-sm text-gray-600 mb-2">{cert.description}</p>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className={`px-2 py-1 rounded-full ${
+                            cert.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {cert.verified ? 'Verified' : 'Pending Verification'}
+                          </span>
+                          <a href={cert.certificateUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                            View
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Work Proof List */}
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Work Proof</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {workProof.map((proof) => (
+                      <div key={proof._id} className="border border-gray-200 rounded-lg p-4">
+                        <h4 className="font-semibold text-gray-900 mb-2">{proof.title}</h4>
+                        <p className="text-sm text-gray-600 mb-2">{proof.description}</p>
+                        <div className="flex items-center justify-between text-sm mb-2">
+                          <span className="text-gray-500">{proof.serviceType}</span>
+                          <span className={`px-2 py-1 rounded-full ${
+                            proof.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {proof.verified ? 'Verified' : 'Pending Verification'}
+                          </span>
+                        </div>
+                        <img src={proof.imageUrl} alt={proof.title} className="w-full h-32 object-cover rounded-md" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </section>

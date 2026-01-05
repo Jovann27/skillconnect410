@@ -2,6 +2,8 @@ import JobFair from "../models/jobFairSchema.js";
 import User from "../models/userSchema.js";
 import ServiceRequest from "../models/serviceRequest.js";
 import Booking from "../models/booking.js";
+import Certificate from "../models/certificate.js";
+import WorkProof from "../models/workProof.js";
 import ErrorHandler from "../middlewares/error.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { sendNotification } from "../utils/socketNotify.js";
@@ -300,3 +302,164 @@ export const getDashboardMetrics = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// Get pending certificates for verification
+export const getPendingCertificates = catchAsyncError(async (req, res, next) => {
+  const certificates = await Certificate.find({ verified: false })
+    .populate('provider', 'firstName lastName email')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    count: certificates.length,
+    certificates
+  });
+});
+
+// Verify certificate
+export const verifyCertificate = catchAsyncError(async (req, res, next) => {
+  const { certificateId } = req.params;
+  const certificate = await Certificate.findById(certificateId).populate('provider');
+
+  if (!certificate) return next(new ErrorHandler("Certificate not found", 404));
+
+  certificate.verified = true;
+  certificate.verifiedBy = req.admin._id;
+  certificate.verificationDate = new Date();
+  await certificate.save();
+
+  // Update provider's verification status if they have at least one verified certificate
+  const provider = certificate.provider;
+  const verifiedCertificates = await Certificate.countDocuments({ 
+    provider: provider._id, 
+    verified: true 
+  });
+
+  if (verifiedCertificates > 0) {
+    provider.verified = true;
+    provider.verificationDate = new Date();
+    await provider.save();
+  }
+
+  await sendNotification(
+    certificate.provider._id,
+    "Certificate Verified",
+    `Your ${certificate.title} certificate has been verified by an administrator.`,
+    { type: "certificate-verified" }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Certificate verified successfully",
+    certificate
+  });
+});
+
+// Reject certificate
+export const rejectCertificate = catchAsyncError(async (req, res, next) => {
+  const { certificateId } = req.params;
+  const { reason } = req.body;
+  const certificate = await Certificate.findById(certificateId).populate('provider');
+
+  if (!certificate) return next(new ErrorHandler("Certificate not found", 404));
+
+  await Certificate.findByIdAndDelete(certificateId);
+
+  await sendNotification(
+    certificate.provider._id,
+    "Certificate Rejected",
+    `Your ${certificate.title} certificate has been rejected. Reason: ${reason || 'Invalid certificate'}`,
+    { type: "certificate-rejected" }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Certificate rejected successfully"
+  });
+});
+
+// Get pending work proof for verification
+export const getPendingWorkProof = catchAsyncError(async (req, res, next) => {
+  const workProofs = await WorkProof.find({ verified: false })
+    .populate('provider', 'firstName lastName email')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    count: workProofs.length,
+    workProofs
+  });
+});
+
+// Verify work proof
+export const verifyWorkProof = catchAsyncError(async (req, res, next) => {
+  const { workProofId } = req.params;
+  const workProof = await WorkProof.findById(workProofId).populate('provider');
+
+  if (!workProof) return next(new ErrorHandler("Work proof not found", 404));
+
+  workProof.verified = true;
+  workProof.verifiedBy = req.admin._id;
+  workProof.verificationDate = new Date();
+  await workProof.save();
+
+  await sendNotification(
+    workProof.provider._id,
+    "Work Proof Verified",
+    `Your ${workProof.title} work proof has been verified by an administrator.`,
+    { type: "work-proof-verified" }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Work proof verified successfully",
+    workProof
+  });
+});
+
+// Reject work proof
+export const rejectWorkProof = catchAsyncError(async (req, res, next) => {
+  const { workProofId } = req.params;
+  const { reason } = req.body;
+  const workProof = await WorkProof.findById(workProofId).populate('provider');
+
+  if (!workProof) return next(new ErrorHandler("Work proof not found", 404));
+
+  await WorkProof.findByIdAndDelete(workProofId);
+
+  await sendNotification(
+    workProof.provider._id,
+    "Work Proof Rejected",
+    `Your ${workProof.title} work proof has been rejected. Reason: ${reason || 'Invalid work proof'}`,
+    { type: "work-proof-rejected" }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Work proof rejected successfully"
+  });
+});
+
+// Get provider verification status
+export const getProviderVerificationStatus = catchAsyncError(async (req, res, next) => {
+  const { providerId } = req.params;
+
+  const provider = await User.findById(providerId);
+  if (!provider) return next(new ErrorHandler("Provider not found", 404));
+
+  const certificates = await Certificate.find({ provider: providerId });
+  const workProofs = await WorkProof.find({ provider: providerId });
+
+  res.status(200).json({
+    success: true,
+    provider: {
+      _id: provider._id,
+      firstName: provider.firstName,
+      lastName: provider.lastName,
+      verified: provider.verified,
+      verificationDate: provider.verificationDate
+    },
+    certificates,
+    workProofs
+  });
+});

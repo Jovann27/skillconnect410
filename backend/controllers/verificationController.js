@@ -89,9 +89,23 @@ export const updateVerificationAppointment = async (req, res) => {
 
     await appointment.save();
 
-    // If completed and passed, provider verification is handled elsewhere
+    // If completed and passed, update provider verification status
     if (status === "Complete" && result === "Passed") {
-      // Provider verification logic removed - verified field no longer exists
+      const provider = await User.findById(appointment.provider);
+      if (provider) {
+        provider.verified = true;
+        provider.verifiedBy = req.admin._id;
+        provider.verificationDate = new Date();
+        await provider.save();
+
+        // Send notification to provider about successful verification
+        await sendNotification(
+          appointment.provider,
+          "Account Verified Successfully",
+          "Congratulations! Your account has been verified. You can now access all platform features and start receiving service requests.",
+          { type: "account_verified" }
+        );
+      }
     }
 
     res.json({ success: true, message: "Appointment updated", appointment });

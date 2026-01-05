@@ -20,6 +20,8 @@ import verificationRouter from "./routes/verificationRouter.js";
 import helpRouter from "./routes/helpRouter.js";
 import reviewRouter from "./routes/reviewRouter.js";
 import residentRouter from "./routes/residentRouter.js";
+import certificateRouter from "./routes/certificateRouter.js";
+import mvpRoutes from "./routes/mvpRoutes.js";
 
 import { errorMiddleware } from "./middlewares/error.js";
 
@@ -88,6 +90,8 @@ app.use(fileUpload({
 // Mount routers
 app.use("/api/v1/user", userAuthRouter); // User authentication routes (register, login)
 app.use("/api/v1/user", userFlowRouter); // User flow routes (dashboard, bookings, etc.)
+app.use("/api/v1/user", certificateRouter); // Certificate and work proof routes
+app.use("/api/v1/user", mvpRoutes); // MVP service request and offer routes
 app.use("/api/v1/admin/auth", adminAuthRouter);
 app.use("/api/v1/admin", adminFlowRouter);
 app.use("/api/v1/admin", adminRouter);

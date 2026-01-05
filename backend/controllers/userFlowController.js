@@ -2,6 +2,9 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../middlewares/error.js";
 import User from "../models/userSchema.js";
 import ServiceRequest from "../models/serviceRequest.js";
+import ServiceOffer from "../models/serviceOffer.js";
+import Certificate from "../models/certificate.js";
+import WorkProof from "../models/workProof.js";
 import Review from "../models/review.js";
 import { sendNotification } from "../utils/socketNotify.js";
 import Booking from "../models/booking.js";
@@ -323,7 +326,7 @@ export const getServiceProviders = catchAsyncError(async (req, res, next) => {
   const skip = (page - 1) * limit;
 
   // Build query
-  let query = { role: "Service Provider", isVerified: true };
+  let query = { role: "Service Provider", verified: true };
   
   if (skills) {
     query.skills = { $in: [new RegExp(skills, 'i')] };
@@ -331,7 +334,7 @@ export const getServiceProviders = catchAsyncError(async (req, res, next) => {
 
   // Get providers with filters
   const providers = await User.find(query)
-    .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews isVerified address')
+    .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews verified address occupation yearsExperience totalJobsCompleted createdAt')
     .skip(skip)
     .limit(parseInt(limit))
     .sort({ averageRating: -1, totalReviews: -1 });
@@ -580,5 +583,512 @@ export const reverseGeocode = catchAsyncError(async (req, res, next) => {
     success: true,
     address: "Address lookup not implemented",
     location: { lat: parseFloat(lat), lng: parseFloat(lng) }
+  });
+});
+
+// MVP Service Request Flow
+export const createServiceRequest = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+  if (req.user.role !== "Community Member") {
+    return next(new ErrorHandler("Only community members can create service requests", 403));
+  }
+
+  const { title, description, location, budgetRange, preferredSchedule, serviceCategory } = req.body;
+  
+  if (!title || !description || !location || !serviceCategory) {
+    return next(new ErrorHandler("Missing required fields: title, description, location, serviceCategory", 400));
+  }
+
+  const serviceRequest = await ServiceRequest.create({
+    requester: req.user._id,
+    title,
+    description,
+    location,
+    budgetRange: budgetRange || { min: 0, max: 0 },
+    preferredSchedule: preferredSchedule || "",
+    serviceCategory,
+    status: "Open",
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+  });
+
+  // Notify matching service providers
+  const matchingProviders = await User.find({
+    role: "Service Provider",
+    verified: true,
+    skills: { $in: [new RegExp(serviceCategory, 'i')] }
+  });
+
+  for (const provider of matchingProviders) {
+    await sendNotification(
+      provider._id,
+      "New Service Request",
+      `New ${serviceCategory} request available in your area`,
+      { requestId: serviceRequest._id, type: "service-request" }
+    );
+  }
+
+  res.status(201).json({ success: true, serviceRequest });
+});
+
+export const browseServiceProviders = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { page = 1, limit = 20, serviceCategory, location, minRating, maxRate } = req.query;
+  const skip = (page - 1) * limit;
+
+  let query = {
+    role: "Service Provider",
+    verified: true
+  };
+
+  if (serviceCategory) {
+    query.skills = { $in: [new RegExp(serviceCategory, 'i')] };
+  }
+
+  if (location) {
+    query.address = { $regex: location, $options: 'i' };
+  }
+
+  if (minRating) {
+    query.averageRating = { $gte: parseFloat(minRating) };
+  }
+
+  if (maxRate) {
+    query.serviceRate = { $lte: parseFloat(maxRate) };
+  }
+
+  const providers = await User.find(query)
+    .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews address')
+    .skip(skip)
+    .limit(parseInt(limit))
+    .sort({ averageRating: -1, totalReviews: -1 });
+
+  const totalCount = await User.countDocuments(query);
+
+  // Get certificates and work proof for each provider
+  const providerIds = providers.map(p => p._id);
+  const certificates = await Certificate.find({ provider: { $in: providerIds }, verified: true });
+  const workProofs = await WorkProof.find({ provider: { $in: providerIds }, verified: true });
+
+  // Group by provider
+  const certsByProvider = {};
+  certificates.forEach(cert => {
+    if (!certsByProvider[cert.provider.toString()]) {
+      certsByProvider[cert.provider.toString()] = [];
+    }
+    certsByProvider[cert.provider.toString()].push({
+      title: cert.title,
+      description: cert.description,
+      certificateUrl: cert.certificateUrl
+    });
+  });
+
+  const proofsByProvider = {};
+  workProofs.forEach(proof => {
+    if (!proofsByProvider[proof.provider.toString()]) {
+      proofsByProvider[proof.provider.toString()] = [];
+    }
+    proofsByProvider[proof.provider.toString()].push({
+      title: proof.title,
+      description: proof.description,
+      imageUrl: proof.imageUrl,
+      serviceType: proof.serviceType
+    });
+  });
+
+  // Add credentials to providers
+  const providersWithCredentials = providers.map(provider => {
+    const providerObj = provider.toObject();
+    providerObj.certificates = certsByProvider[provider._id.toString()] || [];
+    providerObj.workProof = proofsByProvider[provider._id.toString()] || [];
+    return providerObj;
+  });
+
+  res.json({
+    success: true,
+    count: totalCount,
+    providers: providersWithCredentials
+  });
+});
+
+export const viewProviderProfile = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { providerId } = req.params;
+
+  const provider = await User.findById(providerId)
+    .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews address');
+
+  if (!provider || provider.role !== "Service Provider" || !provider.verified) {
+    return next(new ErrorHandler("Provider not found or not verified", 404));
+  }
+
+  // Get provider credentials
+  const certificates = await Certificate.find({ provider: providerId, verified: true });
+  const workProofs = await WorkProof.find({ provider: providerId, verified: true });
+  const reviews = await Review.find({ reviewee: providerId })
+    .populate('reviewer', 'firstName lastName')
+    .sort({ createdAt: -1 });
+
+  res.json({
+    success: true,
+    provider: {
+      ...provider.toObject(),
+      certificates,
+      workProof: workProofs,
+      reviews
+    }
+  });
+});
+
+export const sendDirectServiceOffer = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+  if (req.user.role !== "Community Member") {
+    return next(new ErrorHandler("Only community members can send service offers", 403));
+  }
+
+  const { providerId, title, description, location, budget, preferredDate } = req.body;
+
+  if (!providerId || !title || !description || !location || !budget) {
+    return next(new ErrorHandler("Missing required fields", 400));
+  }
+
+  const provider = await User.findById(providerId);
+  if (!provider || provider.role !== "Service Provider" || !provider.isVerified) {
+    return next(new ErrorHandler("Provider not found or not verified", 404));
+  }
+
+  const serviceOffer = await ServiceOffer.create({
+    requester: req.user._id,
+    provider: providerId,
+    title,
+    description,
+    location,
+    budget,
+    preferredDate: preferredDate || null,
+    status: "Pending"
+  });
+
+  await sendNotification(
+    providerId,
+    "Direct Service Offer",
+    `${req.user.firstName} ${req.user.lastName} sent you a service offer`,
+    { offerId: serviceOffer._id, type: "service-offer" }
+  );
+
+  res.status(201).json({ success: true, serviceOffer });
+});
+
+export const getProviderOffers = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+  if (req.user.role !== "Service Provider") {
+    return next(new ErrorHandler("Only service providers can view offers", 403));
+  }
+
+  const { page = 1, limit = 20, status } = req.query;
+  const skip = (page - 1) * limit;
+
+  let query = { provider: req.user._id };
+  if (status) {
+    query.status = status;
+  }
+
+  const offers = await ServiceOffer.find(query)
+    .populate('requester', 'firstName lastName email phone profilePic')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  const totalCount = await ServiceOffer.countDocuments(query);
+
+  res.json({
+    success: true,
+    count: totalCount,
+    offers
+  });
+});
+
+export const respondToServiceOffer = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+  if (req.user.role !== "Service Provider") {
+    return next(new ErrorHandler("Only service providers can respond to offers", 403));
+  }
+
+  const { offerId } = req.params;
+  const { action } = req.body; // 'accept' or 'decline'
+
+  if (!action || !['accept', 'decline'].includes(action)) {
+    return next(new ErrorHandler("Action must be 'accept' or 'decline'", 400));
+  }
+
+  const offer = await ServiceOffer.findById(offerId).populate('requester');
+  if (!offer) return next(new ErrorHandler("Offer not found", 404));
+  if (String(offer.provider) !== String(req.user._id)) {
+    return next(new ErrorHandler("Not authorized to respond to this offer", 403));
+  }
+
+  if (offer.status !== "Pending") {
+    return next(new ErrorHandler("Offer has already been responded to", 400));
+  }
+
+  offer.status = action === 'accept' ? "Accepted" : "Declined";
+  await offer.save();
+
+  if (action === 'accept') {
+    // Create booking
+    const booking = await Booking.create({
+      requester: offer.requester._id,
+      provider: req.user._id,
+      serviceOffer: offer._id,
+      status: "In Progress"
+    });
+
+    await sendNotification(
+      offer.requester._id,
+      "Offer Accepted",
+      `${req.user.firstName} ${req.user.lastName} accepted your service offer`,
+      { bookingId: booking._id, type: "offer-accepted" }
+    );
+
+    res.status(201).json({ success: true, booking, offer });
+  } else {
+    await sendNotification(
+      offer.requester._id,
+      "Offer Declined",
+      `${req.user.firstName} ${req.user.lastName} declined your service offer`,
+      { offerId: offer._id, type: "offer-declined" }
+    );
+
+    res.json({ success: true, offer });
+  }
+});
+
+export const markServiceCompleted = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { bookingId } = req.params;
+  const { proofOfWork, completionNotes } = req.body;
+
+  const booking = await Booking.findById(bookingId);
+  if (!booking) return next(new ErrorHandler("Booking not found", 404));
+
+  if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
+    return next(new ErrorHandler("Not authorized", 403));
+  }
+
+  booking.status = "Completed";
+  booking.proofOfWork = proofOfWork || [];
+  booking.completionNotes = completionNotes || "";
+  await booking.save();
+
+  // Update service request status if exists
+  if (booking.serviceRequest) {
+    const serviceRequest = await ServiceRequest.findById(booking.serviceRequest);
+    if (serviceRequest) {
+      serviceRequest.status = "Completed";
+      await serviceRequest.save();
+    }
+  }
+
+  // Update provider ratings
+  const provider = await User.findById(booking.provider);
+  if (provider) {
+    const reviews = await Review.find({ reviewee: booking.provider });
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+    provider.averageRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+    provider.totalReviews = reviews.length;
+    await provider.save();
+  }
+
+  const otherUser = String(booking.requester) === String(req.user._id) ? booking.provider : booking.requester;
+  await sendNotification(otherUser, "Service Completed", `Booking ${booking._id} has been completed`);
+
+  res.json({ success: true, booking });
+});
+
+export const applyToServiceRequest = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+  if (req.user.role !== "Service Provider" || !req.user.verified) {
+    return next(new ErrorHandler("Only verified service providers can apply to requests", 403));
+  }
+
+  const { requestId } = req.params;
+
+  const serviceRequest = await ServiceRequest.findById(requestId).populate('requester');
+  if (!serviceRequest) return next(new ErrorHandler("Service request not found", 404));
+  if (serviceRequest.status !== "Open") {
+    return next(new ErrorHandler("Service request is not open for applications", 400));
+  }
+
+  // Check if provider already applied
+  const existingBooking = await Booking.findOne({
+    provider: req.user._id,
+    serviceRequest: requestId
+  });
+
+  if (existingBooking) {
+    return next(new ErrorHandler("You have already applied to this request", 400));
+  }
+
+  const booking = await Booking.create({
+    requester: serviceRequest.requester._id,
+    provider: req.user._id,
+    serviceRequest: requestId,
+    status: "Pending"
+  });
+
+  await sendNotification(
+    serviceRequest.requester._id,
+    "New Application",
+    `${req.user.firstName} ${req.user.lastName} applied to your ${serviceRequest.serviceCategory} request`,
+    { bookingId: booking._id, type: "application" }
+  );
+
+  res.status(201).json({ success: true, booking });
+});
+
+export const getProviderApplications = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+  if (req.user.role !== "Service Provider") {
+    return next(new ErrorHandler("Only service providers can view applications", 403));
+  }
+
+  const { page = 1, limit = 20, status } = req.query;
+  const skip = (page - 1) * limit;
+
+  let query = { provider: req.user._id };
+  if (status) {
+    query.status = status;
+  }
+
+  const bookings = await Booking.find(query)
+    .populate('requester', 'firstName lastName email phone profilePic')
+    .populate('serviceRequest', 'title description serviceCategory location')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  const totalCount = await Booking.countDocuments(query);
+
+  res.json({
+    success: true,
+    count: totalCount,
+    applications: bookings
+  });
+});
+
+export const respondToApplication = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+  if (req.user.role !== "Community Member") {
+    return next(new ErrorHandler("Only community members can respond to applications", 403));
+  }
+
+  const { bookingId } = req.params;
+  const { action } = req.body; // 'accept' or 'decline'
+
+  if (!action || !['accept', 'decline'].includes(action)) {
+    return next(new ErrorHandler("Action must be 'accept' or 'decline'", 400));
+  }
+
+  const booking = await Booking.findById(bookingId).populate('provider serviceRequest');
+  if (!booking) return next(new ErrorHandler("Application not found", 404));
+  if (String(booking.requester) !== String(req.user._id)) {
+    return next(new ErrorHandler("Not authorized to respond to this application", 403));
+  }
+
+  if (booking.status !== "Pending") {
+    return next(new ErrorHandler("Application has already been responded to", 400));
+  }
+
+  if (action === 'accept') {
+    booking.status = "In Progress";
+    await booking.save();
+
+    // Update service request
+    if (booking.serviceRequest) {
+      booking.serviceRequest.status = "In Progress";
+      booking.serviceRequest.serviceProvider = booking.provider._id;
+      await booking.serviceRequest.save();
+    }
+
+    await sendNotification(
+      booking.provider._id,
+      "Application Accepted",
+      `${req.user.firstName} ${req.user.lastName} accepted your application for ${booking.serviceRequest.title}`,
+      { bookingId: booking._id, type: "application-accepted" }
+    );
+
+    res.json({ success: true, booking });
+  } else {
+    booking.status = "Declined";
+    await booking.save();
+
+    await sendNotification(
+      booking.provider._id,
+      "Application Declined",
+      `${req.user.firstName} ${req.user.lastName} declined your application`,
+      { bookingId: booking._id, type: "application-declined" }
+    );
+
+    res.json({ success: true, booking });
+  }
+});
+
+export const getRecommendedProviders = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  // Get top-rated providers with good reviews
+  const providers = await User.find({
+    role: "Service Provider",
+    verified: true,
+    averageRating: { $gte: 4.0 }
+  })
+  .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews address verified occupation yearsExperience totalJobsCompleted createdAt')
+  .sort({ averageRating: -1, totalReviews: -1 })
+  .limit(10);
+
+  res.json({
+    success: true,
+    providers
+  });
+});
+
+export const updateProfilePicture = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  if (!req.files || !req.files.profilePic) {
+    return next(new ErrorHandler("Please upload a profile picture", 400));
+  }
+
+  const profilePic = req.files.profilePic;
+
+  // Validate file type
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  if (!allowedTypes.includes(profilePic.mimetype)) {
+    return next(new ErrorHandler("Please upload a valid image file (JPEG, PNG, WebP)", 400));
+  }
+
+  // Validate file size (5MB limit)
+  if (profilePic.size > 5 * 1024 * 1024) {
+    return next(new ErrorHandler("File size must be less than 5MB", 400));
+  }
+
+  // Generate unique filename
+  const fileName = `profilePic_${Date.now()}_${Math.floor(Math.random() * 1000000)}.${profilePic.mimetype.split('/')[1]}`;
+
+  // Move file to uploads directory
+  await profilePic.mv(`backend/uploads/${fileName}`);
+
+  // Update user profile picture
+  const user = await User.findById(req.user._id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  user.profilePic = `/uploads/${fileName}`;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Profile picture updated successfully",
+    profilePic: user.profilePic
   });
 });

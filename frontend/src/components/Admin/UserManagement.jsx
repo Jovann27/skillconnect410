@@ -25,6 +25,7 @@ const UserManagement = () => {
   const [modalSource, setModalSource] = useState("");
   const [newRegisteredUsers, setNewRegisteredUsers] = useState([]);
   const [roleFilter, setRoleFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPageUsers, setCurrentPageUsers] = useState(1);
   const [currentPageNewUsers, setCurrentPageNewUsers] = useState(1);
   const [isEditingServices, setIsEditingServices] = useState(false);
@@ -188,7 +189,32 @@ const UserManagement = () => {
     );
   }
 
-  const filteredUsers = users.filter(user => user.verified && (roleFilter === 'all' || user.role === roleFilter));
+  // Search and filter logic
+  const filteredUsers = users.filter(user => {
+    // Only show verified users in the main tab
+    if (!user.verified) return false;
+    
+    // Role filter
+    if (roleFilter !== 'all' && user.role !== roleFilter) return false;
+    
+    // Search filter
+    if (searchQuery.trim()) {
+      const searchLower = searchQuery.toLowerCase();
+      const searchableText = [
+        user.firstName,
+        user.lastName,
+        user.email,
+        user.username,
+        user.phone,
+        user.address
+      ].join(' ').toLowerCase();
+      
+      return searchableText.includes(searchLower);
+    }
+    
+    return true;
+  });
+  
   const totalPagesUsers = Math.ceil(filteredUsers.length / itemsPerPage);
   const startIndexUsers = (currentPageUsers - 1) * itemsPerPage;
   const currentUsers = filteredUsers.slice(startIndexUsers, startIndexUsers + itemsPerPage);
@@ -990,8 +1016,83 @@ const UserManagement = () => {
                     <option value="Community Member">Community Member</option>
                   </select>
                 </div>
+                <div className="um-card-header" style={{ marginTop: '1rem' }}>
+              <div className="um-card-header-content">
+                <div className="um-filter-section">
+                  <label className="um-filter-label">Search Users:</label>
+                  <div style={{ position: 'relative', flex: 1 }}>
+                    <input
+                      type="text"
+                      placeholder="Search users by name, email, or username..."
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setCurrentPageUsers(1);
+                      }}
+                      className="um-filter-select"
+                      style={{
+                        paddingLeft: '2.5rem',
+                        paddingRight: '2.5rem'
+                      }}
+                    />
+                    <span style={{
+                      position: 'absolute',
+                      left: '0.75rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: '#64748b',
+                      fontSize: '1rem'
+                    }}>
+                      🔍
+                    </span>
+                    {searchQuery && (
+                      <button
+                        onClick={() => {
+                          setSearchQuery('');
+                          setCurrentPageUsers(1);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          right: '0.75rem',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#64748b',
+                          cursor: 'pointer',
+                          fontSize: '1rem'
+                        }}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setRoleFilter('all');
+                      setCurrentPageUsers(1);
+                    }}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: '#64748b',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Clear Filters
+                  </button>
+                </div>
               </div>
             </div>
+              </div>
+            </div>
+            
+            
 
             <div className="um-card-body">
               {currentUsers.length === 0 ? (

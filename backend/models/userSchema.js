@@ -29,46 +29,34 @@ const userSchema = new mongoose.Schema({
     },
     default: []
   },
+  occupation: { type: String, default: "" },
+  yearsExperience: { type: Number, default: 0 },
+  totalJobsCompleted: { type: Number, default: 0 },
   certificates: [{ type: mongoose.Schema.Types.ObjectId, ref: "Certificate" }],
   workProof: [{ type: mongoose.Schema.Types.ObjectId, ref: "WorkProof" }],
   profilePic: { type: String, default: "" },
   validId: { type: String, required: true },
   
   // Credential-based verification
-  isVerified: { type: Boolean, default: false },
+  verified: { type: Boolean, default: false },
   verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
   verificationDate: { type: Date },
   
   // Service Provider availability and services
   availability: { type: String, enum: ["Available", "Currently Working", "Not Available"], default: "Not Available" },
-  service: {
-    type: String,
-    enum: [
-      "Plumbing",
-      "Electrical",
-      "Cleaning",
-      "Carpentry",
-      "Painting",
-      "Appliance Repair",
-      "Home Renovation",
-      "Pest Control",
-      "Gardening & Landscaping",
-      "Air Conditioning & Ventilation",
-      "Laundry / Labandera"
-    ],
-    required: false
-  },
   serviceRate: { type: Number, default: 0 },
   serviceDescription: { type: String, default: "" },
   isOnline: { type: Boolean, default: true },
-  services: [{
-    name: { type: String, required: true, trim: true },
-    rate: { type: Number, default: 0, min: 0 },
-    description: { type: String, default: "", trim: true }
-  }],
+  
+  // Ratings and reviews
+  averageRating: { type: Number, default: 0 },
+  totalReviews: { type: Number, default: 0 },
 
+  // Community Member specific fields
   bookings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Booking" }],
   notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: "Notification" }],
+  favourites: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
   password: { type: String, required: true, minLength: 8, select: false },
   passwordLength: { type: Number, default: 0 },
@@ -78,18 +66,9 @@ const userSchema = new mongoose.Schema({
 
   // Notification preferences
   notificationPreferences: {
-    eReceipts: { type: Boolean, default: false },
-    proofOfDelivery: { type: Boolean, default: true },
     emailNotifications: { type: Boolean, default: true },
-    smsNotifications: { type: Boolean, default: false },
     pushNotifications: { type: Boolean, default: true }
   },
-
-  // Blocked users (for user-level blocking)
-  blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-
-  // Favourite workers
-  favourites: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
   createdAt: { type: Date, default: Date.now },
 }, {

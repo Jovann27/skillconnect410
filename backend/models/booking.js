@@ -13,25 +13,32 @@ const bookingSchema = new mongoose.Schema({
   },
   serviceRequest: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'ServiceRequest',
-    required: true
+    ref: 'ServiceRequest'
+  },
+  serviceOffer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ServiceOffer'
   },
   status: {
     type: String,
-    enum: ['Available', 'Working', 'Complete', 'Cancelled'],
-    default: 'Available'
+    enum: ["Pending", "In Progress", "Completed", "Cancelled"],
+    default: "Pending"
   },
-  proofImages: [{
+  proofOfWork: [{
     type: String,
     default: []
   }],
-  proofComment: {
+  completionNotes: {
     type: String,
-    default: null
-  }
+    default: ""
+  },
+  createdAt: { type: Date, default: Date.now }
 }, {
   timestamps: true
 });
+
+bookingSchema.index({ requester: 1, provider: 1, status: 1 });
+bookingSchema.index({ provider: 1, status: 1 });
 
 const Booking = mongoose.model('Booking', bookingSchema);
 

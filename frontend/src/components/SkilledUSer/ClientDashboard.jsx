@@ -5,11 +5,13 @@ import { useMainContext } from "../../mainContext";
 import toast from "react-hot-toast";
 import { 
   FaSearch, FaFilter, FaHeart, FaMapMarkerAlt, FaStar, 
-  FaPhone, FaEnvelope, FaEye, FaMessage, FaBriefcase,
-  FaClock, FaUsers, FaTrophy, FaCheckCircle, FaEnvelopeOpen
+  FaPhone, FaEnvelope, FaEye, FaBriefcase,
+  FaClock, FaUsers, FaTrophy, FaCheckCircle, FaEnvelopeOpen,
+  FaPlus, FaHandshake, FaClipboardList, FaFileAlt, FaImage,
+  FaThumbsUp, FaThumbsDown, FaCalendarAlt, FaDollarSign
 } from "react-icons/fa";
 
-const EnhancedClientDashboard = () => {
+const ClientDashboard = () => {
   const { user } = useMainContext();
   const navigate = useNavigate();
   
@@ -663,7 +665,7 @@ const EnhancedClientDashboard = () => {
                         className="bg-purple-600 hover:bg-purple-700 text-white text-sm py-2 px-3 rounded-lg transition-colors duration-200 flex items-center justify-center"
                         onClick={() => {/* Handle message */}}
                       >
-                        <FaMessage className="mr-1" />
+                        <FaEnvelope className="mr-1" />
                         Message
                       </button>
                     </div>
@@ -787,7 +789,7 @@ const EnhancedClientDashboard = () => {
                           className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center"
                           onClick={() => {/* Handle message */}}
                         >
-                          <FaMessage className="mr-2" />
+                          <FaEnvelope className="mr-2" />
                           Message
                         </button>
                         <button
@@ -864,4 +866,4 @@ const EnhancedClientDashboard = () => {
   );
 };
 
-export default EnhancedClientDashboard;
+export default ClientDashboard;
