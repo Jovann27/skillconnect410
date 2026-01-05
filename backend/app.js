@@ -92,6 +92,9 @@ app.use("/api/v1/user", userAuthRouter); // User authentication routes (register
 app.use("/api/v1/user", userFlowRouter); // User flow routes (dashboard, bookings, etc.)
 app.use("/api/v1/user", certificateRouter); // Certificate and work proof routes
 app.use("/api/v1/user", mvpRoutes); // MVP service request and offer routes
+// Alias routes for frontend compatibility
+app.use("/api/v1/certificate", certificateRouter); // Alias for certificate routes
+app.use("/api/v1/work-proof", certificateRouter); // Alias for work proof routes
 app.use("/api/v1/admin/auth", adminAuthRouter);
 app.use("/api/v1/admin", adminFlowRouter);
 app.use("/api/v1/admin", adminRouter);

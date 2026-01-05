@@ -20,7 +20,7 @@ const sortChatList = (list) => {
 
 const ChatIcon = () => {
   const navigate = useNavigate();
-  const { isAuthorized, tokenType, user, admin, openChatAppointmentId, setOpenChatAppointmentId } = useMainContext();
+  const { isAuthorized, tokenType, user, admin, openChatAppointmentId, setOpenChatAppointmentId, openChatWithProvider, setOpenChatWithProvider } = useMainContext();
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState('list'); // 'list' or 'chat' or 'help' or 'help-topics'
   const [chatList, setChatList] = useState([]);
@@ -445,6 +445,58 @@ const ChatIcon = () => {
     }
   }, [openChatAppointmentId, chatList, user, openChat, setOpenChatAppointmentId]);
 
+  // Effect to handle opening chat panel from provider trigger
+  useEffect(() => {
+    if (openChatWithProvider) {
+      setIsOpen(true);
+
+      // Find the chat with this provider
+      const chatToOpen = chatList.find(chat =>
+        chat.otherUser._id === openChatWithProvider
+      );
+
+      if (chatToOpen) {
+        // Open the existing chat
+        openChat(chatToOpen);
+      } else {
+        // No existing chat, create a temporary chat object for this provider
+        // First, we need to fetch the provider details to create the chat object
+        const fetchProviderAndOpenChat = async () => {
+          try {
+            const response = await api.get('/user/service-providers');
+            if (response.data.success) {
+              const provider = response.data.workers.find(p => p._id === openChatWithProvider);
+              if (provider) {
+                // Create a temporary chat object
+                const tempChat = {
+                  otherUser: provider,
+                  serviceRequest: null,
+                  status: 'No Active Service',
+                  canComplete: false,
+                  appointments: [],
+                  appointmentId: null,
+                  totalUnreadCount: 0,
+                  lastMessage: null
+                };
+                setSelectedChat(tempChat);
+                setView('chat');
+                setMessages([]); // No messages yet
+                setError(null);
+              }
+            }
+          } catch (err) {
+            console.error('Error fetching provider details:', err);
+            setView('list'); // Fallback to list view
+          }
+        };
+
+        fetchProviderAndOpenChat();
+      }
+
+      setOpenChatWithProvider(null); // Reset
+    }
+  }, [openChatWithProvider, setOpenChatWithProvider, chatList, openChat]);
+
   // Organize help topics by categories
   useEffect(() => {
     if (helpTopics.length > 0) {
@@ -490,16 +542,53 @@ const ChatIcon = () => {
     setMessages(prev => [...prev, sentMessage]);
 
     try {
+      let appointmentId = selectedChat.appointmentId;
+
+      // If no appointment exists, create a service request first
+      if (!appointmentId) {
+        // Create a service request with the message as inquiry
+        const serviceRequestData = {
+          targetProvider: selectedChat.otherUser._id,
+          name: `Inquiry: ${newMessage.trim().substring(0, 50)}${newMessage.trim().length > 50 ? '...' : ''}`,
+          address: user.address || 'Not specified',
+          phone: user.phone || 'Not provided',
+          typeOfWork: 'General Inquiry',
+          preferredDate: null,
+          time: '09:00', // Default time
+          budget: 0, // Inquiry, no budget set yet
+          notes: `Inquiry from ${user.firstName} ${user.lastName}: ${newMessage.trim()}`
+        };
+
+        const requestResponse = await api.post('/user/post-service-request', serviceRequestData);
+        if (requestResponse.data.success) {
+          appointmentId = requestResponse.data.request._id;
+          // Update the selectedChat with the new appointmentId
+          setSelectedChat(prev => ({
+            ...prev,
+            appointmentId: appointmentId,
+            status: 'Waiting',
+            serviceRequest: {
+              name: serviceRequestData.name,
+              provider: { _id: selectedChat.otherUser._id }
+            }
+          }));
+        } else {
+          throw new Error('Failed to create service request');
+        }
+      }
+
       await api.post('/user/send-message', {
-        appointmentId: selectedChat.appointmentId,
+        appointmentId: appointmentId,
         message: newMessage.trim()
       });
 
       // Clear input and stop typing indicator
       setNewMessage('');
-      socket.emit('stop-typing', selectedChat.appointmentId);
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
+      if (appointmentId) {
+        socket.emit('stop-typing', appointmentId);
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
       }
     } catch (err) {
       console.error('Error sending message:', err);
@@ -909,10 +998,12 @@ const ChatIcon = () => {
                     value={newMessage}
                     onChange={(e) => {
                       setNewMessage(e.target.value);
-                      handleTyping();
+                      if (selectedChat?.appointmentId) {
+                        handleTyping();
+                      }
                     }}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                    placeholder="Type a message..."
+                    placeholder={selectedChat?.appointmentId ? "Type a message..." : "Send inquiry message to check availability..."}
                     disabled={loading}
                     className={chatIconClasses.messageInput}
                   />
@@ -920,7 +1011,7 @@ const ChatIcon = () => {
                     className={chatIconClasses.sendButton}
                     onClick={sendMessage}
                     disabled={!newMessage.trim() || loading}
-                    title="Send message"
+                    title={selectedChat?.appointmentId ? "Send message" : "Send inquiry"}
                   >
                     <i className="fas fa-paper-plane"></i>
                   </button>

@@ -4,7 +4,7 @@ import api from '../../api.js';
 import { useMainContext } from '../../mainContext';
 
 const Settings = () => {
-  const { setUser, logout } = useMainContext();
+  const { setUser } = useMainContext();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -202,15 +202,6 @@ const Settings = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (err) {
-      console.error('Logout failed:', err);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -274,15 +265,6 @@ const Settings = () => {
               ))}
             </nav>
           </div>
-
-          <button
-            className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
-            type="button"
-            onClick={handleLogout}
-          >
-            <span>Log Out</span>
-            <span>⏻</span>
-          </button>
         </div>
       </aside>
 

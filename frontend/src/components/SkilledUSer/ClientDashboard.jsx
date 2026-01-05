@@ -3,16 +3,19 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { useMainContext } from "../../mainContext";
 import toast from "react-hot-toast";
-import { 
-  FaSearch, FaFilter, FaHeart, FaMapMarkerAlt, FaStar, 
+import CreateServiceRequest from "./CreateServiceRequest";
+import ProviderProfileModal from "./ProviderProfileModal";
+import {
+  FaSearch, FaFilter, FaHeart, FaMapMarkerAlt, FaStar,
   FaPhone, FaEnvelope, FaEye, FaBriefcase,
   FaClock, FaUsers, FaTrophy, FaCheckCircle, FaEnvelopeOpen,
   FaPlus, FaHandshake, FaClipboardList, FaFileAlt, FaImage,
-  FaThumbsUp, FaThumbsDown, FaCalendarAlt, FaDollarSign
+  FaThumbsUp, FaThumbsDown, FaCalendarAlt, FaDollarSign,
+  FaChartLine, FaInfoCircle
 } from "react-icons/fa";
 
 const ClientDashboard = () => {
-  const { user } = useMainContext();
+  const { user, setOpenChatWithProvider } = useMainContext();
   const navigate = useNavigate();
   
   // Core state
@@ -41,6 +44,9 @@ const ClientDashboard = () => {
   // UI state
   const [viewMode, setViewMode] = useState('grid'); // grid, list
   const [showFilters, setShowFilters] = useState(false);
+  const [showCreateRequest, setShowCreateRequest] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedProviderId, setSelectedProviderId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
 
@@ -235,12 +241,20 @@ const ClientDashboard = () => {
     toast.success(`Loaded saved search: ${savedSearch.name}`);
   };
 
+  const handleSendMessage = async (providerId) => {
+    try {
+      // Open chat panel with this provider
+      setOpenChatWithProvider(providerId);
+    } catch (error) {
+      console.error('Error opening chat:', error);
+      toast.error('Failed to open chat');
+    }
+  };
+
   const handleSendOffer = async (providerId) => {
-    navigate('/user/dashboard', {
-      state: {
-        selectedProvider: providerId
-      }
-    });
+    // Open the create service request modal so user can create a request and offer it to this provider
+    setShowCreateRequest(true);
+    toast.info('Create a service request to offer it to this provider.');
   };
 
   const handleBulkOffer = async () => {
@@ -249,12 +263,13 @@ const ClientDashboard = () => {
       return;
     }
 
-    navigate('/user/dashboard', {
-      state: {
-        selectedProviders,
-        bulkOffer: true
-      }
-    });
+    // For now, show a message that they need to create a service request first
+    toast.info('Please create a service request first, then offer it to providers from your requests page.');
+  };
+
+  const handleViewProfile = (providerId) => {
+    setSelectedProviderId(providerId);
+    setShowProfileModal(true);
   };
 
   const renderStars = (rating) => {
@@ -304,16 +319,27 @@ const ClientDashboard = () => {
                 Connect with verified professionals in your area
               </p>
             </div>
-            
-            {/* Quick Stats */}
-            <div className="flex gap-4">
-              <div className="bg-white rounded-lg px-4 py-2 shadow-sm border">
-                <div className="text-2xl font-bold text-blue-600">{providers.length}</div>
-                <div className="text-sm text-gray-600">Total Providers</div>
-              </div>
-              <div className="bg-white rounded-lg px-4 py-2 shadow-sm border">
-                <div className="text-2xl font-bold text-green-600">{favorites.length}</div>
-                <div className="text-sm text-gray-600">Favorites</div>
+
+            <div className="flex items-center gap-4">
+              {/* Create Service Request Button */}
+              <button
+                onClick={() => setShowCreateRequest(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center"
+              >
+                <FaPlus className="mr-2" />
+                Create Service Request
+              </button>
+
+              {/* Quick Stats */}
+              <div className="flex gap-4">
+                <div className="bg-white rounded-lg px-4 py-2 shadow-sm border">
+                  <div className="text-2xl font-bold text-blue-600">{providers.length}</div>
+                  <div className="text-sm text-gray-600">Total Providers</div>
+                </div>
+                <div className="bg-white rounded-lg px-4 py-2 shadow-sm border">
+                  <div className="text-2xl font-bold text-green-600">{favorites.length}</div>
+                  <div className="text-sm text-gray-600">Favorites</div>
+                </div>
               </div>
             </div>
           </div>
@@ -494,6 +520,67 @@ const ClientDashboard = () => {
           </div>
         )}
 
+        {/* Recommended Providers Section */}
+        {recommendedProviders.length > 0 && (
+          <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border-2 border-blue-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <FaChartLine className="text-blue-600 text-2xl mr-3" />
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Recommended for You
+                  </h3>
+                  <p className="text-sm text-gray-600 flex items-center mt-1">
+                    <FaInfoCircle className="mr-1" />
+                    Powered by Hybrid Recommendation Algorithm (Content-based + Collaborative Filtering)
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recommendedProviders.slice(0, 3).map((provider) => (
+                <div key={provider._id} className="bg-white rounded-lg shadow-md p-4 border-2 border-blue-300">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center">
+                      <img
+                        src={provider.profilePic || "/default-profile.png"}
+                        alt={`${provider.firstName} ${provider.lastName}`}
+                        className="w-12 h-12 rounded-full object-cover mr-3"
+                      />
+                      <div>
+                        <h4 className="font-semibold">
+                          {provider.firstName} {provider.lastName}
+                          {provider.verified && <FaCheckCircle className="inline ml-1 text-green-500" />}
+                        </h4>
+                        {provider.recommendationScore !== undefined && (
+                          <div className="flex items-center text-blue-600 text-sm">
+                            <FaChartLine className="mr-1" />
+                            <span className="font-semibold">
+                              {Math.round(provider.recommendationScore * 100)}% Match
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <FaStar className="text-yellow-400 mr-1" />
+                      <span className="font-semibold">{provider.averageRating?.toFixed(1) || "N/A"}</span>
+                    </div>
+                    <button
+                      onClick={() => handleSendOffer(provider._id)}
+                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                    >
+                      Contact
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Results Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -654,16 +741,16 @@ const ClientDashboard = () => {
                   {/* Action Buttons */}
                   <div className="space-y-2">
                     <div className="grid grid-cols-2 gap-2">
-                      <button
-                        className="bg-gray-600 hover:bg-gray-700 text-white text-sm py-2 px-3 rounded-lg transition-colors duration-200 flex items-center justify-center"
-                        onClick={() => {/* Handle view profile */}}
-                      >
-                        <FaEye className="mr-1" />
-                        Profile
-                      </button>
+                        <button
+                          className="bg-gray-600 hover:bg-gray-700 text-white text-sm py-2 px-3 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                          onClick={() => handleViewProfile(provider._id)}
+                        >
+                          <FaEye className="mr-1" />
+                          Profile
+                        </button>
                       <button
                         className="bg-purple-600 hover:bg-purple-700 text-white text-sm py-2 px-3 rounded-lg transition-colors duration-200 flex items-center justify-center"
-                        onClick={() => {/* Handle message */}}
+                        onClick={() => handleSendMessage(provider._id)}
                       >
                         <FaEnvelope className="mr-1" />
                         Message
@@ -780,14 +867,14 @@ const ClientDashboard = () => {
                       <div className="flex items-center space-x-3">
                         <button
                           className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center"
-                          onClick={() => {/* Handle view profile */}}
+                          onClick={() => handleViewProfile(provider._id)}
                         >
                           <FaEye className="mr-2" />
                           View Profile
                         </button>
                         <button
                           className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center"
-                          onClick={() => {/* Handle message */}}
+                          onClick={() => handleSendMessage(provider._id)}
                         >
                           <FaEnvelope className="mr-2" />
                           Message
@@ -860,6 +947,32 @@ const ClientDashboard = () => {
               </button>
             </div>
           </div>
+        )}
+
+        {/* Create Service Request Modal */}
+        {showCreateRequest && (
+          <CreateServiceRequest
+            onClose={() => setShowCreateRequest(false)}
+          />
+        )}
+
+        {/* Provider Profile Modal */}
+        {showProfileModal && selectedProviderId && (
+          <ProviderProfileModal
+            providerId={selectedProviderId}
+            onClose={() => {
+              setShowProfileModal(false);
+              setSelectedProviderId(null);
+            }}
+            onOpenChat={(providerId) => {
+              setShowProfileModal(false);
+              setSelectedProviderId(null);
+              // Open chat panel with this provider
+              // For now, navigate to chat page since we need an appointment to open chat panel
+              // In future, we could create a temporary chat or modify chat system
+              handleSendMessage(providerId);
+            }}
+          />
         )}
       </div>
     </div>

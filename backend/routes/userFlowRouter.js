@@ -40,6 +40,7 @@ import {
   updateProfilePicture
 } from '../controllers/userFlowController.js';
 import { getServices } from '../controllers/adminFlowController.js';
+import { updateProfile, updateUserPassword } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -47,37 +48,52 @@ const router = express.Router();
 router.get('/me', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
-  const user = await User.findById(req.user._id);
+  const user = await User.findById(req.user._id)
+    .populate('certificates')
+    .populate('workProof')
+    .populate('bookings');
   if (!user) return next(new ErrorHandler("User not found", 404));
 
+  const safeUser = {
+    _id: user._id,
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    phone: user.phone,
+    address: user.address,
+    birthdate: user.birthdate,
+    occupation: user.occupation,
+    employed: user.employed,
+    role: user.role,
+    skills: user.skills,
+    profilePic: user.profilePic,
+    verified: user.verified,
+    verifiedBy: user.verifiedBy,
+    verificationDate: user.verificationDate,
+    availability: user.availability,
+    acceptedWork: user.acceptedWork,
+    service: user.service,
+    serviceRate: user.serviceRate,
+    serviceDescription: user.serviceDescription,
+    isOnline: user.isOnline,
+    services: user.services,
+    yearsExperience: user.yearsExperience,
+    totalJobsCompleted: user.totalJobsCompleted,
+    averageRating: user.averageRating,
+    totalReviews: user.totalReviews,
+    certificates: user.certificates || [],
+    workProof: user.workProof || [],
+    bookings: user.bookings || [],
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt
+  };
+
+  // For backward compatibility, return both `user` and `profile`
   res.status(200).json({
     success: true,
-    profile: {
-      _id: user._id,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      phone: user.phone,
-      address: user.address,
-      birthdate: user.birthdate,
-      occupation: user.occupation,
-      employed: user.employed,
-      role: user.role,
-      skills: user.skills,
-      profilePic: user.profilePic,
-      verified: user.verified,
-      verifiedBy: user.verifiedBy,
-      availability: user.availability,
-      acceptedWork: user.acceptedWork,
-      service: user.service,
-      serviceRate: user.serviceRate,
-      serviceDescription: user.serviceDescription,
-      isOnline: user.isOnline,
-      services: user.services,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    }
+    user: safeUser,
+    profile: safeUser
   });
 }));
 
@@ -421,5 +437,71 @@ router.post('/apply-to-request/:requestId', isUserAuthenticated, isUserVerified,
 router.post('/respond-to-offer/:offerId', isUserAuthenticated, isUserVerified, respondToServiceOffer);
 router.post('/respond-to-application/:bookingId', isUserAuthenticated, isUserVerified, respondToApplication);
 router.post('/update-profile-picture', isUserAuthenticated, isUserVerified, updateProfilePicture);
+
+// Additional endpoints for frontend compatibility
+
+// User service requests (for clients to view their own requests)
+router.get('/user-service-requests', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+  
+  const requests = await ServiceRequest.find({ requester: req.user._id })
+    .populate('serviceProvider', 'firstName lastName profilePic')
+    .populate('targetProvider', 'firstName lastName profilePic')
+    .sort({ createdAt: -1 });
+  
+  res.status(200).json({ success: true, requests });
+}));
+
+// Matching requests (for workers - alias for available-service-requests)
+router.get('/matching-requests', isUserAuthenticated, isUserVerified, getAvailableServiceRequests);
+
+// Update service request
+router.put('/service-request/:id/update', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+  
+  const { id } = req.params;
+  const request = await ServiceRequest.findById(id);
+  
+  if (!request) return next(new ErrorHandler("Service request not found", 404));
+  if (String(request.requester) !== String(req.user._id)) {
+    return next(new ErrorHandler("Not authorized to update this request", 403));
+  }
+  
+  // Cannot edit if already accepted/working
+  if (['Working', 'Complete', 'Cancelled'].includes(request.status)) {
+    return next(new ErrorHandler("Cannot edit request that is in progress or completed", 400));
+  }
+  
+  const { name, address, phone, typeOfWork, serviceCategory, preferredDate, time, budget, notes, title, description, location, budgetRange, preferredSchedule } = req.body;
+  
+  // Handle both old and new field names
+  if (name) request.name = name;
+  if (title) request.title = title;
+  if (address) request.address = address;
+  if (location) request.location = location;
+  if (phone) request.phone = phone;
+  if (typeOfWork) request.typeOfWork = typeOfWork;
+  if (serviceCategory) request.serviceCategory = serviceCategory;
+  if (description) request.description = description;
+  if (preferredDate) request.preferredDate = preferredDate;
+  if (preferredSchedule) request.preferredSchedule = preferredSchedule;
+  if (time) request.time = time;
+  if (budget !== undefined) request.budget = budget;
+  if (budgetRange) request.budgetRange = budgetRange;
+  if (notes !== undefined) request.notes = notes;
+  
+  await request.save();
+  
+  res.status(200).json({ success: true, request });
+}));
+
+// Update profile endpoint
+router.put('/update-profile', isUserAuthenticated, isUserVerified, catchAsyncError(updateProfile));
+
+// Update password endpoint
+router.put('/password/update', isUserAuthenticated, isUserVerified, catchAsyncError(updateUserPassword));
+
+// Upload profile picture (alias for update-profile-picture)
+router.post('/upload-profile-pic', isUserAuthenticated, isUserVerified, updateProfilePicture);
 
 export default router;

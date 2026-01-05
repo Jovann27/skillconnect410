@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../api";
 import { useMainContext } from "../../mainContext";
 import socket from "../../utils/socket";
+import { FaChartLine, FaInfoCircle } from "react-icons/fa";
 
 const AvailableRequests = ({ searchTerm, filterStatus, filterServiceType, filterBudgetRange, handleRequestClick, handleAcceptRequest, handleDeclineRequest, getStatusClass }) => {
   const { user } = useMainContext();
@@ -28,9 +29,23 @@ const AvailableRequests = ({ searchTerm, filterStatus, filterServiceType, filter
 
   const fetchCurrentRequests = async () => {
     try {
-      console.log('AvailableRequests - Fetching available requests...');
+      console.log('AvailableRequests - Fetching available requests with hybrid recommendations...');
 
-      // Try the matching requests endpoint first
+      // Use hybrid recommendation endpoint for workers
+      try {
+        const { data } = await api.get("/user/available-service-requests?useRecommendations=true", { withCredentials: true });
+        if (data.success && data.requests) {
+          console.log('AvailableRequests - Got requests with recommendations:', data.requests.length);
+          console.log('Algorithm used:', data.algorithm);
+          setRequests(data.requests);
+          setLoading(false);
+          return;
+        }
+      } catch (recommendationError) {
+        console.log('AvailableRequests - Recommendation endpoint not available, trying standard endpoint');
+      }
+
+      // Fallback: Try the matching requests endpoint
       try {
         const { data } = await api.get("/user/matching-requests", { withCredentials: true });
         if (data.success && data.requests && data.requests.length > 0) {
@@ -174,6 +189,7 @@ const AvailableRequests = ({ searchTerm, filterStatus, filterServiceType, filter
           <thead>
             <tr>
               <th>Status</th>
+              <th>Match Score</th>
               <th>Request Date</th>
               <th>Client</th>
               <th>Service Needed</th>
@@ -183,12 +199,40 @@ const AvailableRequests = ({ searchTerm, filterStatus, filterServiceType, filter
             </tr>
           </thead>
           <tbody>
-            {filteredRequests.map((request) => (
+            {filteredRequests
+              .sort((a, b) => {
+                // Sort by recommendation score if available (highest first)
+                if (a.recommendationScore && b.recommendationScore) {
+                  return b.recommendationScore - a.recommendationScore;
+                }
+                if (a.recommendationScore) return -1;
+                if (b.recommendationScore) return 1;
+                return 0;
+              })
+              .map((request) => (
               <tr key={request._id} onClick={() => handleRequestClick(request)} style={{ cursor: 'pointer' }}>
                 <td>
                   <span className={`status-tag ${getStatusClass(request.status)}`}>
                     {request.status === "Waiting" ? "Available" : request.status === "Completed" ? "Complete" : request.status === "Open" ? "Available" : request.status}
                   </span>
+                </td>
+                <td>
+                  {request.recommendationScore !== undefined ? (
+                    <div className="flex items-center space-x-1" title="Hybrid Recommendation Match Score">
+                      <FaChartLine className="text-blue-500 text-sm" />
+                      <span className="font-semibold text-blue-600">
+                        {Math.round(request.recommendationScore * 100)}%
+                      </span>
+                      {request.matchReason && (
+                        <FaInfoCircle 
+                          className="text-gray-400 text-xs cursor-help" 
+                          title={request.matchReason}
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-gray-400 text-sm">-</span>
+                  )}
                 </td>
                 <td>
                   <div className="date">

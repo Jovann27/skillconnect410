@@ -27,6 +27,7 @@ router.delete('/certificate/:certificateId', isUserAuthenticated, isUserVerified
 router.post('/upload-work-proof', isUserAuthenticated, isUserVerified, uploadWorkProof);
 router.get('/provider/:providerId/work-proof', isUserAuthenticated, isUserVerified, getProviderWorkProof);
 router.get('/my-work-proof', isUserAuthenticated, isUserVerified, getMyWorkProof);
+router.get('/my', isUserAuthenticated, isUserVerified, getMyWorkProof); // Alias for frontend
 router.delete('/work-proof/:workProofId', isUserAuthenticated, isUserVerified, deleteWorkProof);
 
 export default router;

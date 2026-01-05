@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import toast from "react-hot-toast";
-import { 
-  FaPlus, FaClipboardList, FaMapMarkerAlt, FaDollarSign, 
-  FaCalendarAlt, FaTools, FaFileAlt, FaImage, FaSave
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import {
+  FaPlus, FaClipboardList, FaMapMarkerAlt, FaDollarSign,
+  FaCalendarAlt, FaTools, FaFileAlt, FaImage, FaSave, FaChartLine
 } from "react-icons/fa";
+import RecommendedWorkersModal from "./RecommendedWorkersModal";
 
 const CreateServiceRequest = ({ onClose }) => {
   const [formData, setFormData] = useState({
@@ -13,10 +16,13 @@ const CreateServiceRequest = ({ onClose }) => {
     description: "",
     location: "",
     budgetRange: { min: 0, max: 0 },
-    preferredSchedule: "",
+    preferredDate: null,
+    preferredTime: "",
     serviceCategory: ""
   });
   const [loading, setLoading] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(false);
+  const [createdRequestId, setCreatedRequestId] = useState(null);
 
   const serviceCategories = [
     "Plumbing",
@@ -44,9 +50,13 @@ const CreateServiceRequest = ({ onClose }) => {
     }
   };
 
+  const handleDateChange = (date) => {
+    setFormData(prev => ({ ...prev, preferredDate: date }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.title || !formData.description || !formData.location || !formData.serviceCategory) {
       toast.error("Please fill in all required fields");
       return;
@@ -54,10 +64,18 @@ const CreateServiceRequest = ({ onClose }) => {
 
     setLoading(true);
     try {
-      const response = await api.post("/user/create-service-request", formData);
+      // Prepare data for submission - convert date object to string
+      const submitData = {
+        ...formData,
+        preferredDate: formData.preferredDate ? formData.preferredDate.toISOString().split('T')[0] : null
+      };
+
+      const response = await api.post("/user/create-service-request", submitData);
       if (response.data.success) {
-        toast.success("Service request created successfully!");
-        if (onClose) onClose();
+        toast.success("Service request created successfully! View recommended workers below.");
+        setCreatedRequestId(response.data.serviceRequest._id);
+        setShowRecommendations(true);
+        // Don't close immediately - let user see recommendations
       }
     } catch (error) {
       console.error("Error creating service request:", error);
@@ -189,19 +207,36 @@ const CreateServiceRequest = ({ onClose }) => {
             </div>
 
             {/* Preferred Schedule */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <FaCalendarAlt className="inline mr-2" />
-                Preferred Schedule
-              </label>
-              <input
-                type="text"
-                name="preferredSchedule"
-                value={formData.preferredSchedule}
-                onChange={handleInputChange}
-                placeholder="e.g., Next week, ASAP, Weekend only"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <FaCalendarAlt className="inline mr-2" />
+                  Preferred Date
+                </label>
+                <DatePicker
+                  selected={formData.preferredDate}
+                  onChange={handleDateChange}
+                  minDate={new Date()}
+                  dateFormat="MMMM d, yyyy"
+                  placeholderText="Select a date"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  wrapperClassName="w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <FaCalendarAlt className="inline mr-2" />
+                  Preferred Time
+                </label>
+                <input
+                  type="time"
+                  name="preferredTime"
+                  value={formData.preferredTime || ""}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
             </div>
 
             {/* Submit Button */}
@@ -223,6 +258,24 @@ const CreateServiceRequest = ({ onClose }) => {
               </button>
             </div>
           </form>
+
+          {/* Show Recommendations after creation */}
+          {showRecommendations && createdRequestId && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <RecommendedWorkersModal
+                serviceRequestId={createdRequestId}
+                onClose={() => {
+                  setShowRecommendations(false);
+                  if (onClose) onClose();
+                }}
+                onSelectWorker={(worker) => {
+                  toast.success(`Selected ${worker.firstName} ${worker.lastName}`);
+                  // Navigate to send offer or booking
+                  if (onClose) onClose();
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

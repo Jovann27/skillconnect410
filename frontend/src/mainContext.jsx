@@ -22,6 +22,7 @@ export const MainProvider = ({ children }) => {
   const [tokenType, setTokenType] = useState(null);
   const [authLoaded, setAuthLoaded] = useState(false);
   const [navigationLoading, setNavigationLoading] = useState(false);
+  const [openChatWithProvider, setOpenChatWithProvider] = useState(null);
 
   // Authentication helpers
   const setAuthToken = (token) => {
@@ -184,7 +185,8 @@ export const MainProvider = ({ children }) => {
     tokenType,
     authLoaded,
     navigationLoading,
-    
+    openChatWithProvider,
+
     // State setters
     setUser,
     setAdmin,
@@ -193,7 +195,8 @@ export const MainProvider = ({ children }) => {
     setTokenType,
     setAuthLoaded,
     setNavigationLoading,
-    
+    setOpenChatWithProvider,
+
     // Helpers
     setAuthToken,
     logout,

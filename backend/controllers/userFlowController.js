@@ -9,16 +9,26 @@ import Review from "../models/review.js";
 import { sendNotification } from "../utils/socketNotify.js";
 import Booking from "../models/booking.js";
 import { io } from "../server.js";
+import { getRecommendedWorkers, getRecommendedServiceRequests } from "../utils/recommendationEngine.js";
 
 export const postServiceRequest = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
   const { name, address, phone, typeOfWork, preferredDate, time, budget, notes, targetProvider } = req.body;
-  if (!name || !address || !phone || !typeOfWork || !time) return next(new ErrorHandler("Missing required fields", 400));
 
+  // For inquiries (General Inquiry), address and phone are not required
+  const isInquiry = typeOfWork === 'General Inquiry';
+  if (!name || !typeOfWork || !time || (!isInquiry && (!address || !phone))) return next(new ErrorHandler("Missing required fields", 400));
+
+  let preferredDateObj = null;
   let expiresAt;
+
   if (preferredDate) {
+    preferredDateObj = new Date(preferredDate);
+    if (isNaN(preferredDateObj.getTime())) {
+      return next(new ErrorHandler("Invalid preferred date format", 400));
+    }
     const [hours, minutes] = time.split(':').map(Number);
-    const expirationDate = new Date(preferredDate);
+    const expirationDate = new Date(preferredDateObj);
     expirationDate.setHours(hours, minutes, 0, 0);
     expiresAt = expirationDate;
   } else {
@@ -28,10 +38,10 @@ export const postServiceRequest = catchAsyncError(async (req, res, next) => {
   const request = await ServiceRequest.create({
     requester: req.user._id,
     name,
-    address,
-    phone,
+    address: isInquiry ? "" : address,
+    phone: isInquiry ? "" : phone,
     typeOfWork,
-    preferredDate: preferredDate || "",
+    preferredDate: preferredDateObj,
     time,
     budget: budget || 0,
     notes,
@@ -157,6 +167,19 @@ export const acceptServiceRequest = catchAsyncError(async (req, res, next) => {
 
   const provider = await User.findById(req.user._id);
   if (!provider || provider.role !== "Service Provider") return next(new ErrorHandler("Not a provider", 403));
+
+  // Check if provider already has a request on the same preferred date
+  if (request.preferredDate) {
+    const existingRequest = await ServiceRequest.findOne({
+      serviceProvider: req.user._id,
+      status: "Working",
+      preferredDate: request.preferredDate
+    });
+
+    if (existingRequest) {
+      return next(new ErrorHandler("You already have a confirmed request on this date. Please complete or cancel it before accepting another request.", 400));
+    }
+  }
 
   const booking = await Booking.create({
     requester: request.requester._id,
@@ -454,6 +477,19 @@ export const acceptOffer = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Not authorized to accept this offer", 403));
   }
 
+  // Check if provider already has a request on the same preferred date
+  if (request.preferredDate) {
+    const existingRequest = await ServiceRequest.findOne({
+      serviceProvider: req.user._id,
+      status: "Working",
+      preferredDate: request.preferredDate
+    });
+
+    if (existingRequest) {
+      return next(new ErrorHandler("You already have a confirmed request on this date. Please complete or cancel it before accepting another request.", 400));
+    }
+  }
+
   // Create booking
   const booking = await Booking.create({
     requester: request.requester._id,
@@ -512,9 +548,32 @@ export const completeBooking = catchAsyncError(async (req, res, next) => {
 export const getAvailableServiceRequests = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
-  const { page = 1, limit = 20, skills, location } = req.query;
+  const { page = 1, limit = 20, skills, location, useRecommendations } = req.query;
   const skip = (page - 1) * limit;
 
+  // If user is a service provider and wants recommendations, use hybrid algorithm
+  if (req.user.role === "Service Provider" && useRecommendations === "true") {
+    try {
+      const worker = await User.findById(req.user._id);
+      const recommendedRequests = await getRecommendedServiceRequests(worker, {
+        limit: parseInt(limit),
+        minScore: 0.3
+      });
+
+      return res.json({
+        success: true,
+        count: recommendedRequests.length,
+        requests: recommendedRequests,
+        algorithm: "hybrid",
+        description: "Using hybrid recommendation algorithm to match service requests to your profile"
+      });
+    } catch (error) {
+      console.error('Error in recommended service requests:', error);
+      // Fall through to regular query
+    }
+  }
+
+  // Regular query with filters
   let query = { 
     status: "Waiting",
     expiresAt: { $gt: new Date() }
@@ -536,7 +595,9 @@ export const getAvailableServiceRequests = catchAsyncError(async (req, res, next
   res.json({
     success: true,
     count: totalCount,
-    requests
+    requests,
+    algorithm: "filtered",
+    description: "Using filtered search"
   });
 });
 
@@ -593,21 +654,49 @@ export const createServiceRequest = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Only community members can create service requests", 403));
   }
 
-  const { title, description, location, budgetRange, preferredSchedule, serviceCategory } = req.body;
-  
+  const { title, description, location, budgetRange, preferredDate, preferredTime, serviceCategory } = req.body;
+
   if (!title || !description || !location || !serviceCategory) {
     return next(new ErrorHandler("Missing required fields: title, description, location, serviceCategory", 400));
   }
 
+  // Parse and validate preferred date and time
+  let preferredDateObj = null;
+  let timeStr = "";
+
+  if (preferredDate) {
+    preferredDateObj = new Date(preferredDate);
+    if (isNaN(preferredDateObj.getTime())) {
+      return next(new ErrorHandler("Invalid preferred date format", 400));
+    }
+
+    // Validate that preferred date is not in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (preferredDateObj < today) {
+      return next(new ErrorHandler("Preferred date cannot be in the past", 400));
+    }
+  }
+
+  if (preferredTime) {
+    // Validate time format (HH:MM)
+    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(preferredTime)) {
+      return next(new ErrorHandler("Invalid time format. Please use HH:MM format (24-hour)", 400));
+    }
+    timeStr = preferredTime;
+  }
+
   const serviceRequest = await ServiceRequest.create({
     requester: req.user._id,
-    title,
-    description,
-    location,
-    budgetRange: budgetRange || { min: 0, max: 0 },
-    preferredSchedule: preferredSchedule || "",
-    serviceCategory,
-    status: "Open",
+    name: title, // Map title to name field
+    address: location, // Map location to address field
+    typeOfWork: serviceCategory, // Map serviceCategory to typeOfWork field
+    preferredDate: preferredDateObj,
+    time: timeStr,
+    budget: budgetRange ? budgetRange.min || budgetRange.max || 0 : 0,
+    notes: description, // Map description to notes field
+    status: "Waiting",
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
   });
 
@@ -1037,20 +1126,62 @@ export const respondToApplication = catchAsyncError(async (req, res, next) => {
 export const getRecommendedProviders = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
-  // Get top-rated providers with good reviews
-  const providers = await User.find({
-    role: "Service Provider",
-    verified: true,
-    averageRating: { $gte: 4.0 }
-  })
-  .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews address verified occupation yearsExperience totalJobsCompleted createdAt')
-  .sort({ averageRating: -1, totalReviews: -1 })
-  .limit(10);
+  const { serviceRequestId } = req.query;
 
-  res.json({
-    success: true,
-    providers
-  });
+  try {
+    // If a service request ID is provided, use hybrid recommendation
+    if (serviceRequestId) {
+      const serviceRequest = await ServiceRequest.findById(serviceRequestId);
+      if (serviceRequest) {
+        const recommendedWorkers = await getRecommendedWorkers(serviceRequest, {
+          limit: 10,
+          minScore: 0.3
+        });
+
+        return res.json({
+          success: true,
+          providers: recommendedWorkers,
+          algorithm: "hybrid",
+          description: "Using hybrid recommendation algorithm (content-based + collaborative filtering)"
+        });
+      }
+    }
+
+    // Fallback: Get top-rated providers (basic recommendation)
+    const providers = await User.find({
+      role: "Service Provider",
+      verified: true,
+      averageRating: { $gte: 4.0 }
+    })
+    .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews address verified occupation yearsExperience totalJobsCompleted createdAt')
+    .sort({ averageRating: -1, totalReviews: -1 })
+    .limit(10);
+
+    res.json({
+      success: true,
+      providers,
+      algorithm: "basic",
+      description: "Using basic rating-based recommendation"
+    });
+  } catch (error) {
+    console.error('Error in getRecommendedProviders:', error);
+    // Fallback to basic recommendation on error
+    const providers = await User.find({
+      role: "Service Provider",
+      verified: true,
+      averageRating: { $gte: 4.0 }
+    })
+    .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews address verified occupation yearsExperience totalJobsCompleted createdAt')
+    .sort({ averageRating: -1, totalReviews: -1 })
+    .limit(10);
+
+    res.json({
+      success: true,
+      providers,
+      algorithm: "fallback",
+      description: "Using fallback recommendation due to error"
+    });
+  }
 });
 
 export const updateProfilePicture = catchAsyncError(async (req, res, next) => {

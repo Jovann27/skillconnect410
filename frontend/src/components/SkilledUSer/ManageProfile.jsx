@@ -25,25 +25,45 @@ const ManageProfile = () => {
   useEffect(() => {
     if (user?._id) {
       fetchUserInsights(user._id);
-      fetchCertificates();
-      fetchWorkProof();
+      // Certificates and workProof are now fetched from user profile
+      if (user.certificates) {
+        setCertificates(user.certificates || []);
+      }
+      if (user.workProof) {
+        setWorkProof(user.workProof || []);
+      }
       // Fetch completed jobs if user is a service provider
       if (user.role === 'Service Provider') {
         fetchCompletedJobs();
       }
     }
-  }, [user?._id, user?.role]);
+  }, [user?._id, user?.role, user?.certificates, user?.workProof]);
 
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
+      setError('');
       const response = await api.get('/user/me');
       if (response.data.success) {
-        setUser(response.data.user);
+        // Handle both 'user' and 'profile' response formats
+        const userData = response.data.user || response.data.profile || null;
+        if (userData) {
+          setUser(userData);
+          // Set certificates and workProof from user profile
+          setCertificates(userData.certificates || []);
+          setWorkProof(userData.workProof || []);
+        } else {
+          setError('No user data received');
+        }
+      } else {
+        setError(response.data.message || 'Failed to fetch profile data');
       }
     } catch (err) {
       setError('Failed to fetch profile data');
       console.error('Error fetching profile:', err);
+      // Set empty arrays to prevent undefined errors
+      setCertificates([]);
+      setWorkProof([]);
     } finally {
       setLoading(false);
     }
@@ -83,27 +103,8 @@ const ManageProfile = () => {
     }
   };
 
-  const fetchCertificates = async () => {
-    try {
-      const response = await api.get('/certificate/my-certificates');
-      if (response.data.success) {
-        setCertificates(response.data.certificates || []);
-      }
-    } catch (error) {
-      console.error('Error fetching certificates:', error);
-    }
-  };
-
-  const fetchWorkProof = async () => {
-    try {
-      const response = await api.get('/work-proof/my');
-      if (response.data.success) {
-        setWorkProof(response.data.workProof || []);
-      }
-    } catch (error) {
-      console.error('Error fetching work proof:', error);
-    }
-  };
+  // Certificates and workProof are now fetched from user profile
+  // No separate API calls needed
 
   const handleProfilePictureUpload = async (file) => {
     if (!file) return;
@@ -190,15 +191,15 @@ const ManageProfile = () => {
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full mx-auto bg-blue-100 flex items-center justify-center text-2xl font-bold text-blue-600 border-4 border-blue-200">
-                    {user.firstName?.charAt(0) || user.lastName?.charAt(0) || 'S'}
+                    {user?.firstName?.charAt(0) || user?.lastName?.charAt(0) || 'S'}
                   </div>
                 )}
               </div>
 
               <div className="text-center mb-6">
-                <h2 className="text-xl font-bold text-gray-900">{`${user.firstName || ''} ${user.lastName || ''}`.trim()}</h2>
-                <p className="text-gray-600">{user.occupation || 'Independent Specialist'}</p>
-                <p className="text-sm text-gray-500">{formatAddress(user.address)}</p>
+                <h2 className="text-xl font-bold text-gray-900">{`${user?.firstName || ''} ${user?.lastName || ''}`.trim()}</h2>
+                <p className="text-gray-600">{user?.occupation || 'Independent Specialist'}</p>
+                <p className="text-sm text-gray-500">{formatAddress(user?.address)}</p>
               </div>
 
               <div className="flex justify-between items-center mb-6 p-4 bg-gray-50 rounded-lg">
@@ -210,18 +211,18 @@ const ManageProfile = () => {
                 </div>
                 <div className="text-right">
                   <span className="block text-sm text-gray-600">{reviewStats.totalReviews || 0} Reviews</span>
-                  <span className="block text-sm text-gray-600">{user.bookings?.length || 0} Jobs</span>
+                  <span className="block text-sm text-gray-600">{user?.bookings?.length || completedJobs?.length || 0} Jobs</span>
                 </div>
               </div>
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm font-medium text-gray-700">Email</span>
-                  <strong className="text-sm text-gray-900">{maskEmail(user.email)}</strong>
+                  <strong className="text-sm text-gray-900">{maskEmail(user?.email)}</strong>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm font-medium text-gray-700">Phone</span>
-                  <strong className="text-sm text-gray-900">{maskPhone(user.phone)}</strong>
+                  <strong className="text-sm text-gray-900">{maskPhone(user?.phone)}</strong>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm font-medium text-gray-700">Skills</span>
@@ -353,7 +354,7 @@ const ManageProfile = () => {
             </div>
 
             {/* Completed Jobs Section - Only for Service Providers */}
-            {user.role === 'Service Provider' && (
+            {user?.role === 'Service Provider' && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                   <div>
@@ -478,46 +479,64 @@ const ManageProfile = () => {
                 {/* Certificates List */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Certificates</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {certificates.map((cert) => (
-                      <div key={cert._id} className="border border-gray-200 rounded-lg p-4">
-                        <h4 className="font-semibold text-gray-900 mb-2">{cert.title}</h4>
-                        <p className="text-sm text-gray-600 mb-2">{cert.description}</p>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className={`px-2 py-1 rounded-full ${
-                            cert.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {cert.verified ? 'Verified' : 'Pending Verification'}
-                          </span>
-                          <a href={cert.certificateUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
-                            View
-                          </a>
+                  {certificates.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-600 mb-2">No certificates uploaded yet</p>
+                      <small className="text-gray-500">Upload certificates to showcase your qualifications</small>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {certificates.map((cert) => (
+                        <div key={cert._id || cert.id} className="border border-gray-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-gray-900 mb-2">{cert.title || 'Untitled Certificate'}</h4>
+                          <p className="text-sm text-gray-600 mb-2">{cert.description || 'No description'}</p>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className={`px-2 py-1 rounded-full ${
+                              cert.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {cert.verified ? 'Verified' : 'Pending Verification'}
+                            </span>
+                            {cert.certificateUrl && (
+                              <a href={getImageUrl(cert.certificateUrl)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                                View
+                              </a>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Work Proof List */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Work Proof</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {workProof.map((proof) => (
-                      <div key={proof._id} className="border border-gray-200 rounded-lg p-4">
-                        <h4 className="font-semibold text-gray-900 mb-2">{proof.title}</h4>
-                        <p className="text-sm text-gray-600 mb-2">{proof.description}</p>
-                        <div className="flex items-center justify-between text-sm mb-2">
-                          <span className="text-gray-500">{proof.serviceType}</span>
-                          <span className={`px-2 py-1 rounded-full ${
-                            proof.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {proof.verified ? 'Verified' : 'Pending Verification'}
-                          </span>
+                  {workProof.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-600 mb-2">No work proof uploaded yet</p>
+                      <small className="text-gray-500">Upload proof of completed work to build your portfolio</small>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {workProof.map((proof) => (
+                        <div key={proof._id || proof.id} className="border border-gray-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-gray-900 mb-2">{proof.title || 'Untitled Work'}</h4>
+                          <p className="text-sm text-gray-600 mb-2">{proof.description || 'No description'}</p>
+                          <div className="flex items-center justify-between text-sm mb-2">
+                            <span className="text-gray-500">{proof.serviceType || 'General'}</span>
+                            <span className={`px-2 py-1 rounded-full ${
+                              proof.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {proof.verified ? 'Verified' : 'Pending Verification'}
+                            </span>
+                          </div>
+                          {proof.imageUrl && (
+                            <img src={getImageUrl(proof.imageUrl)} alt={proof.title || 'Work proof'} className="w-full h-32 object-cover rounded-md" />
+                          )}
                         </div>
-                        <img src={proof.imageUrl} alt={proof.title} className="w-full h-32 object-cover rounded-md" />
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

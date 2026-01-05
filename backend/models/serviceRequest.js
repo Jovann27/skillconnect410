@@ -2,43 +2,28 @@ import mongoose from "mongoose";
 
 const serviceRequestSchema = new mongoose.Schema({
   requester: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  title: { type: String, required: true, trim: true },
-  description: { type: String, required: true },
-  location: { type: String, required: true },
-  budgetRange: { 
-    min: { type: Number, default: 0 },
-    max: { type: Number, default: 0 }
-  },
-  preferredSchedule: { type: String, default: "" },
-  serviceCategory: { 
-    type: String, 
-    enum: [
-      "Plumbing",
-      "Electrical",
-      "Cleaning",
-      "Carpentry",
-      "Painting",
-      "Appliance Repair",
-      "Home Renovation",
-      "Pest Control",
-      "Gardening & Landscaping",
-      "Air Conditioning & Ventilation",
-      "Laundry / Labandera"
-    ],
-    required: true 
-  },
-  status: { 
-    type: String, 
-    enum: ["Open", "In Progress", "Completed", "Cancelled"], 
-    default: "Open" 
+  name: { type: String, required: true, trim: true },
+  address: { type: String },
+  phone: { type: String },
+  typeOfWork: { type: String, required: true },
+  preferredDate: { type: Date },
+  time: { type: String, required: true, match: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/ },
+  budget: { type: Number, default: 0 },
+  notes: { type: String, default: "" },
+  targetProvider: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  status: {
+    type: String,
+    enum: ["Waiting", "Working", "Complete", "Cancelled"],
+    default: "Waiting"
   },
   cancellationReason: { type: String, default: "" },
   expiresAt: { type: Date, default: () => new Date(Date.now() + 24 * 60 * 60 * 1000) },
   serviceProvider: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  eta: { type: Date },
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-serviceRequestSchema.index({ requester: 1, serviceCategory: 1, status: 1 });
+serviceRequestSchema.index({ requester: 1, typeOfWork: 1, status: 1 });
 serviceRequestSchema.index({ status: 1, createdAt: -1 });
 
 export default mongoose.model("ServiceRequest", serviceRequestSchema);
