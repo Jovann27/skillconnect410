@@ -37,7 +37,8 @@ import {
   respondToServiceOffer,
   respondToApplication,
   applyToServiceRequest,
-  updateProfilePicture
+  updateProfilePicture,
+  sendDirectServiceOffer
 } from '../controllers/userFlowController.js';
 import { getServices } from '../controllers/adminFlowController.js';
 import { updateProfile, updateUserPassword } from '../controllers/userController.js';
@@ -373,7 +374,8 @@ router.put('/service-status', isUserAuthenticated, isUserVerified, updateService
 
 // User services route
 router.get('/services', isUserAuthenticated, isUserVerified, getUserServices);
-router.get('/predefined-services', isUserAuthenticated, isUserVerified, getServices);
+// Public route for predefined services (for registration form)
+router.get('/predefined-services', getServices);
 
 // Service Providers route
 router.get('/service-providers', isUserAuthenticated, isUserVerified, getServiceProviders);
@@ -382,6 +384,7 @@ router.get('/service-providers', isUserAuthenticated, isUserVerified, getService
 router.get('/recommended-providers', isUserAuthenticated, isUserVerified, getRecommendedProviders);
 
 // Offer routes
+router.post('/send-direct-service-offer', isUserAuthenticated, isUserVerified, sendDirectServiceOffer);
 router.post('/offer-to-provider', isUserAuthenticated, isUserVerified, offerToProvider);
 router.post('/offer/:requestId/accept', isUserAuthenticated, isUserVerified, acceptOffer);
 router.post('/offer/:requestId/reject', isUserAuthenticated, isUserVerified, rejectOffer);

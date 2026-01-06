@@ -73,6 +73,14 @@ const initializeSocket = (token) => {
         console.log("Socket connected successfully");
     });
 
+    // Listen for new notifications
+    _socket.on("new-notification", (notification) => {
+        console.log("New notification received:", notification);
+        if (notificationHandler) {
+            notificationHandler(notification);
+        }
+    });
+
     if (pendingListeners.length > 0) {
         pendingListeners.forEach(({ event, cb }) => {
             try {
@@ -107,6 +115,13 @@ export const updateSocketToken = (token) => {
         localStorage.removeItem("token");
         _socket = null;
     }
+};
+
+// Notification event handler - to be set by components that need notifications
+let notificationHandler = null;
+
+export const setNotificationHandler = (handler) => {
+    notificationHandler = handler;
 };
 
 export const clearSocket = () => {

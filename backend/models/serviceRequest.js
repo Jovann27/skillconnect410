@@ -8,12 +8,13 @@ const serviceRequestSchema = new mongoose.Schema({
   typeOfWork: { type: String, required: true },
   preferredDate: { type: Date },
   time: { type: String, required: true, match: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/ },
-  budget: { type: Number, default: 0 },
+  minBudget: { type: Number, default: 0 },
+  maxBudget: { type: Number, default: 0 },
   notes: { type: String, default: "" },
   targetProvider: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   status: {
     type: String,
-    enum: ["Waiting", "Working", "Complete", "Cancelled"],
+    enum: ["Waiting", "Offered", "Working", "Complete", "Cancelled"],
     default: "Waiting"
   },
   cancellationReason: { type: String, default: "" },

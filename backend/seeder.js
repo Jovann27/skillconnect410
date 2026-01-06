@@ -394,24 +394,103 @@ for (let i = 0; i < 50; i++) {
 await Chat.insertMany(chatsData);
 console.log("50 chats created");
 
-// Create 50 Services (created by admin)
-const servicesData = [];
-const serviceNamesSet = new Set();
-while (serviceNamesSet.size < 50) {
-  const name = `Service ${Math.random().toString(36).substring(7)}`;
-  serviceNamesSet.add(name);
-}
-for (const name of serviceNamesSet) {
-  servicesData.push({
-    name: name,
-    description: `Description for ${name}`,
-    rate: Math.floor(Math.random() * 500) + 50,
-    createdBy: admin._id
-  });
-}
+// Create comprehensive services covering all barangay community needs
+const servicesData = [
+  // Home & Property Maintenance
+  { name: "Home Cleaning", description: "General house cleaning, deep cleaning, and post-construction cleanup services", rate: 500, createdBy: admin._id },
+  { name: "Plumbing Services", description: "Pipe installation, leak repair, toilet and sink installation, drain cleaning", rate: 300, createdBy: admin._id },
+  { name: "Electrical Services", description: "Wiring, lighting repair, outlet installation, electrical panel maintenance", rate: 400, createdBy: admin._id },
+  { name: "Carpentry & Woodwork", description: "Furniture repair, custom woodwork, door/window fixing, cabinet installation", rate: 600, createdBy: admin._id },
+  { name: "Painting Services", description: "Interior/exterior painting, repainting, wallpaper installation", rate: 800, createdBy: admin._id },
+  { name: "Roofing & Tiling", description: "Roof repair, tile installation, waterproofing services", rate: 1000, createdBy: admin._id },
+  { name: "Masonry & Concrete Work", description: "Bricklaying, concrete work, foundation repair, driveway paving", rate: 700, createdBy: admin._id },
+  { name: "Flooring Installation", description: "Hardwood, tile, laminate, and vinyl flooring installation and repair", rate: 900, createdBy: admin._id },
+
+  // Appliance & Equipment Repair
+  { name: "Appliance Repair", description: "Refrigerator, washing machine, air conditioner, microwave repair", rate: 350, createdBy: admin._id },
+  { name: "TV & Electronics Repair", description: "Television, computer, phone, and other electronics repair", rate: 250, createdBy: admin._id },
+  { name: "Generator & Power Equipment", description: "Generator installation, maintenance, and repair services", rate: 600, createdBy: admin._id },
+
+  // Pest Control & Gardening
+  { name: "Pest Control Services", description: "Termite treatment, cockroach control, rodent extermination", rate: 450, createdBy: admin._id },
+  { name: "Gardening & Landscaping", description: "Lawn mowing, plant care, landscape design, tree trimming", rate: 400, createdBy: admin._id },
+  { name: "Irrigation Systems", description: "Sprinkler system installation and maintenance", rate: 550, createdBy: admin._id },
+
+  // HVAC & Ventilation
+  { name: "Air Conditioning Services", description: "AC installation, cleaning, repair, and maintenance", rate: 500, createdBy: admin._id },
+  { name: "Ventilation & Duct Cleaning", description: "HVAC maintenance, duct cleaning, ventilation setup", rate: 600, createdBy: admin._id },
+
+  // Security & Technology
+  { name: "Home Security Systems", description: "CCTV installation, alarm systems, smart locks", rate: 800, createdBy: admin._id },
+  { name: "IT & Computer Services", description: "Computer setup, network installation, WiFi setup, virus removal", rate: 300, createdBy: admin._id },
+  { name: "Phone & Tablet Repair", description: "Mobile phone, tablet, and smartphone repair services", rate: 200, createdBy: admin._id },
+
+  // Automotive Services
+  { name: "Car Wash & Detailing", description: "Professional car washing, detailing, and interior cleaning", rate: 250, createdBy: admin._id },
+  { name: "Automotive Repair", description: "Basic car maintenance, tire repair, battery replacement, oil changes", rate: 400, createdBy: admin._id },
+  { name: "Car Painting", description: "Automotive painting, scratch removal, and body work", rate: 1200, createdBy: admin._id },
+
+  // Laundry & Textile Services
+  { name: "Laundry Services", description: "Washing, drying, ironing, folding, and dry cleaning", rate: 150, createdBy: admin._id },
+  { name: "Upholstery Cleaning", description: "Sofa, chair, and furniture upholstery cleaning", rate: 350, createdBy: admin._id },
+  { name: "Curtain & Textile Care", description: "Curtain cleaning, alteration, and textile repair", rate: 200, createdBy: admin._id },
+
+  // Specialty Services
+  { name: "Pool & Spa Maintenance", description: "Swimming pool cleaning, chemical balancing, equipment repair", rate: 400, createdBy: admin._id },
+  { name: "Water Tank & Purification", description: "Water tank cleaning, purification system installation", rate: 350, createdBy: admin._id },
+  { name: "Elevator & Lift Services", description: "Elevator maintenance, repair, and modernization", rate: 1500, createdBy: admin._id },
+  { name: "Solar Panel Services", description: "Solar panel installation, maintenance, and repair", rate: 800, createdBy: admin._id },
+
+  // Event & Entertainment Services
+  { name: "Event Setup & Coordination", description: "Party setup, decoration, sound system, and lighting", rate: 600, createdBy: admin._id },
+  { name: "Photography & Videography", description: "Event photography, wedding videography, portraits", rate: 1000, createdBy: admin._id },
+  { name: "Catering & Food Services", description: "Event catering, food preparation, and service", rate: 800, createdBy: admin._id },
+
+  // Health & Wellness
+  { name: "Massage Therapy", description: "Professional massage, relaxation, and therapeutic services", rate: 300, createdBy: admin._id },
+  { name: "First Aid & Medical Assistance", description: "Basic first aid, health monitoring, and medical support", rate: 250, createdBy: admin._id },
+  { name: "Elder Care Services", description: "Assistance for elderly, companionship, and personal care", rate: 350, createdBy: admin._id },
+  { name: "Child Care Services", description: "Babysitting, tutoring, and childcare assistance", rate: 200, createdBy: admin._id },
+
+  // Educational Services
+  { name: "Tutoring Services", description: "Academic tutoring, homework help, and educational support", rate: 250, createdBy: admin._id },
+  { name: "Language Lessons", description: "English, Filipino, and foreign language instruction", rate: 300, createdBy: admin._id },
+  { name: "Music & Art Lessons", description: "Piano, guitar, singing, painting, and art instruction", rate: 350, createdBy: admin._id },
+  { name: "Computer Training", description: "Basic computer skills, internet usage, software training", rate: 200, createdBy: admin._id },
+
+  // Pet Services
+  { name: "Pet Grooming", description: "Dog bathing, haircuts, nail trimming, and pet care", rate: 200, createdBy: admin._id },
+  { name: "Pet Sitting & Walking", description: "Pet sitting, dog walking, and animal care services", rate: 150, createdBy: admin._id },
+  { name: "Veterinary Assistance", description: "Basic animal health care and veterinary support", rate: 300, createdBy: admin._id },
+  { name: "Aquarium Services", description: "Fish tank setup, maintenance, and cleaning", rate: 250, createdBy: admin._id },
+
+  // Business & Professional Services
+  { name: "Accounting & Bookkeeping", description: "Financial record keeping, tax preparation, and accounting services", rate: 500, createdBy: admin._id },
+  { name: "Legal Assistance", description: "Basic legal advice, document preparation, and consultation", rate: 600, createdBy: admin._id },
+  { name: "Marketing & Advertising", description: "Business marketing, social media management, and advertising", rate: 400, createdBy: admin._id },
+  { name: "Business Consulting", description: "Business planning, strategy, and operational consulting", rate: 700, createdBy: admin._id },
+  { name: "Grant Writing & Funding", description: "Grant application assistance and funding consultation", rate: 800, createdBy: admin._id },
+  { name: "Translation Services", description: "Document translation, interpretation, and language services", rate: 300, createdBy: admin._id },
+
+  // Construction & Renovation
+  { name: "Home Renovation", description: "Kitchen remodeling, bathroom renovation, room additions", rate: 1500, createdBy: admin._id },
+  { name: "Fence & Gate Installation", description: "Fence building, gate installation, and security barriers", rate: 700, createdBy: admin._id },
+  { name: "Window & Door Services", description: "Window installation, door repair, and glass replacement", rate: 500, createdBy: admin._id },
+  { name: "Insulation & Weatherproofing", description: "Home insulation, weatherproofing, and energy efficiency", rate: 600, createdBy: admin._id },
+
+  // Environmental & Waste Services
+  { name: "Waste Management", description: "Garbage collection, recycling services, and waste disposal", rate: 300, createdBy: admin._id },
+  { name: "Composting Services", description: "Compost setup, maintenance, and organic waste management", rate: 250, createdBy: admin._id },
+  { name: "Water Conservation", description: "Water-saving fixtures, leak detection, and conservation consulting", rate: 400, createdBy: admin._id },
+
+  // Community Services
+  { name: "Community Event Planning", description: "Barangay events, celebrations, and community gatherings", rate: 500, createdBy: admin._id },
+  { name: "Disaster Preparedness", description: "Emergency planning, first aid training, and disaster response", rate: 350, createdBy: admin._id },
+  { name: "Neighborhood Watch", description: "Community safety, security coordination, and watch programs", rate: 200, createdBy: admin._id }
+];
 
 await Service.insertMany(servicesData);
-console.log("50 services created");
+console.log(`${servicesData.length} comprehensive services created`);
 
 // Update users with bookings where applicable
 for (const booking of bookings) {

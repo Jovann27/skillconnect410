@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { useMainContext } from "../../mainContext";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { 
   FaSearch, FaFilter, FaBriefcase, FaClock, FaEye, FaHeart, 
   FaMapMarkerAlt, FaStar, FaUsers, FaTrophy, FaCheckCircle,
@@ -27,7 +27,7 @@ const ProviderDashboard = () => {
   const [applications, setApplications] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [workProof, setWorkProof] = useState([]);
-  
+
   // Form state - no longer needed for credentials upload
 
   useEffect(() => {
@@ -122,12 +122,32 @@ const ProviderDashboard = () => {
     }
   };
 
-  const handleRespondToOffer = async (offerId, action) => {
+  const handleRespondToOffer = async (offer, action) => {
+    // Add confirmation for accepting offers
+    if (action === 'accept') {
+      const confirmed = window.confirm('Are you sure you want to accept this offer? This action cannot be undone.');
+      if (!confirmed) return;
+    }
+
     try {
-      const response = await api.post(`/user/respond-to-offer/${offerId}`, { action });
-      if (response.data.success) {
+      let response;
+
+      if (offer.type === 'direct') {
+        // Handle direct service offers
+        response = await api.post(`/user/respond-to-offer/${offer._id}`, { action });
+      } else if (offer.type === 'request') {
+        // Handle offered service requests
+        if (action === 'accept') {
+          response = await api.post(`/user/offer/${offer._id}/accept`);
+        } else {
+          response = await api.post(`/user/offer/${offer._id}/reject`);
+        }
+      }
+
+      if (response && response.data.success) {
         toast.success(`Offer ${action === 'accept' ? 'accepted' : 'declined'} successfully!`);
         fetchServiceOffers();
+        fetchApplications(); // Refresh applications in case a booking was created
       }
     } catch (error) {
       console.error('Error responding to offer:', error);
@@ -135,51 +155,8 @@ const ProviderDashboard = () => {
     }
   };
 
-  const handleRespondToApplication = async (applicationId, action) => {
-    try {
-      const response = await api.post(`/user/respond-to-application/${applicationId}`, { action });
-      if (response.data.success) {
-        toast.success(`Application ${action === 'accept' ? 'accepted' : 'declined'} successfully!`);
-        fetchApplications();
-      }
-    } catch (error) {
-      console.error('Error responding to application:', error);
-      toast.error(`Failed to ${action} application`);
-    }
-  };
 
-  const handleProfilePictureUpload = async (file) => {
-    if (!file) return;
 
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be less than 5MB');
-      return;
-    }
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select a valid image file');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('profilePic', file);
-
-    try {
-      const response = await api.post('/user/update-profile-picture', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      if (response.data.success) {
-        toast.success('Profile picture updated successfully!');
-        // Update user context or refetch user data
-        window.location.reload(); // Simple refresh to update profile pic
-      }
-    } catch (error) {
-      console.error('Error uploading profile picture:', error);
-      toast.error('Failed to upload profile picture');
-    }
-  };
 
   const renderStars = (rating) => {
     const stars = [];
@@ -197,6 +174,192 @@ const ProviderDashboard = () => {
     }
     return stars;
   };
+
+  const renderOverviewTab = () => (
+    <div className="bg-gray-50 p-6 rounded-lg">
+      <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+      <div className="space-y-3">
+        {serviceRequests.length > 0 && (
+          <div className="flex items-center p-3 bg-white rounded">
+            <FaClipboardList className="text-blue-600 mr-3" />
+            <div>
+              <div className="font-medium">New service request available</div>
+              <div className="text-sm text-gray-600">{serviceRequests.length} requests waiting for your response</div>
+            </div>
+          </div>
+        )}
+        {serviceOffers.length > 0 && (
+          <div className="flex items-center p-3 bg-white rounded">
+            <FaHandshake className="text-green-600 mr-3" />
+            <div>
+              <div className="font-medium">Pending service offers</div>
+              <div className="text-sm text-gray-600">{serviceOffers.length} offers need your attention</div>
+            </div>
+          </div>
+        )}
+        {applications.length > 0 && (
+          <div className="flex items-center p-3 bg-white rounded">
+            <FaFileAlt className="text-purple-600 mr-3" />
+            <div>
+              <div className="font-medium">Work records submitted</div>
+              <div className="text-sm text-gray-600">{applications.length} work records pending response</div>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+
+  const renderRequestsTab = () => (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Available Service Requests</h3>
+      {serviceRequests.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <FaClipboardList className="mx-auto text-4xl mb-4 text-gray-300" />
+          <p>No available service requests at the moment.</p>
+        </div>
+      ) : (
+        serviceRequests.map((request) => (
+          <div key={request._id} className="bg-white border rounded-lg p-4">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h4 className="font-semibold">{request.name}</h4>
+                <p className="text-sm text-gray-600">{request.typeOfWork}</p>
+                <p className="text-sm text-gray-500">{request.address}</p>
+              </div>
+              <div className="text-right">
+                <div className="font-bold text-green-600">
+                  ₱{request.minBudget && request.maxBudget
+                    ? `${request.minBudget.toLocaleString()} - ₱${request.maxBudget.toLocaleString()}`
+                    : request.minBudget || request.maxBudget
+                    ? `₱${(request.minBudget || request.maxBudget).toLocaleString()}`
+                    : 'Budget not specified'
+                  }
+                </div>
+                <div className="text-sm text-gray-500">{request.time}</div>
+              </div>
+            </div>
+            <p className="text-sm mb-3">{request.notes}</p>
+            <button
+              onClick={() => handleApplyToRequest(request._id)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
+            >
+              Apply to Request
+            </button>
+          </div>
+        ))
+      )}
+    </div>
+  );
+
+  const renderOffersTab = () => (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Service Offers</h3>
+      {serviceOffers.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <FaHandshake className="mx-auto text-4xl mb-4 text-gray-300" />
+          <p>No pending service offers.</p>
+        </div>
+      ) : (
+        serviceOffers.map((offer) => (
+          <div key={offer._id} className="bg-white border rounded-lg p-4">
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold">{offer.title}</h4>
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    offer.type === 'direct'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-purple-100 text-purple-800'
+                  }`}>
+                    {offer.type === 'direct' ? 'Direct Offer' : 'Service Request Offer'}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600">{offer.description}</p>
+                <p className="text-sm text-gray-500">{offer.location}</p>
+              </div>
+              <div className="text-right ml-4">
+                <div className="font-bold text-green-600">
+                  ₱{offer.minBudget && offer.maxBudget
+                    ? `${offer.minBudget.toLocaleString()} - ₱${offer.maxBudget.toLocaleString()}`
+                    : offer.minBudget || offer.maxBudget
+                    ? `₱${(offer.minBudget || offer.maxBudget).toLocaleString()}`
+                    : 'Budget not specified'
+                  }
+                </div>
+                <div className="text-sm text-gray-500">From: {offer.requester?.firstName} {offer.requester?.lastName}</div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleRespondToOffer(offer, 'accept')}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium flex-1"
+              >
+                <FaCheck className="inline mr-2" />
+                Accept
+              </button>
+              <button
+                onClick={() => handleRespondToOffer(offer, 'decline')}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium flex-1"
+              >
+                <FaTimes className="inline mr-2" />
+                Decline
+              </button>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+
+  const renderApplicationsTab = () => (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">My Work Records</h3>
+      {applications.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <FaFileAlt className="mx-auto text-4xl mb-4 text-gray-300" />
+          <p>You haven't submitted any work records yet.</p>
+        </div>
+      ) : (
+        applications.map((application) => (
+          <div key={application._id} className="bg-white border rounded-lg p-4">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h4 className="font-semibold">{application.serviceRequest?.title || application.serviceRequest?.name || 'Service Request'}</h4>
+                <p className="text-sm text-gray-600">{application.serviceRequest?.serviceCategory || application.serviceRequest?.typeOfWork}</p>
+                <p className="text-sm text-gray-500">Client: {application.requester?.firstName} {application.requester?.lastName}</p>
+              </div>
+              <div className="text-right">
+                <div className="font-bold text-green-600">
+                  ₱{application.serviceRequest?.minBudget && application.serviceRequest?.maxBudget
+                    ? `${application.serviceRequest.minBudget.toLocaleString()} - ₱${application.serviceRequest.maxBudget.toLocaleString()}`
+                    : application.serviceRequest?.minBudget || application.serviceRequest?.maxBudget
+                    ? `₱${(application.serviceRequest?.minBudget || application.serviceRequest?.maxBudget).toLocaleString()}`
+                    : application.serviceRequest?.budget
+                    ? `₱${application.serviceRequest.budget.toLocaleString()}`
+                    : 'Budget not specified'
+                  }
+                </div>
+                <div className={`text-sm px-2 py-1 rounded ${
+                  application.status === 'In Progress' ? 'bg-green-100 text-green-800' :
+                  application.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                  application.status === 'Declined' ? 'bg-red-100 text-red-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {application.status}
+                </div>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600">
+              Applied on: {new Date(application.createdAt).toLocaleDateString()}
+            </p>
+          </div>
+        ))
+      )}
+    </div>
+  );
+
 
   if (loading) {
     return (
@@ -220,51 +383,55 @@ const ProviderDashboard = () => {
                 Service Provider Dashboard
               </h2>
               <p className="text-gray-600 text-lg">
-                Manage your services, applications, and credentials
+                Manage your services, applications
               </p>
             </div>
-            <div className="flex gap-4">
-              <div className="bg-white rounded-lg px-4 py-2 shadow-sm border">
-                <div className="text-2xl font-bold text-blue-600">{serviceRequests.length}</div>
-                <div className="text-sm text-gray-600">Available Requests</div>
+            <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-blue-50 p-4 rounded-lg cursor-pointer" onClick={() => setActiveTab('requests')}>
+                <div className="flex items-center">
+                  <FaClipboardList className="text-blue-600 text-2xl mr-3" />
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">{serviceRequests.length}</div>
+                    <div className="text-sm text-gray-600">Available Requests</div>
+                  </div>
+                </div>
               </div>
-              <div className="bg-white rounded-lg px-4 py-2 shadow-sm border">
-                <div className="text-2xl font-bold text-green-600">{serviceOffers.length}</div>
-                <div className="text-sm text-gray-600">Pending Offers</div>
+              <div className="bg-green-50 p-4 rounded-lg cursor-pointer" onClick={() => setActiveTab('offers')}>
+                <div className="flex items-center">
+                  <FaHandshake className="text-green-600 text-2xl mr-3" />
+                  <div>
+                    <div className="text-2xl font-bold text-green-600">{serviceOffers.length}</div>
+                    <div className="text-sm text-gray-600">Pending Offers</div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-purple-50 p-4 rounded-lg cursor-pointer" onClick={() => setActiveTab('applications')}>
+                <div className="flex items-center">
+                  <FaFileAlt className="text-purple-600 text-2xl mr-3" />
+                  <div>
+                    <div className="text-2xl font-bold text-purple-600">{applications.length}</div>
+                    <div className="text-sm text-gray-600">Work Records</div>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
             
           </div>
         </div>
 
-        {/* Navigation Tabs */}
+        {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow-lg mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8 px-6">
-              {[
-                { id: 'overview', label: 'Overview', icon: FaChartLine },
-                { id: 'requests', label: 'Service Requests', icon: FaClipboardList },
-                { id: 'offers', label: 'Service Offers', icon: FaHandshake },
-                { id: 'applications', label: 'Applications', icon: FaFileAlt },
-                { id: 'credentials', label: 'Credentials', icon: FaCheckCircle }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <tab.icon />
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </nav>
+          
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {activeTab === 'overview' && renderOverviewTab()}
+            {activeTab === 'requests' && renderRequestsTab()}
+            {activeTab === 'offers' && renderOffersTab()}
+            {activeTab === 'applications' && renderApplicationsTab()}
           </div>
-
-
         </div>
       </div>
     </div>

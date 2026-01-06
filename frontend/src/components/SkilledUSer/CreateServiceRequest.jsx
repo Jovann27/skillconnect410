@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {
@@ -43,7 +43,7 @@ const CreateServiceRequest = ({ onClose }) => {
     if (name === "budgetRange") {
       setFormData(prev => ({
         ...prev,
-        budgetRange: { ...prev.budgetRange, [e.target.dataset.field]: value }
+        budgetRange: { ...prev.budgetRange, [e.target.dataset.field]: parseFloat(value) || 0 }
       }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
@@ -59,6 +59,12 @@ const CreateServiceRequest = ({ onClose }) => {
 
     if (!formData.title || !formData.description || !formData.location || !formData.serviceCategory) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // Validate budget range
+    if (formData.budgetRange.min > formData.budgetRange.max) {
+      toast.error("Minimum budget cannot be greater than maximum budget");
       return;
     }
 

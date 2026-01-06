@@ -5,6 +5,7 @@ import { useMainContext } from "../../mainContext";
 import toast from "react-hot-toast";
 import CreateServiceRequest from "./CreateServiceRequest";
 import ProviderProfileModal from "./ProviderProfileModal";
+import SendOfferModal from "./SendOfferModal";
 import {
   FaSearch, FaFilter, FaHeart, FaMapMarkerAlt, FaStar,
   FaPhone, FaEnvelope, FaEye, FaBriefcase,
@@ -46,7 +47,9 @@ const ClientDashboard = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showCreateRequest, setShowCreateRequest] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showSendOfferModal, setShowSendOfferModal] = useState(false);
   const [selectedProviderId, setSelectedProviderId] = useState(null);
+  const [offerProvider, setOfferProvider] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
 
@@ -83,7 +86,8 @@ const ClientDashboard = () => {
   const fetchProviders = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/user/service-providers');
+      // Fetch all verified providers by setting a very high limit
+      const response = await api.get('/user/service-providers?limit=10000');
       if (response.data.success) {
         setProviders(response.data.workers);
       }
@@ -251,10 +255,22 @@ const ClientDashboard = () => {
     }
   };
 
-  const handleSendOffer = async (providerId) => {
-    // Open the create service request modal so user can create a request and offer it to this provider
-    setShowCreateRequest(true);
-    toast.info('Create a service request to offer it to this provider.');
+  const handleSendOffer = (providerId) => {
+    // Get provider details first - find the provider from the current list
+    const provider = providers.find(p => p._id === providerId);
+    if (!provider) {
+      toast.error('Provider not found');
+      return;
+    }
+
+    // Show the send offer modal
+    setOfferProvider(provider);
+    setShowSendOfferModal(true);
+  };
+
+  const handleOfferSuccess = () => {
+    // Refresh providers list or show success message
+    toast.success('Offer sent successfully!');
   };
 
   const handleBulkOffer = async () => {
@@ -333,10 +349,6 @@ const ClientDashboard = () => {
               {/* Quick Stats */}
               <div className="flex gap-4">
                 <div className="bg-white rounded-lg px-4 py-2 shadow-sm border">
-                  <div className="text-2xl font-bold text-blue-600">{providers.length}</div>
-                  <div className="text-sm text-gray-600">Total Providers</div>
-                </div>
-                <div className="bg-white rounded-lg px-4 py-2 shadow-sm border">
                   <div className="text-2xl font-bold text-green-600">{favorites.length}</div>
                   <div className="text-sm text-gray-600">Favorites</div>
                 </div>
@@ -372,12 +384,6 @@ const ClientDashboard = () => {
                 Filters
               </button>
               
-              <button
-                onClick={saveSearch}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
-              >
-                Save Search
-              </button>
             </div>
           </div>
 
@@ -520,8 +526,8 @@ const ClientDashboard = () => {
           </div>
         )}
 
-        {/* Recommended Providers Section */}
-        {recommendedProviders.length > 0 && (
+        {/* Recommended Providers Section - Only show when not sending offer to specific provider */}
+        {recommendedProviders.length > 0 && !showCreateRequest && (
           <div className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border-2 border-blue-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
@@ -699,9 +705,6 @@ const ClientDashboard = () => {
                           ({provider.totalReviews || 0})
                         </span>
                       </div>
-                      <div className="text-lg font-bold text-green-600">
-                        ₱{provider.serviceRate?.toLocaleString() || "Rate not set"}
-                      </div>
                     </div>
                   </div>
 
@@ -721,6 +724,35 @@ const ClientDashboard = () => {
                     </div>
                   </div>
 
+                  {/* Services */}
+                  {provider.services && provider.services.length > 0 && (
+                    <div className="mb-4">
+                      <h5 className="text-sm font-semibold text-gray-900 mb-2">Services Offered:</h5>
+                      <div className="space-y-2">
+                        {provider.services.slice(0, 2).map((service, index) => (
+                          <div key={index} className="bg-gray-50 rounded-lg p-2">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <span className="text-sm font-medium text-gray-900">{service.name}</span>
+                                {service.description && (
+                                  <p className="text-xs text-gray-600 mt-1 line-clamp-1">{service.description}</p>
+                                )}
+                              </div>
+                              <span className="text-sm font-bold text-green-600 ml-2">
+                                ₱{service.rate?.toLocaleString() || 'N/A'}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                        {provider.services.length > 2 && (
+                          <span className="text-xs text-gray-500">
+                            +{provider.services.length - 2} more services
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Location and Status */}
                   <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
                     <div className="flex items-center">
@@ -733,10 +765,6 @@ const ClientDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Description */}
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {provider.serviceDescription || "No description available"}
-                  </p>
 
                   {/* Action Buttons */}
                   <div className="space-y-2">
@@ -836,10 +864,6 @@ const ClientDashboard = () => {
                       </div>
                     </div>
 
-                    <p className="text-gray-600 mb-4">
-                      {provider.serviceDescription || "No description available"}
-                    </p>
-
                     <div className="flex flex-wrap gap-2 mb-4">
                       {provider.skills?.map((skill, index) => (
                         <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
@@ -850,12 +874,6 @@ const ClientDashboard = () => {
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        {provider.yearsExperience && (
-                          <span className="text-sm text-gray-600">
-                            <FaUsers className="inline mr-1" />
-                            {provider.yearsExperience} years experience
-                          </span>
-                        )}
                         {provider.totalJobsCompleted && (
                           <span className="text-sm text-gray-600">
                             <FaTrophy className="inline mr-1" />
@@ -972,6 +990,18 @@ const ClientDashboard = () => {
               // In future, we could create a temporary chat or modify chat system
               handleSendMessage(providerId);
             }}
+          />
+        )}
+
+        {/* Send Offer Modal */}
+        {showSendOfferModal && offerProvider && (
+          <SendOfferModal
+            provider={offerProvider}
+            onClose={() => {
+              setShowSendOfferModal(false);
+              setOfferProvider(null);
+            }}
+            onSuccess={handleOfferSuccess}
           />
         )}
       </div>

@@ -62,7 +62,7 @@ const ProviderProfileModal = ({ providerId, onClose, onOpenChat }) => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[200] p-4">
         <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -74,7 +74,7 @@ const ProviderProfileModal = ({ providerId, onClose, onOpenChat }) => {
 
   if (!provider) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[200] p-4">
         <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
           <div className="text-center">
             <p className="text-gray-500">Provider not found</p>
@@ -91,7 +91,7 @@ const ProviderProfileModal = ({ providerId, onClose, onOpenChat }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[200] p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           {/* Header */}
@@ -190,16 +190,49 @@ const ProviderProfileModal = ({ providerId, onClose, onOpenChat }) => {
           {/* Skills & Services */}
           <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
             <h4 className="text-lg font-semibold text-gray-900 mb-4">Skills & Services</h4>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {provider.skills?.map((skill, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-2 bg-blue-100 text-blue-800 text-sm rounded-full"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
+
+            {/* Skills */}
+            {provider.skills && provider.skills.length > 0 && (
+              <div className="mb-4">
+                <h5 className="text-sm font-medium text-gray-700 mb-2">Skills:</h5>
+                <div className="flex flex-wrap gap-2">
+                  {provider.skills.map((skill, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-2 bg-blue-100 text-blue-800 text-sm rounded-full"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Services */}
+            {provider.services && provider.services.length > 0 && (
+              <div>
+                <h5 className="text-sm font-medium text-gray-700 mb-3">Services Offered:</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {provider.services.map((service, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-3 border">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="font-medium text-gray-900 text-sm">{service.name}</span>
+                        <span className="text-green-600 font-bold text-sm">
+                          ₱{service.rate?.toLocaleString() || 'N/A'}
+                        </span>
+                      </div>
+                      {service.description && (
+                        <p className="text-xs text-gray-600 leading-relaxed">{service.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(!provider.skills || provider.skills.length === 0) && (!provider.services || provider.services.length === 0) && (
+              <p className="text-gray-500 text-sm">No skills or services information available.</p>
+            )}
           </div>
 
           {/* Service Description */}

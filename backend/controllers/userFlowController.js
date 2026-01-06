@@ -3,13 +3,13 @@ import ErrorHandler from "../middlewares/error.js";
 import User from "../models/userSchema.js";
 import ServiceRequest from "../models/serviceRequest.js";
 import ServiceOffer from "../models/serviceOffer.js";
-import Certificate from "../models/certificate.js";
-import WorkProof from "../models/workProof.js";
+
 import Review from "../models/review.js";
 import { sendNotification } from "../utils/socketNotify.js";
 import Booking from "../models/booking.js";
 import { io } from "../server.js";
 import { getRecommendedWorkers, getRecommendedServiceRequests } from "../utils/recommendationEngine.js";
+import { sendTargetedRequestNotification } from "../utils/emailService.js";
 
 export const postServiceRequest = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
@@ -348,19 +348,26 @@ export const getServiceProviders = catchAsyncError(async (req, res, next) => {
   const { page = 1, limit = 20, skills, minRating, maxRate } = req.query;
   const skip = (page - 1) * limit;
 
-  // Build query
-  let query = { role: "Service Provider", verified: true };
-  
+  // Build query - return all service providers, not just verified ones
+  let query = { role: "Service Provider" };
+
   if (skills) {
     query.skills = { $in: [new RegExp(skills, 'i')] };
   }
 
+  // If no limit specified or limit is very high, return all providers
+  const shouldReturnAll = !limit || parseInt(limit) >= 10000;
+
   // Get providers with filters
-  const providers = await User.find(query)
-    .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews verified address occupation yearsExperience totalJobsCompleted createdAt')
-    .skip(skip)
-    .limit(parseInt(limit))
+  let providersQuery = User.find(query)
+    .select('firstName lastName email phone skills services serviceDescription serviceRate profilePic isOnline averageRating totalReviews verified address occupation yearsExperience totalJobsCompleted createdAt')
     .sort({ averageRating: -1, totalReviews: -1 });
+
+  if (!shouldReturnAll) {
+    providersQuery = providersQuery.skip(skip).limit(parseInt(limit));
+  }
+
+  const providers = await providersQuery;
 
   // Get total count for pagination
   const totalCount = await User.countDocuments(query);
@@ -434,12 +441,31 @@ export const offerToProvider = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Provider ID and Request ID are required", 400));
   }
 
-  const request = await ServiceRequest.findById(requestId);
+  const request = await ServiceRequest.findById(requestId).populate('requester', 'firstName lastName');
   if (!request) return next(new ErrorHandler("Service request not found", 404));
 
   // Check if the requester is the one making the offer
   if (String(request.requester) !== String(req.user._id)) {
     return next(new ErrorHandler("Not authorized to offer this request", 403));
+  }
+
+  // Check if the request can be offered (must be in Waiting status)
+  if (request.status !== "Waiting") {
+    return next(new ErrorHandler("This request cannot be offered at this time", 400));
+  }
+
+  // Check if the request already has a target provider
+  if (request.targetProvider) {
+    return next(new ErrorHandler("This request has already been offered to a provider", 400));
+  }
+
+  // Get provider details for email
+  const provider = await User.findById(providerId).select('firstName lastName email');
+  if (!provider) return next(new ErrorHandler("Provider not found", 404));
+
+  // Check if the provider is a service provider
+  if (provider.role !== "Service Provider") {
+    return next(new ErrorHandler("Selected user is not a service provider", 400));
   }
 
   // Update the request with target provider
@@ -450,16 +476,30 @@ export const offerToProvider = catchAsyncError(async (req, res, next) => {
   // Create notification for provider
   await sendNotification(
     providerId,
-    "New Service Offer",
-    `You have received an offer for: ${request.typeOfWork}`,
+    "Direct Service Request",
+    `${req.user.firstName} ${req.user.lastName} have requested your service`,
     { requestId: request._id, type: "service-offer" }
   );
 
+  // Send email to provider
+  try {
+    await sendTargetedRequestNotification(
+      provider.email,
+      `${provider.firstName} ${provider.lastName}`,
+      `${request.requester.firstName} ${request.requester.lastName}`,
+      request.typeOfWork,
+      request._id
+    );
+  } catch (emailError) {
+    console.error("Error sending email notification:", emailError);
+    // Don't fail the request if email fails, just log it
+  }
+
   // Emit socket event
-  io.emit("service-request-updated", { 
-    requestId: request._id, 
-    action: "offered", 
-    providerId 
+  io.emit("service-request-updated", {
+    requestId: request._id,
+    action: "offered",
+    providerId
   });
 
   res.status(200).json({ success: true, message: "Offer sent to provider" });
@@ -694,7 +734,8 @@ export const createServiceRequest = catchAsyncError(async (req, res, next) => {
     typeOfWork: serviceCategory, // Map serviceCategory to typeOfWork field
     preferredDate: preferredDateObj,
     time: timeStr,
-    budget: budgetRange ? budgetRange.min || budgetRange.max || 0 : 0,
+    minBudget: budgetRange ? budgetRange.min || 0 : 0,
+    maxBudget: budgetRange ? budgetRange.max || 0 : 0,
     notes: description, // Map description to notes field
     status: "Waiting",
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
@@ -754,49 +795,10 @@ export const browseServiceProviders = catchAsyncError(async (req, res, next) => 
 
   const totalCount = await User.countDocuments(query);
 
-  // Get certificates and work proof for each provider
-  const providerIds = providers.map(p => p._id);
-  const certificates = await Certificate.find({ provider: { $in: providerIds }, verified: true });
-  const workProofs = await WorkProof.find({ provider: { $in: providerIds }, verified: true });
-
-  // Group by provider
-  const certsByProvider = {};
-  certificates.forEach(cert => {
-    if (!certsByProvider[cert.provider.toString()]) {
-      certsByProvider[cert.provider.toString()] = [];
-    }
-    certsByProvider[cert.provider.toString()].push({
-      title: cert.title,
-      description: cert.description,
-      certificateUrl: cert.certificateUrl
-    });
-  });
-
-  const proofsByProvider = {};
-  workProofs.forEach(proof => {
-    if (!proofsByProvider[proof.provider.toString()]) {
-      proofsByProvider[proof.provider.toString()] = [];
-    }
-    proofsByProvider[proof.provider.toString()].push({
-      title: proof.title,
-      description: proof.description,
-      imageUrl: proof.imageUrl,
-      serviceType: proof.serviceType
-    });
-  });
-
-  // Add credentials to providers
-  const providersWithCredentials = providers.map(provider => {
-    const providerObj = provider.toObject();
-    providerObj.certificates = certsByProvider[provider._id.toString()] || [];
-    providerObj.workProof = proofsByProvider[provider._id.toString()] || [];
-    return providerObj;
-  });
-
   res.json({
     success: true,
     count: totalCount,
-    providers: providersWithCredentials
+    providers: providers
   });
 });
 
@@ -806,15 +808,13 @@ export const viewProviderProfile = catchAsyncError(async (req, res, next) => {
   const { providerId } = req.params;
 
   const provider = await User.findById(providerId)
-    .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews address');
+    .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews address verified');
 
-  if (!provider || provider.role !== "Service Provider" || !provider.verified) {
-    return next(new ErrorHandler("Provider not found or not verified", 404));
+  if (!provider || provider.role !== "Service Provider") {
+    return next(new ErrorHandler("Provider not found", 404));
   }
 
-  // Get provider credentials
-  const certificates = await Certificate.find({ provider: providerId, verified: true });
-  const workProofs = await WorkProof.find({ provider: providerId, verified: true });
+  // Get provider reviews
   const reviews = await Review.find({ reviewee: providerId })
     .populate('reviewer', 'firstName lastName')
     .sort({ createdAt: -1 });
@@ -823,8 +823,6 @@ export const viewProviderProfile = catchAsyncError(async (req, res, next) => {
     success: true,
     provider: {
       ...provider.toObject(),
-      certificates,
-      workProof: workProofs,
       reviews
     }
   });
@@ -836,15 +834,37 @@ export const sendDirectServiceOffer = catchAsyncError(async (req, res, next) => 
     return next(new ErrorHandler("Only community members can send service offers", 403));
   }
 
-  const { providerId, title, description, location, budget, preferredDate } = req.body;
+  const { providerId, title, description, location, minBudget, maxBudget, preferredDate, preferredTime } = req.body;
 
-  if (!providerId || !title || !description || !location || !budget) {
+  if (!providerId || !title || !description || !location) {
     return next(new ErrorHandler("Missing required fields", 400));
   }
 
+  if (!minBudget || isNaN(parseFloat(minBudget)) || parseFloat(minBudget) <= 0) {
+    return next(new ErrorHandler("Valid minimum budget is required", 400));
+  }
+
+  if (!maxBudget || isNaN(parseFloat(maxBudget)) || parseFloat(maxBudget) <= 0) {
+    return next(new ErrorHandler("Valid maximum budget is required", 400));
+  }
+
+  if (parseFloat(minBudget) > parseFloat(maxBudget)) {
+    return next(new ErrorHandler("Minimum budget cannot be greater than maximum budget", 400));
+  }
+
   const provider = await User.findById(providerId);
-  if (!provider || provider.role !== "Service Provider" || !provider.isVerified) {
-    return next(new ErrorHandler("Provider not found or not verified", 404));
+  if (!provider || provider.role !== "Service Provider") {
+    return next(new ErrorHandler("Provider not found", 404));
+  }
+
+  // Combine preferredDate and preferredTime into a Date object
+  let preferredDateTime = null;
+  if (preferredDate) {
+    preferredDateTime = new Date(preferredDate);
+    if (preferredTime) {
+      const [hours, minutes] = preferredTime.split(':').map(Number);
+      preferredDateTime.setHours(hours, minutes, 0, 0);
+    }
   }
 
   const serviceOffer = await ServiceOffer.create({
@@ -853,15 +873,16 @@ export const sendDirectServiceOffer = catchAsyncError(async (req, res, next) => 
     title,
     description,
     location,
-    budget,
-    preferredDate: preferredDate || null,
+    minBudget: parseFloat(minBudget),
+    maxBudget: parseFloat(maxBudget),
+    preferredDate: preferredDateTime,
     status: "Pending"
   });
 
   await sendNotification(
     providerId,
-    "Direct Service Offer",
-    `${req.user.firstName} ${req.user.lastName} sent you a service offer`,
+    "Direct Service Request",
+    `${req.user.firstName} ${req.user.lastName} have requested your service`,
     { offerId: serviceOffer._id, type: "service-offer" }
   );
 
@@ -877,23 +898,70 @@ export const getProviderOffers = catchAsyncError(async (req, res, next) => {
   const { page = 1, limit = 20, status } = req.query;
   const skip = (page - 1) * limit;
 
-  let query = { provider: req.user._id };
+  // First, get direct service offers (ServiceOffer records)
+  let directOffersQuery = { provider: req.user._id, status: "Pending" };
   if (status) {
-    query.status = status;
+    directOffersQuery.status = status;
   }
 
-  const offers = await ServiceOffer.find(query)
+  const directOffers = await ServiceOffer.find(directOffersQuery)
     .populate('requester', 'firstName lastName email phone profilePic')
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(parseInt(limit));
+    .sort({ createdAt: -1 });
 
-  const totalCount = await ServiceOffer.countDocuments(query);
+  // Second, get service requests offered to this provider
+  let offeredRequestsQuery = { targetProvider: req.user._id, status: "Offered" };
+  if (status && status !== "Pending") {
+    // Map status to request status if needed
+    offeredRequestsQuery.status = status;
+  }
+
+  const offeredRequests = await ServiceRequest.find(offeredRequestsQuery)
+    .populate('requester', 'firstName lastName email phone profilePic')
+    .sort({ createdAt: -1 });
+
+  // Combine and format the results
+  const allOffers = [
+    ...directOffers.map(offer => ({
+      _id: offer._id,
+      type: 'direct',
+      title: offer.title,
+      description: offer.description,
+      location: offer.location,
+      minBudget: offer.minBudget,
+      maxBudget: offer.maxBudget,
+      preferredDate: offer.preferredDate,
+      status: offer.status,
+      createdAt: offer.createdAt,
+      requester: offer.requester,
+      serviceOffer: offer
+    })),
+    ...offeredRequests.map(request => ({
+      _id: request._id,
+      type: 'request',
+      title: `Service Request: ${request.name}`,
+      description: request.notes,
+      location: request.address,
+      minBudget: request.minBudget,
+      maxBudget: request.maxBudget,
+      preferredDate: request.preferredDate,
+      status: 'Pending', // Map request status to offer status
+      createdAt: request.createdAt,
+      requester: request.requester,
+      serviceRequest: request
+    }))
+  ];
+
+  // Sort combined results by created date
+  allOffers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Apply pagination
+  const totalCount = allOffers.length;
+  const paginatedOffers = allOffers.slice(skip, skip + parseInt(limit));
 
   res.json({
     success: true,
     count: totalCount,
-    offers
+    offers: paginatedOffers
   });
 });
 
@@ -1052,7 +1120,7 @@ export const getProviderApplications = catchAsyncError(async (req, res, next) =>
 
   const bookings = await Booking.find(query)
     .populate('requester', 'firstName lastName email phone profilePic')
-    .populate('serviceRequest', 'title description serviceCategory location')
+    .populate('serviceRequest', 'name address typeOfWork minBudget maxBudget notes preferredDate time')
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(parseInt(limit));

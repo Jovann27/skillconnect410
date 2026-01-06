@@ -177,7 +177,7 @@ const AcceptedOrderPage = ({ request, isOpen, onClose }) => {
 
   if (isLoading) {
     return (
-      <div className="modal-overlay">
+      <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 z-[200] flex items-center justify-center p-4">
         <div className="modal-content">
           <div className="loading-container">
             <div className="loading-content">
@@ -193,7 +193,7 @@ const AcceptedOrderPage = ({ request, isOpen, onClose }) => {
 
   if (error) {
     return (
-      <div className="modal-overlay">
+      <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 z-[200] flex items-center justify-center p-4">
         <div className="modal-content">
           <div className="error-container">
             <h2>❌ Error</h2>
@@ -207,7 +207,7 @@ const AcceptedOrderPage = ({ request, isOpen, onClose }) => {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 z-[200] flex items-center justify-center p-4" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Service Order Details</h2>

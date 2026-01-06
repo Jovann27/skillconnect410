@@ -29,6 +29,20 @@ const userSchema = new mongoose.Schema({
     },
     default: []
   },
+  serviceTypes: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Service" }],
+    validate: {
+      validator: function(serviceTypes) {
+        if (this.role === "Community Member") {
+          return true;
+        } else {
+          return serviceTypes.length >= 1;
+        }
+      },
+      message: 'Service providers must select at least one service type'
+    },
+    default: []
+  },
   occupation: { type: String, default: "" },
   yearsExperience: { type: Number, default: 0 },
   totalJobsCompleted: { type: Number, default: 0 },

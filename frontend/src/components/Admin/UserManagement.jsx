@@ -643,7 +643,7 @@ const UserManagement = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 50;
+          z-index: 200;
           padding: 1rem;
         }
 
@@ -1524,49 +1524,7 @@ const UserManagement = () => {
                 </div>
               )}
 
-              {selectedUser.certificates && selectedUser.certificates.length > 0 && (
-                <div className="um-detail-section">
-                  <h3>📜 Certificates ({selectedUser.certificates.length})</h3>
-                  <div className="um-documents-grid">
-                    {selectedUser.certificates.map((cert, index) => (
-                      <div key={index} className="um-document-item">
-                        <div className="um-document-info">
-                          📄 Certificate {index + 1}
-                        </div>
-                        <div className="um-document-preview">
-                          {cert.match(/\.(jpg|jpeg|png|gif)$/i) && (
-                            <img
-                              src={cert}
-                              alt={`Certificate ${index + 1}`}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
-              {selectedUser.validId && (
-                <div className="um-detail-section">
-                  <h3>🪪 Government ID</h3>
-                  <div className="um-documents-grid">
-                    <div className="um-document-item">
-                      <div className="um-document-info">
-                        🆔 Valid ID Document
-                      </div>
-                      <div className="um-document-preview">
-                        {selectedUser.validId.match(/\.(jpg|jpeg|png|gif)$/i) && (
-                          <img
-                            src={selectedUser.validId}
-                            alt="Valid ID"
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="um-modal-actions">

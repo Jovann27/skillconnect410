@@ -137,6 +137,13 @@ export const register = catchAsyncError(async (req, res, next) => {
       normalizedSkills = incoming.map(s => s.toString().trim().toLowerCase()).filter(Boolean);
     }
 
+    // Normalize serviceTypes for Service Providers (array of ObjectIds)
+    let normalizedServiceTypes = [];
+    if (req.body.serviceTypes) {
+      const incoming = Array.isArray(req.body.serviceTypes) ? req.body.serviceTypes : (typeof req.body.serviceTypes === 'string' ? req.body.serviceTypes.split(',') : []);
+      normalizedServiceTypes = incoming.map(s => s.toString().trim()).filter(Boolean);
+    }
+
     // Create user with Service Provider data
     const user = await User.create({
       username, firstName, lastName, email, phone, address, birthdate, employed,
@@ -145,6 +152,7 @@ export const register = catchAsyncError(async (req, res, next) => {
       profilePic: uploadedFiles.profilePic || "",
       certificates: uploadedFiles.certificates || [],
       skills: normalizedSkills,
+      serviceTypes: normalizedServiceTypes,
     });
 
     // Send notification for new Service Provider registration (non-blocking)

@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
+import { useMainContext } from "../../mainContext";
 import {
   FaStar, FaMapMarkerAlt, FaPhone, FaEnvelope, FaCheckCircle,
   FaTimes, FaUser, FaChartLine, FaHandshake, FaInfoCircle
 } from "react-icons/fa";
 
 const RecommendedWorkersModal = ({ serviceRequestId, onClose, onSelectWorker }) => {
+  const { user } = useMainContext();
   const [recommendedWorkers, setRecommendedWorkers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [algorithm, setAlgorithm] = useState("basic");
+
+  // Only show this modal for Community Members (clients) who have posted service requests
+  // Service Providers send offers, they don't receive recommended workers
+  if (user?.role !== "Community Member") {
+    return null;
+  }
 
   useEffect(() => {
     if (serviceRequestId) {
@@ -33,17 +41,33 @@ const RecommendedWorkersModal = ({ serviceRequestId, onClose, onSelectWorker }) 
     }
   };
 
-  const handleSelectWorker = (worker) => {
-    if (onSelectWorker) {
-      onSelectWorker(worker);
-    }
-    if (onClose) {
-      onClose();
+  const handleSendOffer = async (worker) => {
+    try {
+      // Send offer to the selected provider
+      const response = await api.post('/user/offer-to-provider', {
+        providerId: worker._id,
+        requestId: serviceRequestId
+      });
+
+      if (response.data.success) {
+        toast.success(`Offer sent to ${worker.firstName} ${worker.lastName}!`);
+        if (onSelectWorker) {
+          onSelectWorker(worker);
+        }
+        if (onClose) {
+          onClose();
+        }
+      } else {
+        toast.error("Failed to send offer");
+      }
+    } catch (error) {
+      console.error("Error sending offer:", error);
+      toast.error("Failed to send offer. Please try again.");
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[200] p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
@@ -183,11 +207,11 @@ const RecommendedWorkersModal = ({ serviceRequestId, onClose, onSelectWorker }) 
 
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => handleSelectWorker(worker)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                            onClick={() => handleSendOffer(worker)}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
                           >
-                            <FaHandshake className="mr-2" />
-                            Select Worker
+                            <FaBriefcase className="mr-2" />
+                            Send Offer
                           </button>
                         </div>
                       </div>

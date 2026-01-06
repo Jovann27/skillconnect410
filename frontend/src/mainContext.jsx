@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import api from './api';
 import toast from 'react-hot-toast';
-import { updateSocketToken } from './utils/socket';
+import { updateSocketToken, setNotificationHandler } from './utils/socket';
 
 const MainContext = createContext();
 
@@ -23,6 +23,8 @@ export const MainProvider = ({ children }) => {
   const [authLoaded, setAuthLoaded] = useState(false);
   const [navigationLoading, setNavigationLoading] = useState(false);
   const [openChatWithProvider, setOpenChatWithProvider] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   // Authentication helpers
   const setAuthToken = (token) => {
@@ -176,6 +178,64 @@ export const MainProvider = ({ children }) => {
     }
   }, [logout, navigationLoading, setNavigationLoading]);
 
+  // Notification helpers
+  const fetchNotifications = useCallback(async () => {
+    if (!isAuthorized || tokenType !== 'user') return;
+
+    try {
+      const response = await api.get('/user/notifications');
+      if (response.data.success) {
+        setNotifications(response.data.notifications);
+        setUnreadNotifications(response.data.notifications.filter(n => !n.read).length);
+      }
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  }, [isAuthorized, tokenType]);
+
+  const markNotificationAsRead = useCallback(async (notificationId) => {
+    try {
+      await api.put(`/user/notifications/${notificationId}/read`);
+      setNotifications(prev =>
+        prev.map(n => n._id === notificationId ? { ...n, read: true } : n)
+      );
+      setUnreadNotifications(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  }, []);
+
+  const markAllNotificationsAsRead = useCallback(async () => {
+    try {
+      await api.put('/user/notifications/mark-all-read');
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadNotifications(0);
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
+  }, []);
+
+  // Set up notification handler and fetch initial notifications
+  useEffect(() => {
+    if (isAuthorized && tokenType === 'user') {
+      // Set up socket notification handler
+      setNotificationHandler((notification) => {
+        // Add new notification to the list
+        setNotifications(prev => [notification, ...prev]);
+        setUnreadNotifications(prev => prev + 1);
+
+        // Show toast notification
+        toast.success(notification.title, {
+          description: notification.message,
+          duration: 5000,
+        });
+      });
+
+      // Fetch initial notifications
+      fetchNotifications();
+    }
+  }, [isAuthorized, tokenType, fetchNotifications]);
+
   const value = {
     // State
     user,
@@ -186,6 +246,8 @@ export const MainProvider = ({ children }) => {
     authLoaded,
     navigationLoading,
     openChatWithProvider,
+    notifications,
+    unreadNotifications,
 
     // State setters
     setUser,
@@ -196,11 +258,16 @@ export const MainProvider = ({ children }) => {
     setAuthLoaded,
     setNavigationLoading,
     setOpenChatWithProvider,
+    setNotifications,
+    setUnreadNotifications,
 
     // Helpers
     setAuthToken,
     logout,
     fetchProfile,
+    fetchNotifications,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
   };
 
   return (

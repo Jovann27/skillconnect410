@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { useMainContext } from "../../mainContext";
 import api from "../../api";
 import { FaEye, FaEyeSlash, FaCheck, FaTimes, FaUpload, FaUser, FaArrowLeft, FaArrowRight } from "react-icons/fa";
@@ -12,6 +12,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     role: "",
     skills: [],
+    serviceTypes: [],
     profilePic: null,
     username: "",
     password: "",
@@ -26,9 +27,11 @@ const Register = () => {
     employed: "",
     isApplyingProvider: false,
     certificates: [],
+    workProofs: [],
     validId: null,
   });
 
+  const [predefinedServices, setPredefinedServices] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -38,6 +41,21 @@ const Register = () => {
   const navigate = useNavigate();
 
   const totalSteps = formData.role === "Service Provider" ? 4 : 3;
+
+  // Fetch predefined services on component mount
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const { data } = await api.get('/user/predefined-services');
+        setPredefinedServices(data.services || []);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        // Don't show error to user, just use empty list
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   const validateForm = () => {
     const errors = {};
@@ -92,8 +110,19 @@ const Register = () => {
       } else if (formData.skills.length > 3) {
         errors.skills = "You can select a maximum of 3 skills";
       }
-      if (formData.certificates.length === 0) {
-        errors.certificates = "Certificates are required for Service Providers";
+      if (!formData.serviceTypes || formData.serviceTypes.length === 0) {
+        errors.serviceTypes = "At least one service type is required for Service Providers";
+      }
+      // Allow either certificates OR work proofs (or both)
+      if (formData.certificates.length === 0 && formData.workProofs.length === 0) {
+        errors.certificates = "At least one certificate or work proof is required for Service Providers";
+      }
+      // Limit to 3 images per type
+      if (formData.certificates.length > 3) {
+        errors.certificates = "Maximum 3 certificate images allowed";
+      }
+      if (formData.workProofs.length > 3) {
+        errors.workProofs = "Maximum 3 work proof images allowed";
       }
     }
 
@@ -146,9 +175,19 @@ const Register = () => {
           errors.skills = "At least one skill is required";
         }
         break;
-      case 4: // Certificates (Service Provider only)
-        if (formData.role === "Service Provider" && formData.certificates.length === 0) {
-          errors.certificates = "Certificates are required for Service Providers";
+      case 4: // Certificates & Work Proofs (Service Provider only)
+        if (formData.role === "Service Provider") {
+          // Allow either certificates OR work proofs (or both)
+          if (formData.certificates.length === 0 && formData.workProofs.length === 0) {
+            errors.certificates = "At least one certificate or work proof is required for Service Providers";
+          }
+          // Limit to 3 images per type
+          if (formData.certificates.length > 3) {
+            errors.certificates = "Maximum 3 certificate images allowed";
+          }
+          if (formData.workProofs.length > 3) {
+            errors.workProofs = "Maximum 3 work proof images allowed";
+          }
         }
         break;
     }
@@ -162,6 +201,8 @@ const Register = () => {
     if (type === "file") {
       if (name === "certificates") {
         setFormData({ ...formData, certificates: Array.from(files) });
+      } else if (name === "workProofs") {
+        setFormData({ ...formData, workProofs: Array.from(files) });
       } else {
         setFormData({ ...formData, [name]: files[0] });
       }
@@ -232,8 +273,14 @@ const Register = () => {
         if (formData.skills && formData.skills.length > 0) {
           formData.skills.forEach((skill) => submitData.append("skills", skill));
         }
+        if (formData.serviceTypes && formData.serviceTypes.length > 0) {
+          formData.serviceTypes.forEach((serviceType) => submitData.append("serviceTypes", serviceType));
+        }
         if (formData.certificates && formData.certificates.length > 0) {
           formData.certificates.forEach((file) => submitData.append("certificates", file));
+        }
+        if (formData.workProofs && formData.workProofs.length > 0) {
+          formData.workProofs.forEach((file) => submitData.append("workProofs", file));
         }
       }
 
@@ -681,68 +728,290 @@ const Register = () => {
 
             {/* Skills for Service Provider */}
             {formData.role === "Service Provider" && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-4">
-                  Select Your Skills <span className="text-red-500">*</span>
-                  <span className="text-gray-500 text-xs ml-2">(Select 1-3 skills)</span>
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                  {[
-                    "Pipe Installation", "Leak Repair", "Toilet Installation", "Drain Cleaning", "Water Heater Setup",
-                    "Wiring Installation", "Lighting Repair", "Appliance Troubleshooting", "Outlet Installation", "Circuit Breaker Maintenance",
-                    "General House Cleaning", "Deep Cleaning", "Carpet Cleaning", "Sofa Shampooing", "Post-Construction Cleaning",
-                    "Furniture Repair", "Wood Polishing", "Door and Window Fixing", "Custom Woodwork", "Cabinet Installation",
-                    "Interior Painting", "Exterior Painting", "Repainting", "Wallpaper Installation", "Color Consultation",
-                    "Air Conditioner Repair", "Refrigerator Repair", "Washing Machine Repair", "Microwave Oven Fixing", "Electric Fan Maintenance",
-                    "Tiling", "Roofing", "Masonry", "Floor Installation", "Room Remodeling",
-                    "Termite Treatment", "Cockroach Control", "Rodent Control", "Disinfection", "Mosquito Control",
-                    "Lawn Mowing", "Plant Care", "Landscape Design", "Tree Trimming", "Garden Cleanup",
-                    "Aircon Installation", "Aircon Cleaning", "HVAC Maintenance", "Filter Replacement", "Ventilation Setup",
-                    "Washing Clothes", "Drying & Ironing", "Folding & Packaging", "Delicate Fabric Care", "Stain Removal"
-                  ].map((skill) => (
-                    <label
-                      key={skill}
-                      className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
-                        formData.skills.includes(skill)
-                          ? 'border-primary-500 bg-primary-50 text-primary-700'
-                          : 'border-gray-200 hover:border-primary-300'
-                      } ${
-                        !formData.skills.includes(skill) && formData.skills.length >= 3
-                          ? 'opacity-50 cursor-not-allowed'
-                          : ''
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.skills.includes(skill)}
-                        onChange={(e) => {
-                          const currentSkills = [...formData.skills];
-                          if (e.target.checked) {
-                            if (currentSkills.length < 3) {
-                              currentSkills.push(skill);
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-4">
+                    Select Your Skills <span className="text-red-500">*</span>
+                    <span className="text-gray-500 text-xs ml-2">(Select 1-3 skills)</span>
+                  </label>
+
+                  {/* Search Input */}
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      placeholder="Search skills..."
+                      value={formData.skillSearch || ''}
+                      onChange={(e) => setFormData({ ...formData, skillSearch: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    />
+                  </div>
+
+                  {/* Skills Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                    {[
+                      // Plumbing Services
+                      "Pipe Installation", "Leak Repair", "Toilet Installation", "Drain Cleaning", "Water Heater Setup",
+                      "Sink Installation", "Shower Installation", "Bathroom Plumbing", "Kitchen Plumbing", "Sewage System Repair",
+
+                      // Electrical Services
+                      "Wiring Installation", "Lighting Repair", "Appliance Troubleshooting", "Outlet Installation",
+                      "Circuit Breaker Maintenance", "Electrical Panel Upgrade", "Generator Installation", "Solar Panel Setup",
+                      "Security System Installation", "Smart Home Installation",
+
+                      // Cleaning Services
+                      "General House Cleaning", "Deep Cleaning", "Carpet Cleaning", "Sofa Shampooing", "Post-Construction Cleaning",
+                      "Office Cleaning", "Window Cleaning", "Chimney Cleaning", "Gutter Cleaning", "Driveway Cleaning",
+
+                      // Carpentry & Woodwork
+                      "Furniture Repair", "Wood Polishing", "Door and Window Fixing", "Custom Woodwork", "Cabinet Installation",
+                      "Flooring Installation", "Deck Building", "Fence Installation", "Shelving Installation", "Wood Restoration",
+
+                      // Painting Services
+                      "Interior Painting", "Exterior Painting", "Repainting", "Wallpaper Installation", "Color Consultation",
+                      "Texture Painting", "Spray Painting", "Fence Painting", "Roof Painting", "Decorative Painting",
+
+                      // Appliance Repair
+                      "Air Conditioner Repair", "Refrigerator Repair", "Washing Machine Repair", "Microwave Oven Fixing",
+                      "Electric Fan Maintenance", "Dishwasher Repair", "Oven Repair", "Dryer Repair", "TV Repair", "Computer Repair",
+
+                      // Home Maintenance & Construction
+                      "Tiling", "Roofing", "Masonry", "Floor Installation", "Room Remodeling",
+                      "Drywall Installation", "Insulation Installation", "Concrete Work", "Bricklaying", "Foundation Repair",
+
+                      // Pest Control
+                      "Termite Treatment", "Cockroach Control", "Rodent Control", "Disinfection", "Mosquito Control",
+                      "Ant Control", "Bed Bug Treatment", "Bee Removal", "Wasp Nest Removal", "Flea Treatment",
+
+                      // Gardening & Landscaping
+                      "Lawn Mowing", "Plant Care", "Landscape Design", "Tree Trimming", "Garden Cleanup",
+                      "Irrigation System Installation", "Pest Control", "Flower Arrangement", "Vegetable Gardening", "Composting Setup",
+
+                      // HVAC & Ventilation
+                      "Aircon Installation", "Aircon Cleaning", "HVAC Maintenance", "Filter Replacement", "Ventilation Setup",
+                      "Duct Cleaning", "Thermostat Installation", "Heat Pump Repair", "Furnace Maintenance", "Chiller Repair",
+
+                      // Laundry Services
+                      "Washing Clothes", "Drying & Ironing", "Folding & Packaging", "Delicate Fabric Care", "Stain Removal",
+                      "Dry Cleaning", "Leather Cleaning", "Curtain Cleaning", "Upholstery Cleaning", "Wedding Dress Cleaning",
+
+                      // Automotive Services
+                      "Car Wash", "Car Detailing", "Tire Repair", "Battery Replacement", "Oil Change",
+                      "Brake Repair", "Engine Tune-up", "Transmission Service", "AC Repair", "Car Painting",
+
+                      // Home Security
+                      "CCTV Installation", "Alarm System Setup", "Lock Installation", "Safe Installation",
+                      "Gate Automation", "Intercom System", "Motion Sensor Setup", "Smart Lock Installation",
+
+                      // IT & Technology
+                      "Computer Setup", "Network Installation", "WiFi Setup", "Printer Repair",
+                      "Phone Repair", "Tablet Repair", "Software Installation", "Data Recovery",
+
+                      // Specialty Services
+                      "Pool Cleaning", "Jacuzzi Maintenance", "Elevator Repair", "Generator Maintenance",
+                      "Water Tank Cleaning", "Septic Tank Cleaning", "Well Drilling", "Water Purification Setup",
+
+                      // Event Services
+                      "Event Setup", "Catering Assistance", "Sound System Setup", "Lighting Setup",
+                      "Tent Installation", "Stage Setup", "Decoration Services", "Photography Assistance",
+
+                      // Health & Wellness
+                      "Massage Therapy", "First Aid", "Health Monitoring", "Exercise Instruction",
+                      "Nutrition Consultation", "Mental Health Support", "Elder Care", "Child Care",
+
+                      // Educational Services
+                      "Tutoring", "Language Lessons", "Music Lessons", "Art Lessons",
+                      "Computer Training", "Cooking Classes", "Dance Lessons", "Sports Coaching",
+
+                      // Pet Services
+                      "Pet Grooming", "Pet Sitting", "Dog Walking", "Pet Training",
+                      "Veterinary Assistance", "Pet Transportation", "Aquarium Setup", "Pet Photography",
+
+                      // Business Services
+                      "Bookkeeping", "Tax Preparation", "Legal Assistance", "Accounting Help",
+                      "Marketing Consultation", "Business Planning", "Grant Writing", "Translation Services"
+                    ].filter((skill) =>
+                      !formData.skillSearch ||
+                      skill.toLowerCase().includes(formData.skillSearch.toLowerCase())
+                    ).map((skill) => (
+                      <label
+                        key={skill}
+                        className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
+                          formData.skills.includes(skill)
+                            ? 'border-primary-500 bg-primary-50 text-primary-700'
+                            : 'border-gray-200 hover:border-primary-300'
+                        } ${
+                          !formData.skills.includes(skill) && formData.skills.length >= 3
+                            ? 'opacity-50 cursor-not-allowed'
+                            : ''
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.skills.includes(skill)}
+                          onChange={(e) => {
+                            const currentSkills = [...formData.skills];
+                            if (e.target.checked) {
+                              if (currentSkills.length < 3) {
+                                currentSkills.push(skill);
+                              }
+                            } else {
+                              const index = currentSkills.indexOf(skill);
+                              if (index > -1) {
+                                currentSkills.splice(index, 1);
+                              }
                             }
-                          } else {
-                            const index = currentSkills.indexOf(skill);
-                            if (index > -1) {
-                              currentSkills.splice(index, 1);
-                            }
-                          }
-                          setFormData({ ...formData, skills: currentSkills });
-                        }}
-                        disabled={!formData.skills.includes(skill) && formData.skills.length >= 3}
-                        className="sr-only"
-                      />
-                      <span className="text-sm">{skill}</span>
-                    </label>
-                  ))}
+                            setFormData({ ...formData, skills: currentSkills });
+                          }}
+                          disabled={!formData.skills.includes(skill) && formData.skills.length >= 3}
+                          className="sr-only"
+                        />
+                        <span className="text-sm">{skill}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Selected Skills Display */}
+                  {formData.skills.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Selected Skills:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.skills.map((skill) => (
+                          <span
+                            key={skill}
+                            className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800"
+                          >
+                            {skill}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const currentSkills = formData.skills.filter(s => s !== skill);
+                                setFormData({ ...formData, skills: currentSkills });
+                              }}
+                              className="ml-2 text-primary-600 hover:text-primary-800"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-4 text-sm text-gray-600">
+                    Selected: {formData.skills.length}/3 skills
+                  </div>
+                  {validationErrors.skills && (
+                    <p className="mt-1 text-sm text-red-600">{validationErrors.skills}</p>
+                  )}
                 </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  Selected: {formData.skills.length}/3 skills
+
+                {/* Service Types for Service Provider */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-4">
+                    Select Service Types <span className="text-red-500">*</span>
+                    <span className="text-gray-500 text-xs ml-2">(Select at least 1 service type)</span>
+                  </label>
+
+                  {/* Search Input for Service Types */}
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      placeholder="Search service types..."
+                      value={formData.serviceTypeSearch || ''}
+                      onChange={(e) => setFormData({ ...formData, serviceTypeSearch: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    />
+                  </div>
+
+                  {/* Service Types Grid */}
+                  {predefinedServices.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                      {predefinedServices
+                        .filter((service) =>
+                          !formData.serviceTypeSearch ||
+                          service.name.toLowerCase().includes(formData.serviceTypeSearch.toLowerCase()) ||
+                          service.description.toLowerCase().includes(formData.serviceTypeSearch.toLowerCase())
+                        )
+                        .map((service) => (
+                          <label
+                            key={service._id}
+                            className={`flex items-start p-3 border rounded-lg cursor-pointer transition-all ${
+                              formData.serviceTypes.includes(service._id)
+                                ? 'border-primary-500 bg-primary-50 text-primary-700'
+                                : 'border-gray-200 hover:border-primary-300'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.serviceTypes.includes(service._id)}
+                              onChange={(e) => {
+                                const currentServiceTypes = [...formData.serviceTypes];
+                                if (e.target.checked) {
+                                  currentServiceTypes.push(service._id);
+                                } else {
+                                  const index = currentServiceTypes.indexOf(service._id);
+                                  if (index > -1) {
+                                    currentServiceTypes.splice(index, 1);
+                                  }
+                                }
+                                setFormData({ ...formData, serviceTypes: currentServiceTypes });
+                              }}
+                              className="mt-0.5 mr-3"
+                            />
+                            <div className="flex-1">
+                              <span className="text-sm font-medium block">{service.name}</span>
+                              {service.description && (
+                                <p className="text-xs text-gray-500 mt-1">{service.description}</p>
+                              )}
+                              <p className="text-xs text-gray-400 mt-1">₱{service.rate}</p>
+                            </div>
+                          </label>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>Loading service types...</p>
+                    </div>
+                  )}
+
+                  {/* Selected Service Types Display */}
+                  {formData.serviceTypes.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Selected Service Types:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.serviceTypes.map((serviceId) => {
+                          const service = predefinedServices.find(s => s._id === serviceId);
+                          return service ? (
+                            <span
+                              key={serviceId}
+                              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800"
+                            >
+                              {service.name}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const currentServiceTypes = formData.serviceTypes.filter(id => id !== serviceId);
+                                  setFormData({ ...formData, serviceTypes: currentServiceTypes });
+                                }}
+                                className="ml-2 text-primary-600 hover:text-primary-800"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-4 text-sm text-gray-600">
+                    Selected: {formData.serviceTypes.length} service types
+                  </div>
+                  {validationErrors.serviceTypes && (
+                    <p className="mt-1 text-sm text-red-600">{validationErrors.serviceTypes}</p>
+                  )}
                 </div>
-                {validationErrors.skills && (
-                  <p className="mt-1 text-sm text-red-600">{validationErrors.skills}</p>
-                )}
-              </div>
+              </>
             )}
           </>
         );
@@ -750,11 +1019,13 @@ const Register = () => {
       case 4: // Only for Service Providers
         return (
           <>
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Certificates</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Documentation</h3>
+            <p className="text-gray-600 mb-6">Upload certificates, licenses, or work proof images to verify your expertise (at least one required)</p>
 
-            <div>
+            {/* Certificates Upload */}
+            <div className="mb-8">
               <label htmlFor="certificates" className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Certificates <span className="text-red-500">*</span>
+                Certificates & Licenses <span className="text-gray-500 text-xs">(Optional - Max 3 images)</span>
               </label>
               <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
                 validationErrors.certificates ? 'border-red-300' : 'border-gray-300 hover:border-primary-400'
@@ -779,31 +1050,137 @@ const Register = () => {
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, PDF up to 10MB each</p>
+                  <p className="text-xs text-gray-500">PNG, JPG, PDF up to 10MB each (Max 3 files)</p>
                 </div>
               </div>
-              {validationErrors.certificates && (
+              {validationErrors.certificates && validationErrors.certificates !== "At least one certificate or work proof is required for Service Providers" && (
                 <p className="mt-1 text-sm text-red-600">{validationErrors.certificates}</p>
               )}
               {formData.certificates.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {formData.certificates.map((file, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-3">
-                      {file.type.startsWith("image/") ? (
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`Certificate ${index + 1}`}
-                          className="w-full h-24 object-cover rounded"
-                        />
-                      ) : (
-                        <div className="w-full h-24 bg-gray-100 rounded flex items-center justify-center">
-                          <span className="text-xs text-gray-500 truncate px-2">{file.name}</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Uploaded Certificates ({formData.certificates.length}/3):</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {formData.certificates.map((file, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-3 relative">
+                        {file.type.startsWith("image/") ? (
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Certificate ${index + 1}`}
+                            className="w-full h-24 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-full h-24 bg-gray-100 rounded flex items-center justify-center">
+                            <span className="text-xs text-gray-500 truncate px-2">{file.name}</span>
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newCertificates = formData.certificates.filter((_, i) => i !== index);
+                            setFormData({ ...formData, certificates: newCertificates });
+                          }}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
+            </div>
+
+            {/* Work Proofs Upload */}
+            <div className="mb-8">
+              <label htmlFor="workProofs" className="block text-sm font-medium text-gray-700 mb-2">
+                Work Proof & Portfolio <span className="text-gray-500 text-xs">(Optional - Max 3 images)</span>
+              </label>
+              <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
+                validationErrors.workProofs ? 'border-red-300' : 'border-gray-300 hover:border-primary-400'
+              }`}>
+                <div className="space-y-1 text-center">
+                  <FaUpload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="flex text-sm text-gray-600">
+                    <label
+                      htmlFor="workProofs"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none"
+                    >
+                      <span>Upload work proofs</span>
+                      <input
+                        id="workProofs"
+                        name="workProofs"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleChange}
+                        className="sr-only"
+                      />
+                    </label>
+                    <p className="pl-1">or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-gray-500">PNG, JPG up to 10MB each (Max 3 files)</p>
+                </div>
+              </div>
+              {validationErrors.workProofs && (
+                <p className="mt-1 text-sm text-red-600">{validationErrors.workProofs}</p>
+              )}
+              {formData.workProofs.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Uploaded Work Proofs ({formData.workProofs.length}/3):</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {formData.workProofs.map((file, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-3 relative">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Work proof ${index + 1}`}
+                          className="w-full h-24 object-cover rounded"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newWorkProofs = formData.workProofs.filter((_, i) => i !== index);
+                            setFormData({ ...formData, workProofs: newWorkProofs });
+                          }}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Overall validation message */}
+            {(formData.certificates.length === 0 && formData.workProofs.length === 0) && validationErrors.certificates && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-yellow-800">
+                      Documentation Required
+                    </h3>
+                    <div className="mt-2 text-sm text-yellow-700">
+                      <p>Please upload at least one certificate/license or work proof image to verify your expertise.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Summary */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Documentation Summary:</h4>
+              <div className="text-sm text-gray-600 space-y-1">
+                <p>• Certificates: {formData.certificates.length}/3 uploaded</p>
+                <p>• Work Proofs: {formData.workProofs.length}/3 uploaded</p>
+                <p>• Total documentation: {formData.certificates.length + formData.workProofs.length} files</p>
+              </div>
             </div>
           </>
         );

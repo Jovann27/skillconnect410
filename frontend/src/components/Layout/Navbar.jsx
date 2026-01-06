@@ -446,7 +446,7 @@ const Navbar = () => {
 
       {/* Notification Popup */}
       {showNotifications && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setShowNotifications(false)}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[200] flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setShowNotifications(false)}>
           <div className="bg-pink-50 rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden border border-pink-200 animate-[popupSlideIn_0.3s_ease-out]" onClick={(e) => e.stopPropagation()}>
             <div className="bg-pink-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
               <h3 className="text-xl font-bold">Notifications</h3>

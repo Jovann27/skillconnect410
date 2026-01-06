@@ -28,9 +28,13 @@ const serviceOfferSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  budget: { 
-    type: Number, 
-    required: true 
+  minBudget: {
+    type: Number,
+    default: 0
+  },
+  maxBudget: {
+    type: Number,
+    default: 0
   },
   preferredDate: { 
     type: Date 
