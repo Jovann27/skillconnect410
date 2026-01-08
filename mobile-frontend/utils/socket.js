@@ -39,7 +39,7 @@ const initializeSocket = async (token) => {
         return null;
     }
 
-    _socket = io("https://skillconnect4102.onrender.com/api/v1", {
+    _socket = io("http://localhost:4000/api/v1", {
         withCredentials: true,
         query: { token }
     });

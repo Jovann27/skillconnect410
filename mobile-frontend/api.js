@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Constants for configuration
-const API_BASE_URL = 'https://skillconnect4102.onrender.com/api/v1';
+const API_BASE_URL = 'http://localhost:4000/api/v1';
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BASE_DELAY = 1000; // 1 second base delay
 const RETRY_MULTIPLIER = 2; // Exponential backoff multiplier
@@ -88,6 +88,27 @@ export const serviceProfileAPI = {
 // User Services API
 export const userServicesAPI = {
   getUserServices: () => apiClient.get('/user/services'),
+};
+
+// Dashboard APIs for Client and Provider dashboards
+export const dashboardAPI = {
+  // Client Dashboard APIs
+  getServiceProviders: (params) => apiClient.get('/user/service-providers', { params }),
+  getRecommendedProviders: () => apiClient.get('/user/recommended-providers'),
+  getClientApplications: () => apiClient.get('/user/client-applications'),
+  getUserServiceRequests: () => apiClient.get('/user/user-service-requests'),
+  respondToApplication: (bookingId, action) => apiClient.post(`/user/respond-to-application/${bookingId}`, { action }),
+
+  // Provider Dashboard APIs
+  getAvailableServiceRequests: (params) => apiClient.get('/user/available-service-requests', { params }),
+  getProviderOffers: () => apiClient.get('/user/provider-offers'),
+  getProviderApplications: () => apiClient.get('/user/provider-applications'),
+  applyToRequest: (requestId, data) => apiClient.post(`/user/apply-to-request/${requestId}`, data),
+  respondToOffer: (offerId, action) => apiClient.post(`/user/respond-to-offer/${offerId}`, { action }),
+
+  // Additional APIs
+  getCertificates: () => apiClient.get('/user/my-certificates'),
+  getWorkProof: () => apiClient.get('/user/my-work-proof'),
 };
 
 export default apiClient;

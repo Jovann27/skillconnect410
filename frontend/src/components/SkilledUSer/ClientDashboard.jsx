@@ -81,8 +81,17 @@ const ClientDashboard = () => {
       fetchApplications();
     } else if (activeTab === 'requests') {
       fetchMyRequests();
+      // Fetch applications after a short delay to ensure requests are loaded
+      setTimeout(() => fetchApplications(), 100);
     }
   }, [activeTab]);
+
+  // Also refresh applications when switching to requests tab
+  useEffect(() => {
+    if (activeTab === 'requests' && myRequests.length > 0) {
+      fetchApplications();
+    }
+  }, [myRequests.length]);
 
   useEffect(() => {
     applyFilters();
@@ -132,13 +141,20 @@ const ClientDashboard = () => {
   const fetchApplications = async () => {
     try {
       setApplicationsLoading(true);
+      console.log('Fetching applications...');
       const response = await api.get('/user/client-applications');
+      console.log('Applications response:', response.data);
       if (response.data.success) {
-        setApplications(response.data.applications);
+        setApplications(response.data.applications || []);
+        console.log('Applications set:', response.data.applications?.length || 0);
+      } else {
+        console.error('Failed to fetch applications:', response.data);
+        setApplications([]);
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
       toast.error('Failed to load applications');
+      setApplications([]);
     } finally {
       setApplicationsLoading(false);
     }
@@ -455,12 +471,10 @@ const ClientDashboard = () => {
               <h2 className="text-4xl font-bold text-gray-900 mb-2">
                 {activeTab === 'browse' && 'Find Top Service Providers'}
                 {activeTab === 'requests' && 'My Service Requests'}
-                {activeTab === 'applications' && 'Review Applications'}
               </h2>
               <p className="text-gray-600 text-lg">
                 {activeTab === 'browse' && 'Connect with verified professionals in your area'}
                 {activeTab === 'requests' && 'Manage your posted service requests'}
-                {activeTab === 'applications' && 'Review and respond to applications from service providers'}
               </p>
             </div>
 
@@ -526,6 +540,16 @@ const ClientDashboard = () => {
                 <FaHandshake className="inline mr-2" />
                 Applications ({applications.length})
               </button>
+              {activeTab === 'requests' && (
+                <button
+                  onClick={() => fetchApplications()}
+                  className="ml-auto px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center"
+                  disabled={applicationsLoading}
+                >
+                  <FaInfoCircle className="mr-2" />
+                  {applicationsLoading ? 'Refreshing...' : 'Refresh Applications'}
+                </button>
+              )}
             </nav>
           </div>
         </div>
@@ -1166,40 +1190,120 @@ const ClientDashboard = () => {
               </div>
             ) : (
               <div className="space-y-6">
-                {myRequests.map((request) => (
-                  <div key={request._id} className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-2">{request.name}</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
-                          <div><span className="font-medium text-gray-700">Type:</span> {request.typeOfWork}</div>
-                          <div><span className="font-medium text-gray-700">Location:</span> {request.address}</div>
-                          <div><span className="font-medium text-gray-700">Budget:</span> ₱{request.minBudget} - ₱{request.maxBudget}</div>
-                          <div><span className="font-medium text-gray-700">Status:</span>
-                            <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
-                              request.status === 'Waiting' ? 'bg-yellow-100 text-yellow-800' :
-                              request.status === 'Offered' ? 'bg-blue-100 text-blue-800' :
-                              request.status === 'Working' ? 'bg-green-100 text-green-800' :
-                              request.status === 'Complete' ? 'bg-gray-100 text-gray-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {request.status}
-                            </span>
+                {myRequests.map((request) => {
+                  // Find applications for this request
+                  const requestApplications = applications.filter(app => {
+                    // Handle different possible data structures
+                    if (!app.serviceRequest) return false;
+
+                    // serviceRequest might be an object or just an ID string
+                    const serviceRequestId = typeof app.serviceRequest === 'object'
+                      ? app.serviceRequest._id
+                      : app.serviceRequest;
+
+                    return serviceRequestId === request._id ||
+                           serviceRequestId?.toString() === request._id?.toString();
+                  });
+
+                  return (
+                    <div key={request._id} className="bg-white rounded-lg shadow-md p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-2">{request.name}</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                            <div><span className="font-medium text-gray-700">Type:</span> {request.typeOfWork}</div>
+                            <div><span className="font-medium text-gray-700">Location:</span> {request.address}</div>
+                            <div><span className="font-medium text-gray-700">Budget:</span> ₱{request.minBudget} - ₱{request.maxBudget}</div>
+                            <div><span className="font-medium text-gray-700">Status:</span>
+                              <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                                request.status === 'Waiting' ? 'bg-yellow-100 text-yellow-800' :
+                                request.status === 'Offered' ? 'bg-blue-100 text-blue-800' :
+                                request.status === 'Working' ? 'bg-green-100 text-green-800' :
+                                request.status === 'Complete' ? 'bg-gray-100 text-gray-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {request.status}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        {request.notes && (
-                          <div className="mb-4">
-                            <span className="font-medium text-gray-700">Notes:</span>
-                            <p className="text-sm text-gray-600 mt-1">{request.notes}</p>
+                          {request.notes && (
+                            <div className="mb-4">
+                              <span className="font-medium text-gray-700">Notes:</span>
+                              <p className="text-sm text-gray-600 mt-1">{request.notes}</p>
+                            </div>
+                          )}
+                          <div className="text-sm text-gray-500">
+                            Posted on {new Date(request.createdAt).toLocaleDateString()}
                           </div>
-                        )}
-                        <div className="text-sm text-gray-500">
-                          Posted on {new Date(request.createdAt).toLocaleDateString()}
                         </div>
                       </div>
+
+                      {/* Show providers who applied */}
+                      {requestApplications.length > 0 && (
+                        <div className="border-t border-gray-200 pt-4">
+                          <h5 className="text-md font-semibold text-gray-900 mb-3 flex items-center">
+                            <FaUsers className="mr-2 text-blue-600" />
+                            Providers Who Applied ({requestApplications.length})
+                          </h5>
+                          <div className="space-y-3">
+                            {requestApplications.map((application) => (
+                              <div key={application._id} className="bg-gray-50 rounded-lg p-3 border-l-4 border-blue-400">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <img
+                                      src={application.provider?.profilePic || "/default-profile.png"}
+                                      alt={`${application.provider?.firstName} ${application.provider?.lastName}`}
+                                      className="w-10 h-10 rounded-full object-cover border border-gray-300"
+                                    />
+                                    <div>
+                                      <div className="flex items-center space-x-2">
+                                        <span className="font-medium text-gray-900">
+                                          {application.provider?.firstName} {application.provider?.lastName}
+                                        </span>
+                                        {application.provider?.verified && (
+                                          <FaCheckCircle className="text-green-500 text-sm" />
+                                        )}
+                                      </div>
+                                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                        <div className="flex">
+                                          {renderStars(application.provider?.averageRating || 0)}
+                                        </div>
+                                        <span>({application.provider?.totalReviews || 0})</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-sm font-semibold text-green-600">
+                                      ₱{application.commissionFee?.toLocaleString() || 'N/A'}
+                                    </div>
+                                    <div className="text-xs text-gray-500">Commission Fee</div>
+                                  </div>
+                                </div>
+                                <div className="mt-2 flex items-center justify-between">
+                                  <div className="flex flex-wrap gap-1">
+                                    {application.provider?.skills?.slice(0, 3).map((skill, index) => (
+                                      <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                        {skill}
+                                      </span>
+                                    ))}
+                                    {application.provider?.skills?.length > 3 && (
+                                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                        +{application.provider.skills.length - 3} more
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    Applied {new Date(application.createdAt).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
