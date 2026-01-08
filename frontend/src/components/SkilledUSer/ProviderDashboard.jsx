@@ -20,7 +20,15 @@ const ProviderDashboard = () => {
   // Core state
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
-  
+
+  // Modal state
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [commissionFee, setCommissionFee] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+
   // Data state
   const [serviceRequests, setServiceRequests] = useState([]);
   const [serviceOffers, setServiceOffers] = useState([]);
@@ -56,7 +64,8 @@ const ProviderDashboard = () => {
 
   const fetchServiceRequests = async () => {
     try {
-      const response = await api.get('/user/available-service-requests');
+      // Request all available service requests by setting a high limit
+      const response = await api.get('/user/available-service-requests?limit=10000');
       if (response.data.success) {
         setServiceRequests(response.data.requests);
       }
@@ -109,12 +118,30 @@ const ProviderDashboard = () => {
     }
   };
 
-  const handleApplyToRequest = async (requestId) => {
+  const handleApplyToRequest = async (requestId, commissionFee) => {
+    // Double-check if already applied before submitting
+    if (hasAlreadyApplied(requestId)) {
+      setShowDuplicateModal(true);
+      setShowApplyModal(false);
+      setSelectedRequest(null);
+      setCommissionFee('');
+      return;
+    }
+
     try {
-      const response = await api.post(`/user/apply-to-request/${requestId}`);
+      const response = await api.post(`/user/apply-to-request/${requestId}`, {
+        commissionFee: parseFloat(commissionFee)
+      });
       if (response.data.success) {
+        // Show success screen with details
+        setSuccessMessage(`Your application for "${selectedRequest.name}" has been submitted successfully with a commission fee of ₱${parseFloat(commissionFee).toLocaleString()}!`);
+        setShowSuccessModal(true);
         toast.success('Application submitted successfully!');
         fetchServiceRequests();
+        fetchApplications();
+        setShowApplyModal(false);
+        setSelectedRequest(null);
+        setCommissionFee('');
       }
     } catch (error) {
       console.error('Error applying to request:', error);
@@ -211,6 +238,10 @@ const ProviderDashboard = () => {
     </div>
   );
 
+  const hasAlreadyApplied = (requestId) => {
+    return applications.some(app => app.serviceRequest && app.serviceRequest._id === requestId);
+  };
+
   const renderRequestsTab = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Available Service Requests</h3>
@@ -220,35 +251,49 @@ const ProviderDashboard = () => {
           <p>No available service requests at the moment.</p>
         </div>
       ) : (
-        serviceRequests.map((request) => (
-          <div key={request._id} className="bg-white border rounded-lg p-4">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <h4 className="font-semibold">{request.name}</h4>
-                <p className="text-sm text-gray-600">{request.typeOfWork}</p>
-                <p className="text-sm text-gray-500">{request.address}</p>
-              </div>
-              <div className="text-right">
-                <div className="font-bold text-green-600">
-                  ₱{request.minBudget && request.maxBudget
-                    ? `${request.minBudget.toLocaleString()} - ₱${request.maxBudget.toLocaleString()}`
-                    : request.minBudget || request.maxBudget
-                    ? `₱${(request.minBudget || request.maxBudget).toLocaleString()}`
-                    : 'Budget not specified'
-                  }
+        serviceRequests.map((request) => {
+          const alreadyApplied = hasAlreadyApplied(request._id);
+          return (
+            <div key={request._id} className="bg-white border rounded-lg p-4">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <h4 className="font-semibold">{request.name}</h4>
+                  <p className="text-sm text-gray-600">{request.typeOfWork}</p>
+                  <p className="text-sm text-gray-500">{request.address}</p>
                 </div>
-                <div className="text-sm text-gray-500">{request.time}</div>
+                <div className="text-right">
+                  <div className="font-bold text-green-600">
+                    ₱{request.minBudget && request.maxBudget
+                      ? `${request.minBudget.toLocaleString()} - ₱${request.maxBudget.toLocaleString()}`
+                      : request.minBudget || request.maxBudget
+                      ? `₱${(request.minBudget || request.maxBudget).toLocaleString()}`
+                      : 'Budget not specified'
+                    }
+                  </div>
+                  <div className="text-sm text-gray-500">{request.time}</div>
+                </div>
               </div>
+              <p className="text-sm mb-3">{request.notes}</p>
+              {alreadyApplied ? (
+                <div className="flex items-center text-green-600">
+                  <FaCheckCircle className="mr-2" />
+                  <span className="font-medium">Already Applied</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setSelectedRequest(request);
+                    setCommissionFee('');
+                    setShowApplyModal(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
+                >
+                  Apply to Request
+                </button>
+              )}
             </div>
-            <p className="text-sm mb-3">{request.notes}</p>
-            <button
-              onClick={() => handleApplyToRequest(request._id)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
-            >
-              Apply to Request
-            </button>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );
@@ -423,7 +468,7 @@ const ProviderDashboard = () => {
 
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow-lg mb-6">
-          
+
 
           {/* Tab Content */}
           <div className="p-6">
@@ -433,6 +478,162 @@ const ProviderDashboard = () => {
             {activeTab === 'applications' && renderApplicationsTab()}
           </div>
         </div>
+
+        {/* Apply Modal */}
+        {showApplyModal && selectedRequest && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <h3 className="text-lg font-semibold mb-4">Confirm Application</h3>
+              <div className="mb-4">
+                <h4 className="font-medium">{selectedRequest.name}</h4>
+                <p className="text-sm text-gray-600">{selectedRequest.typeOfWork}</p>
+                <p className="text-sm text-gray-500">Budget: ₱{
+                  selectedRequest.minBudget && selectedRequest.maxBudget
+                    ? `${selectedRequest.minBudget.toLocaleString()} - ₱${selectedRequest.maxBudget.toLocaleString()}`
+                    : selectedRequest.minBudget || selectedRequest.maxBudget
+                    ? `${(selectedRequest.minBudget || selectedRequest.maxBudget).toLocaleString()}`
+                    : 'Not specified'
+                }</p>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Desired Commission Fee (₱)
+                </label>
+                <input
+                  type="number"
+                  value={commissionFee}
+                  onChange={(e) => setCommissionFee(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your commission fee"
+                  min="0"
+                  step="0.01"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Fee must be within the client's budget range
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowApplyModal(false);
+                    setSelectedRequest(null);
+                    setCommissionFee('');
+                  }}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    const fee = parseFloat(commissionFee);
+                    if (isNaN(fee) || fee < 0) {
+                      toast.error('Please enter a valid commission fee');
+                      return;
+                    }
+                    if (selectedRequest.maxBudget && fee > selectedRequest.maxBudget) {
+                      toast.error(`Commission fee cannot exceed ₱${selectedRequest.maxBudget.toLocaleString()}`);
+                      return;
+                    }
+                    if (selectedRequest.minBudget && fee < selectedRequest.minBudget) {
+                      toast.error(`Commission fee cannot be less than ₱${selectedRequest.minBudget.toLocaleString()}`);
+                      return;
+                    }
+                    handleApplyToRequest(selectedRequest._id, commissionFee);
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
+                >
+                  Confirm Apply
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success Modal */}
+        {showSuccessModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+              <div className="mb-6">
+                <FaCheckCircle className="text-green-500 text-6xl mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h3>
+                <p className="text-gray-600">{successMessage}</p>
+              </div>
+              <div className="mb-6">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="text-sm text-green-800">
+                    <strong>What happens next?</strong><br />
+                    The client will review your application and may contact you for further details.
+                    You'll be notified once they make a decision.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    setSuccessMessage('');
+                  }}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded font-medium"
+                >
+                  Continue Browsing
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    setSuccessMessage('');
+                    setActiveTab('applications');
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
+                >
+                  View My Applications
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Duplicate Application Modal */}
+        {showDuplicateModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+              <div className="mb-6">
+                <FaTimes className="text-red-500 text-6xl mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Already Applied</h3>
+                <p className="text-gray-600">
+                  You have already submitted an application for this service request.
+                  You cannot apply to the same request multiple times.
+                </p>
+              </div>
+              <div className="mb-6">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <p className="text-sm text-yellow-800">
+                    <strong>Check your applications:</strong><br />
+                    You can view and manage your existing applications in the "My Work Records" tab.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDuplicateModal(false);
+                  }}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded font-medium"
+                >
+                  Continue Browsing
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDuplicateModal(false);
+                    setActiveTab('applications');
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
+                >
+                  View My Applications
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

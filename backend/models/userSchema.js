@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   address: { type: String, required: true },
   birthdate: { type: Date, required: true },
+  employed: { type: String, enum: ["employed", "unemployed"], required: true },
 
   role: { type: String, required: true, enum: ["Community Member", "Service Provider", "Admin"], default: "Community Member" },
 

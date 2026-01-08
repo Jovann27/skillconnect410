@@ -29,6 +29,8 @@ const SendOfferModal = ({ provider, onClose, onSuccess }) => {
   });
 
   const [isSending, setIsSending] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     if (provider) {
@@ -106,9 +108,11 @@ const SendOfferModal = ({ provider, onClose, onSuccess }) => {
       });
 
       if (response.data.success) {
-        toast.success(`Offer sent successfully to ${provider.firstName} ${provider.lastName}!`);
+        // Show success screen with details
+        setSuccessMessage(`Your service request "${formData.title}" has been sent successfully to ${provider.firstName} ${provider.lastName}! They will be notified and can respond to your offer.`);
+        setShowSuccessModal(true);
+        toast.success('Service request sent successfully!');
         if (onSuccess) onSuccess();
-        onClose();
       } else {
         toast.error('Failed to send offer');
       }
@@ -349,6 +353,51 @@ const SendOfferModal = ({ provider, onClose, onSuccess }) => {
           </form>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[300] p-4">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div className="mb-6">
+              <FaCheckCircle className="text-green-500 text-6xl mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Request Sent Successfully!</h3>
+              <p className="text-gray-600">{successMessage}</p>
+            </div>
+            <div className="mb-6">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-sm text-green-800">
+                  <strong>What happens next?</strong><br />
+                  The provider will review your request and can accept or decline it.
+                  You'll be notified once they respond.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  setSuccessMessage('');
+                  onClose();
+                }}
+                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded font-medium"
+              >
+                Continue Browsing
+              </button>
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  setSuccessMessage('');
+                  onClose();
+                  // Could navigate to a different page if needed
+                }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
+              >
+                View Other Providers
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

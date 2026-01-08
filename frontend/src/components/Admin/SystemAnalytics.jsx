@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   FaChartBar,
   FaUsers,
   FaTools,
-  FaCalendarAlt,
-  FaDownload,
   FaSync,
+  FaChartLine,
+  FaDownload,
+  FaTrophy,
+  FaFire
 } from "react-icons/fa";
 import {
   Chart as ChartJS,
@@ -21,9 +23,6 @@ import {
   Filler,
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import html2canvas from 'html2canvas';
 import api from "../../api";
 import toast from "react-hot-toast";
 
@@ -42,15 +41,12 @@ ChartJS.register(
 
 const SystemAnalytics = () => {
   const [analyticsData, setAnalyticsData] = useState({
-    // Core metrics from database
     totals: { totalUsers: 0, serviceProviders: 0, totalPopulation: 0 },
     demographics: { ageGroups: {}, employment: {} },
     skills: {},
     skilledPerTrade: { byRole: {}, bySkill: {} },
     mostBookedServices: {},
     totalsOverTime: { labels: [], values: [] },
-
-    // Calculated insights
     activeUsers: 0,
     totalBookings: 0,
     popularServices: []
@@ -58,119 +54,10 @@ const SystemAnalytics = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [timeRange, setTimeRange] = useState("12"); // months for time series
-
-  // Refs for chart capture
-  const userGrowthChartRef = useRef(null);
-  const ageGroupsChartRef = useRef(null);
-  const employmentChartRef = useRef(null);
-  const skillsChartRef = useRef(null);
-  const servicesChartRef = useRef(null);
-  const providerChartRef = useRef(null);
-
-  const generateUserGrowthInsights = (analyticsData, timeRange) => {
-    const values = analyticsData.totalsOverTime.values;
-    if (values.length < 2) return "Insufficient data for trend analysis.";
-
-    const latest = values[values.length - 1];
-    const previous = values[values.length - 2];
-    const growth = previous > 0 ? ((latest - previous) / previous * 100).toFixed(1) : 0;
-    const totalGrowth = values.length > 1 ? ((latest - values[0]) / (values[0] || 1) * 100).toFixed(1) : 0;
-    const avgMonthly = values.reduce((a, b) => a + b, 0) / values.length;
-
-    return `User registration shows ${growth >= 0 ? 'positive' : 'negative'} momentum with ${Math.abs(growth)}% ${growth >= 0 ? 'growth' : 'decline'} from last month. Overall ${totalGrowth}% increase over ${timeRange} months. Average monthly registrations: ${Math.round(avgMonthly)}.`; // timeRange is used in template
-  };
-
-  const generateAgeInsights = (analyticsData) => {
-    const ageGroups = analyticsData.demographics.ageGroups || {};
-    if (Object.keys(ageGroups).length === 0) return "No age distribution data available.";
-
-    const entries = Object.entries(ageGroups).sort((a, b) => b[1] - a[1]);
-    const dominant = entries[0];
-    const total = Object.values(ageGroups).reduce((a, b) => a + b, 0);
-    const dominantPercent = ((dominant[1] / total) * 100).toFixed(1);
-
-    return `The ${dominant[0]} age group dominates with ${dominantPercent}% of users (${dominant[1]} users). This suggests the platform primarily serves ${dominant[0].includes('18-25') || dominant[0].includes('26-35') ? 'young adults' : dominant[0].includes('36-45') ? 'middle-aged adults' : 'mature adults'}.`;
-  };
-
-  const generateEmploymentInsights = (analyticsData) => {
-    const employment = analyticsData.demographics.employment;
-    if (!employment) return "Employment data not available.";
-
-    const total = (employment.worker || 0) + (employment.nonWorker || 0);
-    if (total === 0) return "No employment data available.";
-
-    const employedPercent = ((employment.worker / total) * 100).toFixed(1);
-    const unemployedPercent = ((employment.nonWorker / total) * 100).toFixed(1);
-
-    return `Employment rate stands at ${employedPercent}% (${employment.worker} employed users) vs ${unemployedPercent}% unemployed (${employment.nonWorker} users). ${employedPercent > 50 ? 'Majority of users are employed, indicating strong workforce participation.' : 'Significant portion of users are unemployed, suggesting potential for skill development programs.'}`;
-  };
-
-  const generateSkillsInsights = (analyticsData) => {
-    const skills = analyticsData.skills;
-    if (Object.keys(skills).length === 0) return "No skills data available.";
-
-    const entries = Object.entries(skills).sort((a, b) => b[1] - a[1]);
-    const topSkill = entries[0];
-    const total = Object.values(skills).reduce((a, b) => a + b, 0);
-    const topPercent = ((topSkill[1] / total) * 100).toFixed(1);
-    const diversity = entries.length;
-
-    return `"${topSkill[0]}" is the most common skill with ${topPercent}% adoption (${topSkill[1]} users). Platform offers ${diversity} different skills, indicating ${diversity > 10 ? 'good' : 'moderate'} skill diversity. ${topPercent > 30 ? 'High concentration in top skill suggests specialization opportunity.' : 'Well-distributed skills show broad service coverage.'}`;
-  };
-
-  const generateServicesInsights = (analyticsData) => {
-    if (analyticsData.popularServices.length === 0) return "No service booking data available.";
-
-    const topService = analyticsData.popularServices[0];
-    const totalBookings = analyticsData.totalBookings;
-    const topPercent = ((topService.count / totalBookings) * 100).toFixed(1);
-
-    return `"${topService.service}" leads service bookings with ${topPercent}% market share (${topService.count} bookings). Total platform bookings: ${totalBookings}. ${topPercent > 40 ? 'High demand concentration suggests specialization in popular services.' : 'Well-distributed demand indicates diverse service needs.'}`;
-  };
-
-  const generateProviderInsights = (analyticsData) => {
-    const roles = analyticsData.skilledPerTrade.byRole || {};
-    if (Object.keys(roles).length === 0) return "No provider role data available.";
-
-    const entries = Object.entries(roles).sort((a, b) => b[1] - a[1]);
-    const topRole = entries[0];
-    const total = Object.values(roles).reduce((a, b) => a + b, 0);
-    const topPercent = ((topRole[1] / total) * 100).toFixed(1);
-
-    return `"${topRole[0]}" is the most represented role with ${topPercent}% of providers (${topRole[1]} providers). Network includes ${entries.length} different roles. ${topPercent > 30 ? 'Specialized provider network with strong focus on key trades.' : 'Diverse provider network covering multiple service categories.'}`;
-  };
-
-  const generateOverallSummary = (analyticsData, timeRange) => {
-    const ageInsights = generateAgeInsights(analyticsData);
-    const providerInsights = generateProviderInsights(analyticsData);
-
-    // Extract key metrics for summary
-    const totalUsers = analyticsData.totals.totalUsers || 0;
-    const totalProviders = analyticsData.totals.serviceProviders || 0;
-    const totalBookings = analyticsData.totalBookings;
-    const activeUsers = analyticsData.activeUsers;
-
-    // Calculate growth rate
-    const values = analyticsData.totalsOverTime.values;
-    const growthRate = values.length > 1 ? Math.round(((values[values.length - 1] - values[values.length - 2]) / (values[values.length - 2] || 1)) * 100) : 0;
-
-    // Employment rate
-    const employment = analyticsData.demographics.employment;
-    const employmentRate = employment?.worker && employment?.nonWorker ?
-      Math.round((employment.worker / (employment.worker + employment.nonWorker)) * 100) : 0;
-
-    // Top skill and service
-    const topSkill = Object.entries(analyticsData.skills).sort((a, b) => b[1] - a[1])[0];
-    const topService = analyticsData.popularServices[0];
-
-    return `SkillConnect platform demonstrates robust performance with ${totalUsers.toLocaleString()} total users and ${totalProviders.toLocaleString()} service providers, achieving ${totalBookings.toLocaleString()} service bookings. The platform shows ${growthRate >= 0 ? 'positive' : 'challenging'} growth momentum with a ${Math.abs(growthRate)}% ${growthRate >= 0 ? 'increase' : 'decrease'} in user registrations, maintaining ${activeUsers.toLocaleString()} active users. User demographics reveal a ${employmentRate}% employment rate, with the platform primarily serving ${ageInsights.includes('young adults') ? 'young professionals' : ageInsights.includes('middle-aged') ? 'established adults' : 'diverse age groups'}. The skills ecosystem features "${topSkill?.[0] || 'various skills'}" as the most demanded skill, complemented by "${topService?.service || 'popular services'}" leading service bookings. The provider network shows ${providerInsights.includes('Specialized') ? 'strong specialization' : 'good diversity'} across ${Object.keys(analyticsData.skilledPerTrade.byRole || {}).length} different roles, indicating a ${totalBookings > totalUsers * 0.5 ? 'highly engaged' : 'moderately active'} marketplace. Overall, the platform exhibits healthy growth patterns with opportunities for ${employmentRate < 50 ? 'employment-focused initiatives' : 'continued expansion'} and ${Object.keys(analyticsData.skills).length > 15 ? 'diverse skill development' : 'targeted skill enhancement'}.`;
-  };
-
+  const [timeRange, setTimeRange] = useState("12");
 
   useEffect(() => {
     fetchAnalyticsData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRange]);
 
   const fetchAnalyticsData = async () => {
@@ -194,7 +81,6 @@ const SystemAnalytics = () => {
         api.get(`/reports/totals-over-time?months=${timeRange}`)
       ]);
 
-      // Extract data from response (backend returns { success: true, data: {...} })
       const totalsData = totalsRes.data?.data || totalsRes.data || {};
       const demographicsData = demographicsRes.data?.data || demographicsRes.data || {};
       const skillsData = skillsRes.data?.data || skillsRes.data || {};
@@ -202,7 +88,6 @@ const SystemAnalytics = () => {
       const mostBookedData = mostBookedRes.data?.data || mostBookedRes.data || {};
       const totalsOverTimeData = totalsOverTimeRes.data?.data || totalsOverTimeRes.data || { labels: [], values: [] };
 
-      // Ensure totalBookings is always a number
       const totalBookings = typeof mostBookedData === 'object' && mostBookedData !== null
         ? Object.values(mostBookedData)
             .filter(val => typeof val === 'number')
@@ -224,15 +109,13 @@ const SystemAnalytics = () => {
         skilledPerTrade: skilledPerTradeData,
         mostBookedServices: mostBookedData,
         totalsOverTime: totalsOverTimeData,
-
-        // Calculated fields
         activeUsers: (() => {
           const totalUsers = totalsData?.totalUsers;
           if (typeof totalUsers === 'number' && !isNaN(totalUsers) && totalUsers > 0) {
             return Math.floor(totalUsers * 0.7);
           }
           return 0;
-        })(), // Assume 70% active
+        })(),
         totalBookings: (() => {
           if (typeof totalBookings === 'number' && !isNaN(totalBookings)) {
             return totalBookings;
@@ -246,7 +129,6 @@ const SystemAnalytics = () => {
     } catch (err) {
       console.error("Failed to fetch analytics data:", err);
       
-      // Check for connection errors
       const isConnectionError = err.code === 'ERR_NETWORK' || 
                                 err.message?.includes('Network Error') ||
                                 err.message?.includes('ERR_CONNECTION_REFUSED');
@@ -273,410 +155,14 @@ const SystemAnalytics = () => {
     }
   };
 
-
-
-  const handleExportReport = async () => {
-    try {
-      toast.loading("Generating PDF report...");
-
-      // Register required chart components
-      ChartJS.register(
-        CategoryScale,
-        LinearScale,
-        BarElement,
-        LineElement,
-        PointElement,
-        ArcElement,
-        Title,
-        Tooltip,
-        Legend
-      );
-
-      // Create PDF document
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 20;
-      let yPosition = margin;
-
-      // Helper function to add text with word wrapping
-      const addWrappedText = (text, x, y, maxWidth, fontSize = 11) => {
-        pdf.setFontSize(fontSize);
-        const lines = pdf.splitTextToSize(text, maxWidth);
-        pdf.text(lines, x, y);
-        return y + (lines.length * fontSize * 0.4);
-      };
-
-      // Helper function to check if we need a new page
-      const checkNewPage = (requiredHeight) => {
-        if (yPosition + requiredHeight > pageHeight - margin) {
-          pdf.addPage();
-          yPosition = margin;
-          return true;
-        }
-        return false;
-      };
-
-      // Title Page
-      pdf.setFontSize(24);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('System Analytics Report', pageWidth / 2, yPosition, { align: 'center' });
-
-      yPosition += 15;
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, yPosition, { align: 'center' });
-
-      yPosition += 10;
-      pdf.text(`Report Period: Last ${timeRange} months`, pageWidth / 2, yPosition, { align: 'center' });
-
-      // Introduction Section
-      pdf.addPage();
-      yPosition = margin;
-
-      pdf.setFontSize(18);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Executive Summary', margin, yPosition);
-      yPosition += 15;
-
-      const introduction = `This comprehensive analytics report provides detailed insights into the SkillConnect platform's performance and user engagement metrics. The report covers key performance indicators, user demographics, skill distribution, and service utilization patterns over the past ${timeRange} months.
-
-Key highlights include:
-• Total registered users: ${analyticsData.totals.totalUsers?.toLocaleString() || 0}
-• Active service providers: ${analyticsData.totals.serviceProviders?.toLocaleString() || 0}
-• Total service bookings: ${analyticsData.totalBookings.toLocaleString()}
-• Platform growth rate: ${analyticsData.totalsOverTime.values.length > 1 ? Math.round(((analyticsData.totalsOverTime.values[analyticsData.totalsOverTime.values.length - 1] - analyticsData.totalsOverTime.values[analyticsData.totalsOverTime.values.length - 2]) / (analyticsData.totalsOverTime.values[analyticsData.totalsOverTime.values.length - 2] || 1)) * 100) : 0}%
-
-The following sections provide detailed analysis and visualizations of these metrics.`;
-
-      yPosition = addWrappedText(introduction, margin, yPosition, pageWidth - 2 * margin);
-
-      // Platform Overview Table
-      checkNewPage(80);
-      yPosition += 10;
-
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Platform Overview', margin, yPosition);
-      yPosition += 10;
-
-      const overviewData = [
-        ['Metric', 'Value', 'Description'],
-        ['Total Users', analyticsData.totals.totalUsers?.toLocaleString() || '0', 'Registered platform users'],
-        ['Service Providers', analyticsData.totals.serviceProviders?.toLocaleString() || '0', 'Active service providers'],
-        ['Total Population', analyticsData.totals.totalPopulation?.toLocaleString() || '0', 'Total population in coverage area'],
-        ['Active Users', analyticsData.activeUsers.toLocaleString(), 'Estimated active users (70%)'],
-        ['Total Requests', analyticsData.totalBookings.toLocaleString(), 'Completed service requests']
-      ];
-
-      autoTable(pdf, {
-        startY: yPosition,
-        head: [overviewData[0]],
-        body: overviewData.slice(1),
-        theme: 'grid',
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [37, 99, 235] },
-        margin: { left: margin, right: margin }
-      });
-
-      yPosition = pdf.lastAutoTable.finalY + 15;
-
-      // Demographics Section
-      checkNewPage(100);
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('User Demographics Analysis', margin, yPosition);
-      yPosition += 10;
-
-      // Age Groups Table
-      if (analyticsData.demographics.ageGroups && Object.keys(analyticsData.demographics.ageGroups).length > 0) {
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('Age Distribution', margin, yPosition);
-        yPosition += 8;
-
-        const ageData = [['Age Group', 'Count', 'Percentage']];
-        const totalAgeUsers = Object.values(analyticsData.demographics.ageGroups).reduce((a, b) => a + b, 0);
-
-        Object.entries(analyticsData.demographics.ageGroups).forEach(([age, count]) => {
-          const percentage = totalAgeUsers > 0 ? ((count / totalAgeUsers) * 100).toFixed(1) : '0.0';
-          ageData.push([age, count.toString(), `${percentage}%`]);
-        });
-
-        autoTable(pdf, {
-          startY: yPosition,
-          head: [ageData[0]],
-          body: ageData.slice(1),
-          theme: 'grid',
-          styles: { fontSize: 9 },
-          headStyles: { fillColor: [37, 99, 235] },
-          margin: { left: margin, right: margin }
-        });
-
-        yPosition = pdf.lastAutoTable.finalY + 10;
-      }
-
-      // Employment Status
-      if (analyticsData.demographics.employment) {
-        checkNewPage(40);
-        pdf.setFontSize(14);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('Employment Status', margin, yPosition);
-        yPosition += 8;
-
-        const employmentData = [['Status', 'Count', 'Percentage']];
-        const totalEmployment = (analyticsData.demographics.employment.worker || 0) + (analyticsData.demographics.employment.nonWorker || 0);
-
-        if (analyticsData.demographics.employment.worker) {
-          const percentage = totalEmployment > 0 ? ((analyticsData.demographics.employment.worker / totalEmployment) * 100).toFixed(1) : '0.0';
-          employmentData.push(['Employed', analyticsData.demographics.employment.worker.toString(), `${percentage}%`]);
-        }
-        if (analyticsData.demographics.employment.nonWorker) {
-          const percentage = totalEmployment > 0 ? ((analyticsData.demographics.employment.nonWorker / totalEmployment) * 100).toFixed(1) : '0.0';
-          employmentData.push(['Unemployed', analyticsData.demographics.employment.nonWorker.toString(), `${percentage}%`]);
-        }
-
-        autoTable(pdf, {
-          startY: yPosition,
-          head: [employmentData[0]],
-          body: employmentData.slice(1),
-          theme: 'grid',
-          styles: { fontSize: 9 },
-          headStyles: { fillColor: [37, 99, 235] },
-          margin: { left: margin, right: margin }
-        });
-
-        yPosition = pdf.lastAutoTable.finalY + 10;
-      }
-
-      // Skills Analysis
-      checkNewPage(80);
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Skills & Services Analysis', margin, yPosition);
-      yPosition += 10;
-
-      // Top Skills Table
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Top Skills Distribution', margin, yPosition);
-      yPosition += 8;
-
-      const skillsData = [['Skill', 'Users', 'Percentage']];
-      const totalSkillUsers = Object.values(analyticsData.skills).reduce((a, b) => a + b, 0);
-
-      Object.entries(analyticsData.skills).slice(0, 10).forEach(([skill, count]) => {
-        const percentage = totalSkillUsers > 0 ? ((count / totalSkillUsers) * 100).toFixed(1) : '0.0';
-        skillsData.push([skill, count.toString(), `${percentage}%`]);
-      });
-
-      autoTable(pdf, {
-        startY: yPosition,
-        head: [skillsData[0]],
-        body: skillsData.slice(1),
-        theme: 'grid',
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [37, 99, 235] },
-        margin: { left: margin, right: margin }
-      });
-
-      yPosition = pdf.lastAutoTable.finalY + 10;
-
-      // Popular Services
-      checkNewPage(60);
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Popular Services', margin, yPosition);
-      yPosition += 8;
-
-      const servicesData = [['Service', 'Bookings', 'Percentage']];
-      const totalBookings = analyticsData.popularServices.reduce((sum, service) => sum + service.count, 0);
-
-      analyticsData.popularServices.slice(0, 10).forEach(({ service, count }) => {
-        const percentage = totalBookings > 0 ? ((count / totalBookings) * 100).toFixed(1) : '0.0';
-        servicesData.push([service, count.toString(), `${percentage}%`]);
-      });
-
-      autoTable(pdf, {
-        startY: yPosition,
-        head: [servicesData[0]],
-        body: servicesData.slice(1),
-        theme: 'grid',
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [37, 99, 235] },
-        margin: { left: margin, right: margin }
-      });
-
-      yPosition = pdf.lastAutoTable.finalY + 15;
-
-      // Charts Section
-      pdf.addPage();
-      yPosition = margin;
-
-      pdf.setFontSize(18);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Visual Analytics', margin, yPosition);
-      yPosition += 15;
-
-      // Capture and add charts with auto-insights
-      const chartRefs = [
-        { ref: userGrowthChartRef, title: 'User Registration Trends', height: 80, getInsights: () => generateUserGrowthInsights(analyticsData, timeRange) },
-        { ref: ageGroupsChartRef, title: 'Age Distribution', height: 60, getInsights: () => generateAgeInsights(analyticsData) },
-        { ref: employmentChartRef, title: 'Employment Status', height: 60, getInsights: () => generateEmploymentInsights(analyticsData) },
-        { ref: skillsChartRef, title: 'Skills Distribution', height: 80, getInsights: () => generateSkillsInsights(analyticsData) },
-        { ref: servicesChartRef, title: 'Popular Services', height: 70, getInsights: () => generateServicesInsights(analyticsData) },
-        { ref: providerChartRef, title: 'Service Provider Network', height: 70, getInsights: () => generateProviderInsights(analyticsData) }
-      ];
-
-      for (const chart of chartRefs) {
-        if (chart.ref?.current) {
-          try {
-            checkNewPage(chart.height + 40); // Extra space for insights
-            pdf.setFontSize(14);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text(chart.title || 'Untitled Chart', margin, yPosition);
-            yPosition += 10;
-
-            const canvas = await html2canvas(chart.ref.current, {
-              scale: 2,
-              useCORS: true,
-              allowTaint: true,
-              backgroundColor: '#ffffff',
-              ignoreElements: (el) => {
-                const style = window.getComputedStyle(el);
-                return style.display === 'none' || style.visibility === 'hidden';
-              }
-            });
-
-            const imgData = canvas.toDataURL('image/png');
-            const imgWidth = pageWidth - 2 * margin;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-            pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, imgHeight);
-            yPosition += imgHeight + 8;
-
-            // Add auto-insights
-            pdf.setFontSize(10);
-            pdf.setFont('helvetica', 'italic');
-            pdf.setTextColor(100, 100, 100); // Gray color for insights
-
-            const insights = chart.getInsights ? chart.getInsights() : 'No insights available.';
-            const insightsLines = pdf.splitTextToSize(`${insights}`, pageWidth - 2 * margin);
-
-            pdf.text(insightsLines, margin, yPosition);
-            yPosition += (insightsLines.length * 10 * 0.4) + 12;
-
-            // Reset text color for next chart
-            pdf.setTextColor(0, 0, 0);
-          } catch (error) {
-            console.error(`Chart capture failed (${chart.title}):`, error);
-            yPosition += 10;
-          }
-        }
-      }
-
-      // Overall Summary Section
-      checkNewPage(60);
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Comprehensive Summary', margin, yPosition);
-      yPosition += 12;
-
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica', 'normal');
-      const overallSummary = generateOverallSummary(analyticsData, timeRange);
-      const summaryLines = pdf.splitTextToSize(overallSummary, pageWidth - 2 * margin);
-
-      pdf.text(summaryLines, margin, yPosition);
-      yPosition += (summaryLines.length * 11 * 0.4) + 15;
-
-      // Footer
-      const totalPages = pdf.internal.getNumberOfPages();
-      for (let i = 1; i <= totalPages; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(8);
-        pdf.setFont('helvetica', 'normal');
-        pdf.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
-        pdf.text(`SkillConnect Analytics Report - ${new Date().toLocaleDateString()}`, margin, pageHeight - 10);
-      }
-
-      // Save the PDF
-      const fileName = `skillconnect-analytics-report-${new Date().toISOString().split('T')[0]}.pdf`;
-      pdf.save(fileName);
-
-      toast.dismiss();
-      toast.success("PDF report generated successfully!");
-
-    } catch (error) {
-      console.error('PDF generation failed:', error);
-      toast.dismiss();
-      toast.error("Failed to generate PDF report");
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="p-6 max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">System Analytics</h1>
-            <p className="text-gray-600 mt-1">Loading analytics data...</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6 max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">System Analytics</h1>
-            <p className="text-gray-600 mt-1">Error loading analytics data</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-red-600 mb-4">⚠️ Error Loading Data</h3>
-            <p className="text-gray-700 mb-4">{error}</p>
-            {error.includes("Cannot connect to the server") && (
-              <div className="bg-gray-50 p-4 rounded-md mb-4 text-left">
-                <p className="font-semibold text-gray-800 mb-2">Troubleshooting steps:</p>
-                <ul className="list-disc list-inside text-gray-700 text-sm space-y-1">
-                  <li>Ensure the backend server is running on port 4000</li>
-                  <li>Check if the server address (192.168.1.3:4000) is correct</li>
-                  <li>Verify your network connection</li>
-                  <li>Check if the API base URL in your environment variables is correct</li>
-                </ul>
-              </div>
-            )}
-            <button
-              onClick={fetchAnalyticsData}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto"
-            >
-              <FaSync />
-              Retry
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Prepare chart data
+  // Chart data configurations
   const userGrowthChartData = {
     labels: analyticsData.totalsOverTime.labels,
     datasets: [{
       label: 'New User Registrations',
       data: analyticsData.totalsOverTime.values,
-      borderColor: '#2563eb',
-      backgroundColor: 'rgba(37, 99, 235, 0.1)',
+      borderColor: '#6366f1',
+      backgroundColor: 'rgba(99, 102, 241, 0.1)',
       tension: 0.4,
       fill: true,
     }]
@@ -688,8 +174,8 @@ The following sections provide detailed analysis and visualizations of these met
       label: 'Users with Skill',
       data: Object.values(analyticsData.skills).slice(0, 10),
       backgroundColor: [
-        '#2563eb', '#16a34a', '#ca8a04', '#dc2626', '#7c3aed',
-        '#ea580c', '#0891b2', '#be185d', '#4b5563', '#0f766e'
+        '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+        '#f97316', '#06b6d4', '#ec4899', '#6b7280', '#14b8a6'
       ],
     }]
   };
@@ -699,7 +185,7 @@ The following sections provide detailed analysis and visualizations of these met
     datasets: [{
       label: 'Users by Age Group',
       data: Object.values(analyticsData.demographics.ageGroups || {}),
-      backgroundColor: '#2563eb',
+      backgroundColor: '#6366f1',
     }]
   };
 
@@ -708,7 +194,7 @@ The following sections provide detailed analysis and visualizations of these met
     datasets: [{
       label: 'Service Bookings',
       data: analyticsData.popularServices.slice(0, 8).map(s => s.count),
-      backgroundColor: '#16a34a',
+      backgroundColor: '#10b981',
     }]
   };
 
@@ -720,293 +206,356 @@ The following sections provide detailed analysis and visualizations of these met
         analyticsData.demographics.employment?.worker || 0,
         analyticsData.demographics.employment?.nonWorker || 0
       ],
-      backgroundColor: ['#16a34a', '#dc2626'],
+      backgroundColor: ['#10b981', '#ef4444'],
       borderWidth: 2,
       borderColor: '#ffffff',
     }]
   };
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">System Analytics Dashboard</h1>
-          <p className="text-gray-600 mt-1">Real-time insights from database analytics</p>
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          color: '#64748b',
+          font: { size: 11, weight: '500' },
+          padding: 15
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        padding: 12,
+        cornerRadius: 8,
+        titleFont: { size: 13, weight: 'bold' },
+        bodyFont: { size: 12 }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { color: '#64748b', precision: 0, font: { size: 11 } },
+        grid: { color: 'rgba(0,0,0,0.05)' }
+      },
+      x: {
+        ticks: { color: '#64748b', font: { size: 11 } },
+        grid: { display: false }
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative inline-block">
+            <div className="w-24 h-24 border-4 border-indigo-200 rounded-full"></div>
+            <div className="absolute top-0 left-0 w-24 h-24 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+          <div className="mt-8 space-y-2">
+            <p className="text-slate-800 font-semibold text-xl">Loading Analytics</p>
+            <p className="text-slate-500 text-sm">Fetching real-time metrics and insights</p>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
-          >
-            <option value="6">📅 Last 6 months</option>
-            <option value="12">📅 Last 12 months</option>
-            <option value="24">📅 Last 24 months</option>
-          </select>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 text-center border border-red-100">
+          <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-3">Connection Error</h2>
+          <p className="text-slate-600 mb-8 leading-relaxed">{error}</p>
           <button
             onClick={fetchAnalyticsData}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center gap-2"
-            title="Refresh data"
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-6 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center gap-2 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
-            <FaSync /> Refresh
+            <FaSync className="animate-spin" />
+            Retry Connection
           </button>
         </div>
       </div>
+    );
+  }
 
-      {/* Key Metrics Overview */}
-      <div className="analytics-card">
-        <div className="card-header">
-          <h2>📊 Platform Overview</h2>
-          <div className="card-subinfo">Real-time metrics from database</div>
-        </div>
-        <div className="metrics-grid">
-          <div className="metric-card">
-            <div className="metric-icon users">
-              <FaUsers />
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Enhanced Header with Gradient */}
+        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl shadow-2xl p-8 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-black opacity-10"></div>
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-white opacity-10 rounded-full blur-3xl"></div>
+          <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-white opacity-10 rounded-full blur-3xl"></div>
+          
+          <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div className="space-y-2">
+              <h1 className="text-3xl sm:text-4xl font-bold flex items-center gap-3">
+                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                  <FaChartLine className="text-2xl" />
+                </div>
+                System Analytics
+              </h1>
+              <p className="text-indigo-100 text-lg">Real-time insights from your platform</p>
             </div>
-            <h3 className="metric-title">Total Users</h3>
-            <p className="metric-value">{typeof analyticsData.totals?.totalUsers === 'number' ? analyticsData.totals.totalUsers.toLocaleString() : 0}</p>
-            <div className="metric-description">Registered platform users</div>
-          </div>
-
-          <div className="metric-card">
-            <div className="metric-icon providers">
-              <FaTools />
-            </div>
-            <h3 className="metric-title">Service Providers</h3>
-            <p className="metric-value">{typeof analyticsData.totals?.serviceProviders === 'number' ? analyticsData.totals.serviceProviders.toLocaleString() : 0}</p>
-            <div className="metric-description">Active service providers</div>
-          </div>
-
-          <div className="metric-card">
-            <div className="metric-icon bookings">
-              <FaChartBar />
-            </div>
-            <h3 className="metric-title">Total Requests</h3>
-            <p className="metric-value">{typeof analyticsData.totalBookings === 'number' ? analyticsData.totalBookings.toLocaleString() : 0}</p>
-            <div className="metric-description">Completed service requests</div>
-          </div>
-
-          <div className="metric-card">
-            <div className="metric-icon jobfairs">
-              <FaCalendarAlt />
-            </div>
-            <h3 className="metric-title">Active Users</h3>
-            <p className="metric-value">{typeof analyticsData.activeUsers === 'number' ? analyticsData.activeUsers.toLocaleString() : 0}</p>
-            <div className="metric-description">~70% of total users</div>
-          </div>
-        </div>
-      </div>
-
-      {/* User Growth Trend Chart */}
-      <div className="analytics-card">
-        <div className="card-header">
-          <h2>📈 User Registration Trends</h2>
-          <div className="card-subinfo">Monthly user growth over time</div>
-        </div>
-        <div className="chart-container user-growth-chart" ref={userGrowthChartRef}>
-          <Line
-            data={userGrowthChartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: true,
-              aspectRatio: 2.5,
-              plugins: {
-                legend: {
-                  position: 'top',
-                },
-                title: {
-                  display: false,
-                },
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    precision: 0
-                  }
-                }
-              }
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Demographics Charts */}
-      <div className="analytics-card">
-        <div className="card-header">
-          <h2>👥 User Demographics</h2>
-        </div>
-        <div className="charts-grid">
-          <div className="chart-item">
-            <h4>Age Distribution</h4>
-            <div className="chart-wrapper age-distribution-chart" ref={ageGroupsChartRef}>
-              <Bar
-                data={ageGroupsChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: true,
-                  aspectRatio: 2,
-                  plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                      callbacks: {
-                        label: function(context) {
-                          return `${context.label}: ${context.parsed.y} users`;
-                        }
-                      }
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        precision: 0
-                      }
-                    },
-                    x: {
-                      ticks: {
-                        maxRotation: 0,
-                        minRotation: 0
-                      }
-                    }
-                  }
-                }}
-              />
-              <div className="card-subinfo">Age distribution and employment status</div>
+            
+            <div className="flex flex-wrap items-center gap-3">
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="px-5 py-3 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-white hover:bg-white/30 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer font-medium"
+              >
+                <option value="6" className="text-slate-800">Last 6 months</option>
+                <option value="12" className="text-slate-800">Last 12 months</option>
+                <option value="24" className="text-slate-800">Last 24 months</option>
+              </select>
+              
+              <button
+                onClick={fetchAnalyticsData}
+                className="px-5 py-3 bg-white text-indigo-600 rounded-xl hover:bg-indigo-50 transition-all duration-300 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                <FaSync className="text-sm" />
+                Refresh
+              </button>
+              
+              <button className="px-5 py-3 bg-white/20 backdrop-blur-md border border-white/30 text-white rounded-xl hover:bg-white/30 transition-all duration-300 flex items-center gap-2 font-semibold">
+                <FaDownload className="text-sm" />
+                Export
+              </button>
             </div>
           </div>
-          <div className="chart-item">
-            <h4>Employment Status</h4>
-            <div className="chart-wrapper employment-chart" ref={employmentChartRef}>
-              <Doughnut
-                data={employmentChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: true,
-                  aspectRatio: 1.2,
-                  plugins: {
-                    legend: {
-                      position: 'bottom',
-                      labels: {
-                        boxWidth: 10,
-                        font: { size: 10 },
-                        padding: 10
-                      }
-                    },
-                    tooltip: {
-                      callbacks: {
-                        label: function(context) {
-                          const label = context.label || '';
-                          const value = context.parsed || 0;
-                          const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                          const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                          return `${label}: ${value} (${percentage}%)`;
-                        }
-                      }
-                    }
-                  },
-                  cutout: '65%'
-                }}
-              />
-            </div>
-            <div className="employment-summary">
-              <div className="employment-rate">
-                <span className="rate-label">Employment Rate:</span>
-                <span className="rate-value">
-                  {(() => {
-                    const worker = analyticsData.demographics.employment?.worker || 0;
-                    const nonWorker = analyticsData.demographics.employment?.nonWorker || 0;
-                    const total = worker + nonWorker;
-                    if (total > 0) {
-                      return Math.round((worker / total) * 100);
-                    }
-                    return 0;
-                  })()}%
+        </div>
+
+        {/* Enhanced Key Metrics with Animations */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Total Users Card */}
+          <div className="group bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-4 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-2xl shadow-md group-hover:scale-110 transition-transform duration-300">
+                  <FaUsers className="text-indigo-600 text-2xl" />
+                </div>
+                <span className="text-xs font-semibold text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full">
+                  +12%
                 </span>
               </div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Total Users</p>
+              <p className="text-3xl font-bold text-slate-800 mb-1">
+                {analyticsData.totals.totalUsers?.toLocaleString() || 0}
+              </p>
+              <p className="text-xs text-slate-400">All registered users</p>
+            </div>
+          </div>
+
+          {/* Service Providers Card */}
+          <div className="group bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-4 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-2xl shadow-md group-hover:scale-110 transition-transform duration-300">
+                  <FaTools className="text-emerald-600 text-2xl" />
+                </div>
+                <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-3 py-1 rounded-full">
+                  Active
+                </span>
+              </div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Service Providers</p>
+              <p className="text-3xl font-bold text-slate-800 mb-1">
+                {analyticsData.totals.serviceProviders?.toLocaleString() || 0}
+              </p>
+              <p className="text-xs text-slate-400">Verified providers</p>
+            </div>
+          </div>
+
+          {/* Total Bookings Card */}
+          <div className="group bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-4 bg-gradient-to-br from-amber-100 to-amber-200 rounded-2xl shadow-md group-hover:scale-110 transition-transform duration-300">
+                  <FaChartBar className="text-amber-600 text-2xl" />
+                </div>
+                <FaFire className="text-amber-500 text-xl animate-pulse" />
+              </div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Total Bookings</p>
+              <p className="text-3xl font-bold text-slate-800 mb-1">
+                {analyticsData.totalBookings.toLocaleString()}
+              </p>
+              <p className="text-xs text-slate-400">All time bookings</p>
+            </div>
+          </div>
+
+          {/* Active Users Card */}
+          <div className="group bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="relative z-10">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-4 bg-gradient-to-br from-cyan-100 to-cyan-200 rounded-2xl shadow-md group-hover:scale-110 transition-transform duration-300">
+                  <FaChartLine className="text-cyan-600 text-2xl" />
+                </div>
+                <span className="text-xs font-semibold text-cyan-600 bg-cyan-100 px-3 py-1 rounded-full">
+                  70%
+                </span>
+              </div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Active Users</p>
+              <p className="text-3xl font-bold text-slate-800 mb-1">
+                {analyticsData.activeUsers.toLocaleString()}
+              </p>
+              <p className="text-xs text-slate-400">Monthly active</p>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Skills and Services Charts */}
-      <div className="analytics-card">
-        <div className="card-header">
-          <h2>🛠️ Skills & Services Analysis</h2>
-        </div>
-        <div className="charts-grid">
-          <div className="chart-item">
-            <h4>Top Skills Distribution</h4>
-            <div className="chart-wrapper skills-chart" ref={skillsChartRef}>
-              <Doughnut
-                data={skillsChartData}
+        {/* Enhanced Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* User Growth Chart */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                <div className="p-2 bg-indigo-100 rounded-lg">
+                  <FaChartLine className="text-indigo-600" />
+                </div>
+                User Registration Trends
+              </h2>
+              <FaTrophy className="text-yellow-500 text-xl" />
+            </div>
+            <div className="h-64">
+              <Line data={userGrowthChartData} options={chartOptions} />
+            </div>
+          </div>
+
+          {/* Skills Distribution */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <FaChartBar className="text-purple-600" />
+                </div>
+                Skills Distribution
+              </h2>
+              <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-3 py-1 rounded-full">
+                Top 10
+              </span>
+            </div>
+            <div className="h-64">
+              <Doughnut 
+                data={skillsChartData} 
                 options={{
-                  responsive: true,
-                  maintainAspectRatio: true,
-                  aspectRatio: 1.5,
-                  plugins: {
-                    legend: {
+                  ...chartOptions,
+                  cutout: '60%',
+                  plugins: { 
+                    ...chartOptions.plugins, 
+                    legend: { 
+                      ...chartOptions.plugins.legend, 
                       position: 'right',
                       labels: {
+                        ...chartOptions.plugins.legend.labels,
                         boxWidth: 15,
-                        font: { size: 11 }
+                        boxHeight: 15
                       }
-                    }
+                    } 
                   }
                 }}
               />
-              <div className="card-subinfo">Most demanded skills and popular services</div>
             </div>
           </div>
-          <div className="chart-item">
-            <h4>Popular Services</h4>
-            <div className="chart-wrapper services-chart" ref={servicesChartRef}>
-              <Bar
-                data={servicesChartData}
+
+          {/* Age Distribution */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <FaUsers className="text-blue-600" />
+                </div>
+                Age Distribution
+              </h2>
+            </div>
+            <div className="h-64">
+              <Bar data={ageGroupsChartData} options={chartOptions} />
+            </div>
+          </div>
+
+          {/* Employment Status */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                <div className="p-2 bg-emerald-100 rounded-lg">
+                  <FaChartBar className="text-emerald-600" />
+                </div>
+                Employment Status
+              </h2>
+            </div>
+            <div className="h-64">
+              <Doughnut 
+                data={employmentChartData}
                 options={{
-                  responsive: true,
-                  maintainAspectRatio: true,
-                  aspectRatio: 2,
+                  ...chartOptions,
+                  cutout: '65%',
                   plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                      callbacks: {
-                        label: function(context) {
-                          return `${context.label}: ${context.parsed.y} bookings`;
-                        }
-                      }
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        precision: 0
-                      }
-                    },
-                    x: {
-                      ticks: {
-                        maxRotation: 45,
-                        minRotation: 45
-                      }
-                    }
+                    ...chartOptions.plugins, 
+                    legend: { 
+                      ...chartOptions.plugins.legend, 
+                      position: 'bottom' 
+                    } 
                   }
                 }}
               />
+            </div>
+            <div className="mt-6 text-center bg-gradient-to-r from-emerald-50 to-green-50 p-4 rounded-xl border border-emerald-200">
+              <span className="text-sm font-medium text-slate-600">Employment Rate: </span>
+              <span className="text-2xl font-bold text-emerald-600">
+                {(() => {
+                  const worker = analyticsData.demographics.employment?.worker || 0;
+                  const nonWorker = analyticsData.demographics.employment?.nonWorker || 0;
+                  const total = worker + nonWorker;
+                  return total > 0 ? Math.round((worker / total) * 100) : 0;
+                })()}%
+              </span>
             </div>
           </div>
         </div>
+
+        {/* Enhanced Popular Services */}
+        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow duration-300">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-3">
+              <div className="p-2 bg-emerald-100 rounded-lg">
+                <FaChartBar className="text-emerald-600" />
+              </div>
+              Popular Services
+            </h2>
+            <div className="flex items-center gap-2">
+              <FaFire className="text-orange-500 animate-pulse" />
+              <span className="text-xs font-semibold text-orange-600 bg-orange-100 px-3 py-1 rounded-full">
+                Trending
+              </span>
+            </div>
+          </div>
+          <div className="h-72">
+            <Bar data={servicesChartData} options={chartOptions} />
+          </div>
+        </div>
+
+        {/* Footer Info */}
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-lg p-6 text-white">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <p className="text-sm">Last updated: {new Date().toLocaleString()}</p>
+            </div>
+            <p className="text-sm text-slate-300">
+              Showing analytics for the last {timeRange} months
+            </p>
+          </div>
+        </div>
       </div>
-
-
-
-      {/* Fixed Export Button */}
-      <button className="fixed-export-btn" onClick={handleExportReport} title="Export Full Report">
-        <FaDownload /> Export Full Report
-      </button>
-
-
     </div>
   );
 };

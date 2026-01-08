@@ -34,7 +34,7 @@ const Settings = () => {
     try {
       setLoading(true);
       const response = await api.get('/user/me');
-      if (response.data.success) {
+      if (response.data.success && response.data.user) {
         const userData = response.data.user;
         setUser(userData);
         setFormData({
@@ -44,6 +44,8 @@ const Settings = () => {
           email: userData.email || '',
           phone: userData.phone || '',
         });
+      } else {
+        setError('Failed to fetch profile data');
       }
     } catch (err) {
       setError('Failed to fetch profile data');

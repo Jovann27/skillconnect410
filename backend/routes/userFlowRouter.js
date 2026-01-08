@@ -98,6 +98,31 @@ router.get('/me', isUserAuthenticated, isUserVerified, catchAsyncError(async (re
   });
 }));
 
+// Separate endpoints for certificates and work proof
+router.get('/my-certificates', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const user = await User.findById(req.user._id).populate('certificates');
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  res.status(200).json({
+    success: true,
+    certificates: user.certificates || []
+  });
+}));
+
+router.get('/my-work-proof', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const user = await User.findById(req.user._id).populate('workProof');
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  res.status(200).json({
+    success: true,
+    workProof: user.workProof || []
+  });
+}));
+
 // Password length route for Settings component
 router.get('/me/password', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res) => {
   // Return a dummy response since we don't want to expose password info
@@ -446,13 +471,32 @@ router.post('/update-profile-picture', isUserAuthenticated, isUserVerified, upda
 // User service requests (for clients to view their own requests)
 router.get('/user-service-requests', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-  
+
   const requests = await ServiceRequest.find({ requester: req.user._id })
     .populate('serviceProvider', 'firstName lastName profilePic')
     .populate('targetProvider', 'firstName lastName profilePic')
     .sort({ createdAt: -1 });
-  
+
   res.status(200).json({ success: true, requests });
+}));
+
+// Client applications (for clients to view applications to their requests)
+router.get('/client-applications', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  // Get bookings where user is requester and status is "Applied"
+  const applications = await Booking.find({
+    requester: req.user._id,
+    status: "Applied"
+  })
+    .populate('provider', 'firstName lastName profilePic email phone skills averageRating totalReviews')
+    .populate({
+      path: 'serviceRequest',
+      select: 'name address typeOfWork minBudget maxBudget notes preferredDate time'
+    })
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({ success: true, applications });
 }));
 
 // Matching requests (for workers - alias for available-service-requests)

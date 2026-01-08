@@ -43,7 +43,8 @@ export const postServiceRequest = catchAsyncError(async (req, res, next) => {
     typeOfWork,
     preferredDate: preferredDateObj,
     time,
-    budget: budget || 0,
+    minBudget: budget || 0,
+    maxBudget: budget || 0,
     notes,
     targetProvider,
     status: "Waiting",
@@ -1070,11 +1071,26 @@ export const applyToServiceRequest = catchAsyncError(async (req, res, next) => {
   }
 
   const { requestId } = req.params;
+  const { commissionFee } = req.body;
 
   const serviceRequest = await ServiceRequest.findById(requestId).populate('requester');
   if (!serviceRequest) return next(new ErrorHandler("Service request not found", 404));
-  if (serviceRequest.status !== "Open") {
-    return next(new ErrorHandler("Service request is not open for applications", 400));
+  if (serviceRequest.status !== "Waiting") {
+    return next(new ErrorHandler("Service request is not available for applications", 400));
+  }
+
+  // Validate commission fee
+  const fee = parseFloat(commissionFee);
+  if (isNaN(fee) || fee < 0) {
+    return next(new ErrorHandler("Invalid commission fee", 400));
+  }
+
+  // Check if commission fee is within budget range
+  if (serviceRequest.maxBudget && fee > serviceRequest.maxBudget) {
+    return next(new ErrorHandler(`Commission fee cannot exceed ₱${serviceRequest.maxBudget.toLocaleString()}`, 400));
+  }
+  if (serviceRequest.minBudget && fee < serviceRequest.minBudget) {
+    return next(new ErrorHandler(`Commission fee cannot be less than ₱${serviceRequest.minBudget.toLocaleString()}`, 400));
   }
 
   // Check if provider already applied
@@ -1087,17 +1103,19 @@ export const applyToServiceRequest = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("You have already applied to this request", 400));
   }
 
+  // Create application record (booking with status "Applied" for applications)
   const booking = await Booking.create({
     requester: serviceRequest.requester._id,
     provider: req.user._id,
     serviceRequest: requestId,
-    status: "Pending"
+    status: "Applied",
+    commissionFee: fee
   });
 
   await sendNotification(
     serviceRequest.requester._id,
     "New Application",
-    `${req.user.firstName} ${req.user.lastName} applied to your ${serviceRequest.serviceCategory} request`,
+    `${req.user.firstName} ${req.user.lastName} applied to your service request with a commission fee of ₱${fee.toLocaleString()}`,
     { bookingId: booking._id, type: "application" }
   );
 
@@ -1153,7 +1171,7 @@ export const respondToApplication = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Not authorized to respond to this application", 403));
   }
 
-  if (booking.status !== "Pending") {
+  if (booking.status !== "Applied") {
     return next(new ErrorHandler("Application has already been responded to", 400));
   }
 
