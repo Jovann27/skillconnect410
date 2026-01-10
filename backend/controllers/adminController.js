@@ -62,6 +62,7 @@ export const adminGetAllServiceRequests = async (req, res) => {
     const totalPages = Math.ceil(totalRequests / limit);
 
     res.json({
+      success: true,
       count: totalRequests,
       totalPages,
       requests

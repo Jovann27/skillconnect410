@@ -1,8 +1,23 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../middlewares/error.js";
+import {
+  validateServiceRequest,
+  validateChatMessage,
+  validateServiceOffer,
+  validateBookingStatus,
+  validateReview,
+  validateProfileUpdate,
+  validateApplication,
+  validateApplicationResponse,
+  validateOfferResponse,
+  validateMongoId,
+  handleValidationErrors,
+  sanitizeInput
+} from "../middlewares/validation.js";
 import User from "../models/userSchema.js";
 import ServiceRequest from "../models/serviceRequest.js";
 import ServiceOffer from "../models/serviceOffer.js";
+import Chat from "../models/chat.js";
 
 import Review from "../models/review.js";
 import { sendNotification } from "../utils/socketNotify.js";
@@ -47,13 +62,13 @@ export const postServiceRequest = catchAsyncError(async (req, res, next) => {
     maxBudget: budget || 0,
     notes,
     targetProvider,
-    status: "Waiting",
+    status: "Open",
     expiresAt,
   });
 
   const matchingProviders = await User.find({
     role: "Service Provider",
-    skills: { $in: [new RegExp(typeOfWork, 'i')] },
+    skills: { $in: [typeOfWork.toLowerCase()] },
   }).select("_id");
 
   for (const provider of matchingProviders) {
@@ -164,7 +179,7 @@ export const acceptServiceRequest = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
   const request = await ServiceRequest.findById(id).populate('requester');
   if (!request) return next(new ErrorHandler("Service Request not found", 404));
-  if (request.status !== "Waiting") return next(new ErrorHandler("Request is not available", 400));
+  if (request.status !== "Open") return next(new ErrorHandler("Request is not available", 400));
 
   const provider = await User.findById(req.user._id);
   if (!provider || provider.role !== "Service Provider") return next(new ErrorHandler("Not a provider", 403));
@@ -210,21 +225,53 @@ export const acceptServiceRequest = catchAsyncError(async (req, res, next) => {
 export const getBookings = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
+  const { page = 1, limit = 10 } = req.query;
+
+  // Validate pagination parameters
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  if (isNaN(pageNum) || pageNum < 1) return next(new ErrorHandler("Invalid page number", 400));
+  if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) return next(new ErrorHandler("Invalid limit (1-100 allowed)", 400));
+
   const bookings = await Booking.find({
     $or: [
       { requester: req.user._id },
       { provider: req.user._id }
     ]
   }).populate('requester provider', 'firstName lastName')
-    .populate('serviceRequest');
+    .populate('serviceRequest')
+    .sort({ createdAt: -1 })
+    .skip((pageNum - 1) * limitNum)
+    .limit(limitNum);
 
-  res.status(200).json({ success: true, bookings });
+  const totalCount = await Booking.countDocuments({
+    $or: [
+      { requester: req.user._id },
+      { provider: req.user._id }
+    ]
+  });
+
+  res.status(200).json({
+    success: true,
+    bookings,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limitNum)
+    }
+  });
 });
 
 export const getBooking = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
   const { id } = req.params;
+
+  // Validate booking ID format
+  if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+    return next(new ErrorHandler("Invalid booking ID format", 400));
+  }
 
   const booking = await Booking.findById(id)
     .populate('requester', 'firstName lastName username email phone profilePic')
@@ -274,18 +321,39 @@ export const getServiceProfile = catchAsyncError(async (req, res, next) => {
 
 export const updateServiceProfile = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-  
+
   const { skills, serviceDescription, serviceRate } = req.body;
-  
+
+  // Validate input data
+  if (skills && !Array.isArray(skills)) {
+    return next(new ErrorHandler("Skills must be an array", 400));
+  }
+
+  if (serviceDescription && (typeof serviceDescription !== 'string' || serviceDescription.trim().length > 500)) {
+    return next(new ErrorHandler("Service description must be a string with maximum 500 characters", 400));
+  }
+
+  if (serviceRate !== undefined) {
+    const rate = parseFloat(serviceRate);
+    if (isNaN(rate) || rate < 0 || rate > 100000) {
+      return next(new ErrorHandler("Service rate must be a valid number between 0 and 100,000", 400));
+    }
+  }
+
   const user = await User.findById(req.user._id);
   if (!user) return next(new ErrorHandler("User not found", 404));
-  
-  if (skills) user.skills = skills;
-  if (serviceDescription) user.serviceDescription = serviceDescription;
-  if (serviceRate) user.serviceRate = serviceRate;
-  
+
+  // Only allow service providers to update service-related fields
+  if (user.role !== "Service Provider") {
+    return next(new ErrorHandler("Only service providers can update service profiles", 403));
+  }
+
+  if (skills) user.skills = skills.map(skill => skill.toString().trim().toLowerCase()).filter(Boolean);
+  if (serviceDescription !== undefined) user.serviceDescription = serviceDescription.trim();
+  if (serviceRate !== undefined) user.serviceRate = parseFloat(serviceRate);
+
   await user.save();
-  
+
   res.status(200).json({ success: true, profile: {
     firstName: user.firstName,
     lastName: user.lastName,
@@ -304,8 +372,19 @@ export const updateServiceStatus = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
   const { isOnline } = req.body;
+
+  // Validate isOnline parameter
+  if (typeof isOnline !== 'boolean') {
+    return next(new ErrorHandler("isOnline must be a boolean value", 400));
+  }
+
   const user = await User.findById(req.user._id);
   if (!user) return next(new ErrorHandler("User not found", 404));
+
+  // Only allow service providers to update their online status
+  if (user.role !== "Service Provider") {
+    return next(new ErrorHandler("Only service providers can update online status", 403));
+  }
 
   user.isOnline = isOnline;
   await user.save();
@@ -315,100 +394,492 @@ export const updateServiceStatus = catchAsyncError(async (req, res, next) => {
 
 export const getMatchingRequests = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-  
-  res.status(200).json({ success: true, requests: [] });
+
+  // Get all users that the current user has had service interactions with
+  const userInteractions = await Booking.find({
+    $or: [
+      { requester: req.user._id },
+      { provider: req.user._id }
+    ]
+  })
+  .populate('requester', 'firstName lastName profilePic isOnline')
+  .populate('provider', 'firstName lastName profilePic isOnline')
+  .select('requester provider status');
+
+  // Also get users from service requests (direct offers, etc.)
+  const serviceRequestInteractions = await ServiceRequest.find({
+    $or: [
+      { requester: req.user._id },
+      { serviceProvider: req.user._id },
+      { targetProvider: req.user._id }
+    ]
+  })
+  .populate('requester', 'firstName lastName profilePic isOnline')
+  .populate('serviceProvider', 'firstName lastName profilePic isOnline')
+  .populate('targetProvider', 'firstName lastName profilePic isOnline')
+  .select('requester serviceProvider targetProvider status');
+
+  // Collect unique users
+  const uniqueUsers = new Map();
+
+  // From bookings
+  userInteractions.forEach(booking => {
+    const otherUser = booking.requester._id.toString() === req.user._id.toString()
+      ? booking.provider
+      : booking.requester;
+
+    if (otherUser && !uniqueUsers.has(otherUser._id.toString())) {
+      uniqueUsers.set(otherUser._id.toString(), {
+        user: otherUser,
+        lastInteraction: booking.createdAt,
+        type: 'booking',
+        status: booking.status
+      });
+    }
+  });
+
+  // From service requests
+  serviceRequestInteractions.forEach(request => {
+    let otherUser = null;
+    let type = 'service_request';
+
+    if (request.requester._id.toString() === req.user._id.toString()) {
+      otherUser = request.serviceProvider || request.targetProvider;
+      type = request.targetProvider ? 'direct_offer' : 'service_request';
+    } else {
+      otherUser = request.requester;
+    }
+
+    if (otherUser && !uniqueUsers.has(otherUser._id.toString())) {
+      uniqueUsers.set(otherUser._id.toString(), {
+        user: otherUser,
+        lastInteraction: request.createdAt,
+        type: type,
+        status: request.status
+      });
+    }
+  });
+
+  // Convert to array and sort by last interaction
+  const matches = Array.from(uniqueUsers.values())
+    .sort((a, b) => new Date(b.lastInteraction) - new Date(a.lastInteraction));
+
+  res.status(200).json({
+    success: true,
+    requests: matches,
+    count: matches.length
+  });
 });
 
 export const getChatHistory = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-  
-  res.status(200).json({ success: true, chatHistory: [] });
+
+  const { appointmentId, userId, page = 1, limit = 50 } = req.query;
+
+  if (!appointmentId && !userId) {
+    return next(new ErrorHandler("Either appointmentId or userId is required", 400));
+  }
+
+  let query = {};
+
+  if (appointmentId) {
+    // Get chat history for a specific booking/appointment
+    query.appointment = appointmentId;
+
+    // Verify user is part of this booking
+    const booking = await Booking.findById(appointmentId);
+    if (!booking) return next(new ErrorHandler("Booking not found", 404));
+
+    if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
+      return next(new ErrorHandler("Not authorized to view this chat", 403));
+    }
+  } else if (userId) {
+    // Get chat history between current user and specified user
+    // Find bookings where both users are involved
+    const bookings = await Booking.find({
+      $or: [
+        { requester: req.user._id, provider: userId },
+        { requester: userId, provider: req.user._id }
+      ]
+    }).select('_id');
+
+    if (bookings.length === 0) {
+      return res.status(200).json({ success: true, chatHistory: [], message: "No chat history found" });
+    }
+
+    query.appointment = { $in: bookings.map(b => b._id) };
+  }
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const chatHistory = await Chat.find(query)
+    .populate('sender', 'firstName lastName profilePic')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  // Reverse to get chronological order (oldest first)
+  chatHistory.reverse();
+
+  // Mark messages as seen if the current user is not the sender
+  const unseenMessages = chatHistory.filter(msg =>
+    msg.sender._id.toString() !== req.user._id.toString() &&
+    msg.status !== 'seen' &&
+    !msg.seenBy.some(seen => seen.user.toString() === req.user._id.toString())
+  );
+
+  if (unseenMessages.length > 0) {
+    // Update seen status for messages
+    await Chat.updateMany(
+      {
+        _id: { $in: unseenMessages.map(msg => msg._id) }
+      },
+      {
+        $push: {
+          seenBy: {
+            user: req.user._id,
+            seenAt: new Date()
+          }
+        },
+        $set: { status: 'seen' }
+      }
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    chatHistory,
+    count: chatHistory.length,
+    page: parseInt(page),
+    limit: parseInt(limit)
+  });
 });
 
-export const sendMessage = catchAsyncError(async (req, res, next) => {
+export const sendMessage = [
+  sanitizeInput,
+  validateChatMessage,
+  handleValidationErrors,
+  catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-  
-  res.status(201).json({ success: true, message: {} });
+
+  const { appointmentId, message, receiverId } = req.body;
+
+  if (!message || message.trim().length === 0) {
+    return next(new ErrorHandler("Message cannot be empty", 400));
+  }
+
+  if (message.length > 1000) {
+    return next(new ErrorHandler("Message cannot exceed 1000 characters", 400));
+  }
+
+  let booking = null;
+  let receiver = null;
+
+  if (appointmentId) {
+    // Verify the booking exists and user is part of it
+    booking = await Booking.findById(appointmentId);
+    if (!booking) return next(new ErrorHandler("Booking not found", 404));
+
+    if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
+      return next(new ErrorHandler("Not authorized to send messages in this conversation", 403));
+    }
+
+    // Determine receiver
+    receiver = booking.requester._id.toString() === req.user._id.toString()
+      ? booking.provider
+      : booking.requester;
+  } else if (receiverId) {
+    // Direct message - verify there's an existing relationship
+    receiver = await User.findById(receiverId);
+    if (!receiver) return next(new ErrorHandler("Receiver not found", 404));
+
+    // Check if there's an existing booking between these users
+    booking = await Booking.findOne({
+      $or: [
+        { requester: req.user._id, provider: receiverId },
+        { requester: receiverId, provider: req.user._id }
+      ]
+    });
+
+    if (!booking) {
+      return next(new ErrorHandler("No existing conversation found with this user", 400));
+    }
+  } else {
+    return next(new ErrorHandler("Either appointmentId or receiverId is required", 400));
+  }
+
+  // Create the chat message
+  const chatMessage = await Chat.create({
+    appointment: booking._id,
+    sender: req.user._id,
+    message: message.trim(),
+    status: 'sent'
+  });
+
+  // Populate sender info for response
+  await chatMessage.populate('sender', 'firstName lastName profilePic');
+
+  // Send real-time notification via socket
+  io.to(`booking-${booking._id}`).emit("new-message", {
+    message: chatMessage,
+    bookingId: booking._id
+  });
+
+  // Send notification to receiver
+  await sendNotification(
+    receiver._id,
+    "New Message",
+    `You have a new message from ${req.user.firstName} ${req.user.lastName}`,
+    { bookingId: booking._id, messageId: chatMessage._id, type: "new-message" }
+  );
+
+  res.status(201).json({
+    success: true,
+    message: chatMessage
+  });
 });
 
 export const getChatList = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-  
-  res.status(200).json({ success: true, chatList: [] });
+
+  // Get all bookings where user is involved
+  const userBookings = await Booking.find({
+    $or: [
+      { requester: req.user._id },
+      { provider: req.user._id }
+    ]
+  })
+  .populate('requester', 'firstName lastName profilePic isOnline')
+  .populate('provider', 'firstName lastName profilePic isOnline')
+  .populate('serviceRequest', 'name typeOfWork')
+  .select('_id requester provider serviceRequest status createdAt');
+
+  if (userBookings.length === 0) {
+    return res.status(200).json({ success: true, chatList: [], message: "No active chats found" });
+  }
+
+  // Get chat statistics for each booking
+  const chatList = await Promise.all(
+    userBookings.map(async (booking) => {
+      const otherUser = booking.requester._id.toString() === req.user._id.toString()
+        ? booking.provider
+        : booking.requester;
+
+      // Get latest message for this booking
+      const latestMessage = await Chat.findOne({ appointment: booking._id })
+        .populate('sender', 'firstName lastName')
+        .sort({ createdAt: -1 })
+        .select('message sender createdAt status');
+
+      // Count unread messages for current user
+      const unreadCount = await Chat.countDocuments({
+        appointment: booking._id,
+        sender: { $ne: req.user._id },
+        status: { $ne: 'seen' },
+        seenBy: { $not: { $elemMatch: { user: req.user._id } } }
+      });
+
+      return {
+        bookingId: booking._id,
+        otherUser: {
+          _id: otherUser._id,
+          firstName: otherUser.firstName,
+          lastName: otherUser.lastName,
+          profilePic: otherUser.profilePic,
+          isOnline: otherUser.isOnline
+        },
+        serviceRequest: booking.serviceRequest ? {
+          _id: booking.serviceRequest._id,
+          name: booking.serviceRequest.name,
+          typeOfWork: booking.serviceRequest.typeOfWork
+        } : null,
+        bookingStatus: booking.status,
+        latestMessage: latestMessage ? {
+          message: latestMessage.message,
+          sender: latestMessage.sender,
+          createdAt: latestMessage.createdAt,
+          isFromMe: latestMessage.sender._id.toString() === req.user._id.toString()
+        } : null,
+        unreadCount,
+        lastActivity: latestMessage ? latestMessage.createdAt : booking.createdAt
+      };
+    })
+  );
+
+  // Sort by last activity (most recent first)
+  chatList.sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity));
+
+  res.status(200).json({
+    success: true,
+    chatList,
+    count: chatList.length
+  });
 });
 
 export const markMessagesAsSeen = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-  
-  res.status(200).json({ success: true, message: "Messages marked as seen" });
+
+  const { appointmentId } = req.params;
+
+  if (!appointmentId) {
+    return next(new ErrorHandler("Appointment ID is required", 400));
+  }
+
+  // Verify user is part of this booking
+  const booking = await Booking.findById(appointmentId);
+  if (!booking) return next(new ErrorHandler("Booking not found", 404));
+
+  if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
+    return next(new ErrorHandler("Not authorized to mark messages as seen in this conversation", 403));
+  }
+
+  // Update all unseen messages in this booking where the sender is not the current user
+  const result = await Chat.updateMany(
+    {
+      appointment: appointmentId,
+      sender: { $ne: req.user._id },
+      status: { $ne: 'seen' },
+      seenBy: { $not: { $elemMatch: { user: req.user._id } } }
+    },
+    {
+      $push: {
+        seenBy: {
+          user: req.user._id,
+          seenAt: new Date()
+        }
+      },
+      $set: { status: 'seen' }
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: `${result.modifiedCount} messages marked as seen`,
+    modifiedCount: result.modifiedCount
+  });
 });
 
 export const getServiceProviders = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
-  const { page = 1, limit = 20, skills, minRating, maxRate } = req.query;
+  const { page = 1, limit = 20, skills, minRating, maxRate, includeReviews = 'true' } = req.query;
   const skip = (page - 1) * limit;
+  const includeReviewsBool = includeReviews === 'true';
 
-  // Build query - return all service providers, not just verified ones
-  let query = { role: "Service Provider" };
+  // Build match conditions for aggregation pipeline
+  const matchConditions = { role: "Service Provider" };
 
   if (skills) {
-    query.skills = { $in: [new RegExp(skills, 'i')] };
+    // Use exact match instead of regex for better index utilization
+    // Split skills by comma and trim whitespace
+    const skillArray = skills.split(',').map(s => s.trim().toLowerCase());
+    matchConditions.skills = { $in: skillArray };
+  }
+
+  if (minRating) {
+    matchConditions.averageRating = { $gte: parseFloat(minRating) };
+  }
+
+  if (maxRate) {
+    matchConditions.serviceRate = { $lte: parseFloat(maxRate) };
   }
 
   // If no limit specified or limit is very high, return all providers
   const shouldReturnAll = !limit || parseInt(limit) >= 10000;
 
-  // Get providers with filters
-  let providersQuery = User.find(query)
-    .select('firstName lastName email phone skills services serviceDescription serviceRate profilePic isOnline averageRating totalReviews verified address occupation yearsExperience totalJobsCompleted createdAt')
-    .sort({ averageRating: -1, totalReviews: -1 });
+  // Use aggregation pipeline for better performance
+  const aggregationPipeline = [
+    { $match: matchConditions },
+    {
+      $facet: {
+        providers: [
+          {
+            $project: {
+              firstName: 1,
+              lastName: 1,
+              email: 1,
+              phone: 1,
+              skills: 1,
+              services: 1,
+              serviceDescription: 1,
+              serviceRate: 1,
+              profilePic: 1,
+              isOnline: 1,
+              averageRating: 1,
+              totalReviews: 1,
+              verified: 1,
+              address: 1,
+              occupation: 1,
+              yearsExperience: 1,
+              totalJobsCompleted: 1,
+              createdAt: 1
+            }
+          },
+          { $sort: { averageRating: -1, totalReviews: -1 } }
+        ].concat(shouldReturnAll ? [] : [
+          { $skip: skip },
+          { $limit: parseInt(limit) }
+        ]),
+        totalCount: [
+          { $count: "count" }
+        ]
+      }
+    }
+  ];
 
-  if (!shouldReturnAll) {
-    providersQuery = providersQuery.skip(skip).limit(parseInt(limit));
+  const result = await User.aggregate(aggregationPipeline);
+  const providers = result[0].providers;
+  const totalCount = result[0].totalCount[0]?.count || 0;
+
+  // If reviews are not needed, return early
+  if (!includeReviewsBool) {
+    return res.json({
+      success: true,
+      count: totalCount,
+      workers: providers
+    });
   }
 
-  const providers = await providersQuery;
-
-  // Get total count for pagination
-  const totalCount = await User.countDocuments(query);
-
-  // Get reviews for each provider
+  // Get reviews for each provider with pagination (limit to 5 most recent reviews per provider)
   const providerIds = providers.map(p => p._id);
-  const reviews = await Review.find({ reviewee: { $in: providerIds } })
-    .populate('reviewer', 'firstName lastName')
-    .sort({ createdAt: -1 });
+  const reviews = await Review.find({
+    reviewee: { $in: providerIds }
+  })
+  .populate('reviewer', 'firstName lastName')
+  .sort({ createdAt: -1 })
+  .limit(5 * providers.length); // Limit total reviews fetched
 
-  // Group reviews by provider
+  // Group reviews by provider (limit to 5 per provider)
   const reviewsByProvider = {};
   reviews.forEach(review => {
     const providerId = review.reviewee.toString();
     if (!reviewsByProvider[providerId]) {
       reviewsByProvider[providerId] = [];
     }
-    reviewsByProvider[providerId].push({
-      _id: review._id,
-      comment: review.comments,
-      rating: review.rating,
-      reviewer: {
-        firstName: review.reviewer.firstName,
-        lastName: review.reviewer.lastName
-      },
-      createdAt: review.createdAt
-    });
+    if (reviewsByProvider[providerId].length < 5) {
+      reviewsByProvider[providerId].push({
+        _id: review._id,
+        comment: review.comments,
+        rating: review.rating,
+        reviewer: {
+          firstName: review.reviewer.firstName,
+          lastName: review.reviewer.lastName
+        },
+        createdAt: review.createdAt
+      });
+    }
   });
 
   // Add reviews to providers
-  const workersWithReviews = providers.map(provider => {
-    const providerObj = provider.toObject();
-    providerObj.reviews = reviewsByProvider[provider._id.toString()] || [];
-    return providerObj;
-  });
+  const workersWithReviews = providers.map(provider => ({
+    ...provider,
+    reviews: reviewsByProvider[provider._id.toString()] || []
+  }));
 
-  res.json({ 
-    success: true, 
+  res.json({
+    success: true,
     count: totalCount,
-    workers: workersWithReviews 
+    workers: workersWithReviews
   });
 });
 
@@ -614,31 +1085,85 @@ export const getAvailableServiceRequests = catchAsyncError(async (req, res, next
     }
   }
 
-  // Regular query with filters
-  let query = { 
+  // Build match conditions for aggregation pipeline
+  const matchConditions = {
     status: "Waiting",
     expiresAt: { $gt: new Date() }
   };
 
   if (skills) {
-    query.typeOfWork = { $in: [new RegExp(skills, 'i')] };
+    // Use exact match instead of regex for better index utilization
+    // Split skills by comma and trim whitespace
+    const skillArray = skills.split(',').map(s => s.trim().toLowerCase());
+    matchConditions.typeOfWork = { $in: skillArray };
   }
 
-  const requests = await ServiceRequest.find(query)
-    .populate('requester', 'firstName lastName profilePic')
-    .populate('targetProvider', 'firstName lastName')
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(parseInt(limit));
+  // Use aggregation pipeline for better performance and selective population
+  const aggregationPipeline = [
+    { $match: matchConditions },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'requester',
+        foreignField: '_id',
+        as: 'requester',
+        pipeline: [
+          {
+            $project: {
+              firstName: 1,
+              lastName: 1,
+              profilePic: 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'targetProvider',
+        foreignField: '_id',
+        as: 'targetProvider',
+        pipeline: [
+          {
+            $project: {
+              firstName: 1,
+              lastName: 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      $addFields: {
+        requester: { $arrayElemAt: ['$requester', 0] },
+        targetProvider: { $arrayElemAt: ['$targetProvider', 0] }
+      }
+    },
+    {
+      $facet: {
+        requests: [
+          { $sort: { createdAt: -1 } },
+          { $skip: skip },
+          { $limit: parseInt(limit) }
+        ],
+        totalCount: [
+          { $count: "count" }
+        ]
+      }
+    }
+  ];
 
-  const totalCount = await ServiceRequest.countDocuments(query);
+  const result = await ServiceRequest.aggregate(aggregationPipeline);
+  const requests = result[0].requests;
+  const totalCount = result[0].totalCount[0]?.count || 0;
 
   res.json({
     success: true,
     count: totalCount,
     requests,
     algorithm: "filtered",
-    description: "Using filtered search"
+    description: "Using optimized filtered search with aggregation pipeline"
   });
 });
 
@@ -746,7 +1271,7 @@ export const createServiceRequest = catchAsyncError(async (req, res, next) => {
   const matchingProviders = await User.find({
     role: "Service Provider",
     verified: true,
-    skills: { $in: [new RegExp(serviceCategory, 'i')] }
+    skills: { $in: [serviceCategory.toLowerCase()] }
   });
 
   for (const provider of matchingProviders) {
@@ -767,34 +1292,65 @@ export const browseServiceProviders = catchAsyncError(async (req, res, next) => 
   const { page = 1, limit = 20, serviceCategory, location, minRating, maxRate } = req.query;
   const skip = (page - 1) * limit;
 
-  let query = {
+  // Build match conditions for aggregation pipeline
+  const matchConditions = {
     role: "Service Provider",
     verified: true
   };
 
   if (serviceCategory) {
-    query.skills = { $in: [new RegExp(serviceCategory, 'i')] };
+    // Use exact match instead of regex for better index utilization
+    matchConditions.skills = { $in: [serviceCategory.toLowerCase()] };
   }
 
   if (location) {
-    query.address = { $regex: location, $options: 'i' };
+    matchConditions.address = { $regex: location, $options: 'i' };
   }
 
   if (minRating) {
-    query.averageRating = { $gte: parseFloat(minRating) };
+    matchConditions.averageRating = { $gte: parseFloat(minRating) };
   }
 
   if (maxRate) {
-    query.serviceRate = { $lte: parseFloat(maxRate) };
+    matchConditions.serviceRate = { $lte: parseFloat(maxRate) };
   }
 
-  const providers = await User.find(query)
-    .select('firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews address')
-    .skip(skip)
-    .limit(parseInt(limit))
-    .sort({ averageRating: -1, totalReviews: -1 });
+  // Use aggregation pipeline for better performance
+  const aggregationPipeline = [
+    { $match: matchConditions },
+    {
+      $facet: {
+        providers: [
+          {
+            $project: {
+              firstName: 1,
+              lastName: 1,
+              email: 1,
+              phone: 1,
+              skills: 1,
+              serviceDescription: 1,
+              serviceRate: 1,
+              profilePic: 1,
+              isOnline: 1,
+              averageRating: 1,
+              totalReviews: 1,
+              address: 1
+            }
+          },
+          { $sort: { averageRating: -1, totalReviews: -1 } },
+          { $skip: skip },
+          { $limit: parseInt(limit) }
+        ],
+        totalCount: [
+          { $count: "count" }
+        ]
+      }
+    }
+  ];
 
-  const totalCount = await User.countDocuments(query);
+  const result = await User.aggregate(aggregationPipeline);
+  const providers = result[0].providers;
+  const totalCount = result[0].totalCount[0]?.count || 0;
 
   res.json({
     success: true,

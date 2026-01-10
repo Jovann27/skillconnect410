@@ -14,8 +14,8 @@ const serviceRequestSchema = new mongoose.Schema({
   targetProvider: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   status: {
     type: String,
-    enum: ["Waiting", "Offered", "Working", "Complete", "Cancelled"],
-    default: "Waiting"
+    enum: ["Open", "Offered", "Accepted", "In Progress", "Completed", "Cancelled"],
+    default: "Open"
   },
   cancellationReason: { type: String, default: "" },
   expiresAt: { type: Date, default: () => new Date(Date.now() + 24 * 60 * 60 * 1000) },

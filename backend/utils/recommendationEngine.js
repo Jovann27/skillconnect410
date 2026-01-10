@@ -72,79 +72,53 @@ const calculateContentBasedScore = (worker, serviceRequest) => {
 };
 
 /**
- * Calculate collaborative filtering score based on similar users' preferences
+ * Calculate collaborative filtering score (synchronous version for performance)
  * @param {Object} worker - Worker user object
  * @param {Object} serviceRequest - Service request object
  * @param {Array} similarRequests - Array of similar service requests
  * @param {Array} historicalBookings - Array of historical bookings
  * @returns {number} Collaborative filtering score (0-1)
  */
-const calculateCollaborativeScore = async (worker, serviceRequest, similarRequests, historicalBookings) => {
+const calculateCollaborativeScoreSync = (worker, serviceRequest, similarRequests, historicalBookings) => {
   let score = 0;
   let factors = 0;
 
-  // Factor 1: Historical Success Rate (40% weight)
-  // Check if worker has completed similar service requests successfully
+  // Factor 1: Historical Success Rate (50% weight)
   const workerBookings = historicalBookings.filter(
-    booking => String(booking.provider) === String(worker._id) && 
-               booking.status === 'Complete'
+    booking => String(booking.provider) === String(worker._id) &&
+               booking.status === 'Completed'
   );
 
   if (workerBookings.length > 0) {
-    // Find similar completed bookings
     const similarCompletedBookings = workerBookings.filter(booking => {
       if (!booking.serviceRequest) return false;
-      const bookingService = booking.serviceRequest.serviceCategory || booking.serviceRequest.typeOfWork;
-      return bookingService && 
-             bookingService.toLowerCase() === serviceRequest.serviceCategory?.toLowerCase();
+      const bookingService = booking.serviceRequest.typeOfWork;
+      const requestService = serviceRequest.typeOfWork || serviceRequest.serviceCategory || '';
+      return bookingService &&
+             bookingService.toLowerCase().includes(requestService.toLowerCase().split(' ')[0]);
     });
 
-    const successRate = similarCompletedBookings.length / Math.max(workerBookings.length, 1);
-    score += successRate * 0.4;
-    factors += 0.4;
+    const successRate = similarCompletedBookings.length / workerBookings.length;
+    score += successRate * 0.5;
+    factors += 0.5;
   }
 
-  // Factor 2: Popularity Among Similar Users (30% weight)
-  // Check how many similar requests were fulfilled by this worker type
-  if (similarRequests.length > 0) {
-    const fulfilledSimilarRequests = similarRequests.filter(req => 
-      req.status === 'Complete' || req.status === 'Working'
-    );
-    
-    // Check if this worker type (based on skills) fulfilled similar requests
-    const workerTypeFulfillments = fulfilledSimilarRequests.filter(req => {
-      if (!req.serviceProvider) return false;
-      // This would require populating serviceProvider, simplified here
-      return true;
-    });
-
-    const popularityScore = workerTypeFulfillments.length / Math.max(similarRequests.length, 1);
-    score += popularityScore * 0.3;
+  // Factor 2: Experience with similar work (30% weight)
+  if (worker.totalJobsCompleted && worker.totalJobsCompleted > 0) {
+    const experienceScore = Math.min(worker.totalJobsCompleted / 20.0, 1);
+    score += experienceScore * 0.3;
     factors += 0.3;
   }
 
-  // Factor 3: User Preference Patterns (30% weight)
-  // Check if requester has worked with similar workers before
-  if (serviceRequest.requester) {
-    const requesterBookings = historicalBookings.filter(
-      booking => String(booking.requester) === String(serviceRequest.requester)
-    );
-
-    if (requesterBookings.length > 0) {
-      // Check if requester prefers workers with similar skills
-      const completedWithSimilarWorkers = requesterBookings.filter(booking => {
-        // This would require populating provider details
-        return booking.status === 'Complete';
-      });
-
-      const preferenceScore = completedWithSimilarWorkers.length / Math.max(requesterBookings.length, 1);
-      score += preferenceScore * 0.3;
-      factors += 0.3;
-    }
+  // Factor 3: Rating consistency (20% weight)
+  if (worker.averageRating && worker.totalReviews && worker.totalReviews > 0) {
+    const ratingScore = Math.min(worker.averageRating / 5.0, 1);
+    score += ratingScore * 0.2;
+    factors += 0.2;
   }
 
   // Normalize by actual factors present
-  return factors > 0 ? score / factors : 0.5; // Default to 0.5 if no data
+  return factors > 0 ? score : 0.3; // Default to 0.3 if no data
 };
 
 /**
@@ -199,7 +173,7 @@ export const getRecommendedWorkers = async (serviceRequest, options = {}) => {
         const contentScore = calculateContentBasedScore(worker, serviceRequest);
 
         // Collaborative filtering score
-        const collaborativeScore = await calculateCollaborativeScore(
+        const collaborativeScore = calculateCollaborativeScoreSync(
           worker,
           serviceRequest,
           similarRequests,
@@ -278,42 +252,53 @@ const generateRecommendationReason = (item) => {
 export const getRecommendedServiceRequests = async (worker, options = {}) => {
   const {
     limit = 10,
-    minScore = 0.3
+    minScore = 0.3,
+    page = 1
   } = options;
 
   try {
-    // Get available service requests
+    // Get available service requests with skill-based filtering
+    const workerSkills = worker.skills || [];
+    const skillRegex = workerSkills.length > 0
+      ? new RegExp(workerSkills.join('|'), 'i')
+      : new RegExp(worker.occupation || '', 'i');
+
     const serviceRequests = await ServiceRequest.find({
-      status: "Waiting",
-      expiresAt: { $gt: new Date() }
+      status: "Open",
+      expiresAt: { $gt: new Date() },
+      $or: [
+        { typeOfWork: { $regex: skillRegex } },
+        { notes: { $regex: skillRegex } }
+      ]
     })
       .populate('requester', 'firstName lastName profilePic')
-      .limit(100); // Get more to filter
+      .limit(50); // Limit for performance
 
     if (serviceRequests.length === 0) {
       return [];
     }
 
-    // Get historical data
+    // Get worker's historical data
     const historicalBookings = await Booking.find({
       provider: worker._id,
-      status: { $in: ['Complete', 'Working'] }
+      status: { $in: ['Completed', 'In Progress'] }
     })
-      .populate('serviceRequest', 'serviceCategory typeOfWork');
+      .populate('serviceRequest', 'typeOfWork')
+      .limit(20);
 
     // Score each service request
     const scoredRequests = serviceRequests.map(request => {
       const contentScore = calculateContentBasedScore(worker, request);
-      
+
       // Check if worker has completed similar requests
       const similarCompleted = historicalBookings.filter(booking => {
-        const bookingService = booking.serviceRequest?.serviceCategory || booking.serviceRequest?.typeOfWork;
-        return bookingService && 
-               bookingService.toLowerCase() === request.serviceCategory?.toLowerCase();
+        const bookingService = booking.serviceRequest?.typeOfWork;
+        return bookingService &&
+               bookingService.toLowerCase().includes(request.typeOfWork.toLowerCase().split(' ')[0]);
       });
-      
-      const collaborativeScore = similarCompleted.length > 0 ? 0.8 : 0.5;
-      const hybridScore = (contentScore * 0.6) + (collaborativeScore * 0.4);
+
+      const collaborativeScore = similarCompleted.length > 0 ? 0.8 : 0.4;
+      const hybridScore = (contentScore * 0.7) + (collaborativeScore * 0.3);
 
       return {
         request: request.toObject(),
@@ -364,4 +349,5 @@ export default {
   calculateContentBasedScore,
   calculateCollaborativeScore
 };
+
 

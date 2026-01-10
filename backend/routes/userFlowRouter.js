@@ -22,7 +22,6 @@ import {
   acceptServiceRequest,
   getAvailableServiceRequests,
   getUserServices,
-  getServiceProviders,
   getRecommendedProviders,
   offerToProvider,
   acceptOffer,
@@ -41,6 +40,7 @@ import {
   sendDirectServiceOffer
 } from '../controllers/userFlowController.js';
 import { getServices } from '../controllers/adminFlowController.js';
+import { getServiceProviders } from '../controllers/adminController.js';
 import { updateProfile, updateUserPassword } from '../controllers/userController.js';
 
 const router = express.Router();

@@ -39,10 +39,10 @@ const serviceOfferSchema = new mongoose.Schema({
   preferredDate: { 
     type: Date 
   },
-  status: { 
-    type: String, 
-    enum: ["Pending", "Accepted", "Declined", "Expired"], 
-    default: "Pending" 
+  status: {
+    type: String,
+    enum: ["Open", "Accepted", "Declined", "Expired"],
+    default: "Open"
   },
   createdAt: { 
     type: Date, 

@@ -53,7 +53,7 @@ const initializeSocket = async (token) => {
     });
 
     _socket.on("connect", () => {
-        console.log("Socket connected successfully");
+        // Socket connected successfully
     });
 
     if (pendingListeners.length > 0) {

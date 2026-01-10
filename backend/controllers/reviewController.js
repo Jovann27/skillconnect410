@@ -3,13 +3,32 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../middlewares/error.js";
 
 // Get all reviews for a specific user (reviewee)
-export const getUserReviews = catchAsyncError(async (req, res) => {
+export const getUserReviews = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
   const { userId } = req.params;
+
+  // Validate userId format
+  if (!userId || !userId.match(/^[0-9a-fA-F]{24}$/)) {
+    return next(new ErrorHandler("Invalid user ID format", 400));
+  }
+
+  const { page = 1, limit = 10 } = req.query;
+
+  // Validate pagination parameters
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  if (isNaN(pageNum) || pageNum < 1) return next(new ErrorHandler("Invalid page number", 400));
+  if (isNaN(limitNum) || limitNum < 1 || limitNum > 50) return next(new ErrorHandler("Invalid limit (1-50 allowed)", 400));
 
   const reviews = await Review.find({ reviewee: userId })
     .populate('reviewer', 'firstName lastName profilePic')
     .populate('booking', 'service')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip((pageNum - 1) * limitNum)
+    .limit(limitNum);
+
+  const totalCount = await Review.countDocuments({ reviewee: userId });
 
   // Format the reviews for the mobile app
   const formattedReviews = reviews.map(review => ({
@@ -24,14 +43,46 @@ export const getUserReviews = catchAsyncError(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    reviews: formattedReviews
+    reviews: formattedReviews,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limitNum)
+    }
   });
 });
 
 // Create a new review
 export const createReview = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
   const { bookingId, rating, comments } = req.body;
-  const reviewerId = req.user._id;
+
+  // Validate required fields
+  if (!bookingId) {
+    return next(new ErrorHandler("Booking ID is required", 400));
+  }
+
+  // Validate bookingId format
+  if (!bookingId.match(/^[0-9a-fA-F]{24}$/)) {
+    return next(new ErrorHandler("Invalid booking ID format", 400));
+  }
+
+  // Validate rating
+  if (rating === undefined || rating === null) {
+    return next(new ErrorHandler("Rating is required", 400));
+  }
+
+  const ratingNum = parseFloat(rating);
+  if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+    return next(new ErrorHandler("Rating must be a number between 1 and 5", 400));
+  }
+
+  // Validate comments
+  if (comments && (typeof comments !== 'string' || comments.trim().length > 1000)) {
+    return next(new ErrorHandler("Comments must be a string with maximum 1000 characters", 400));
+  }
 
   // Find the booking to get the reviewee
   const Booking = (await import("../models/booking.js")).default;
@@ -41,17 +92,37 @@ export const createReview = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Booking not found", 404));
   }
 
+  // Check if booking is completed
+  if (booking.status !== "Complete" && booking.status !== "Completed") {
+    return next(new ErrorHandler("Can only review completed bookings", 400));
+  }
+
+  // Check if user is part of this booking
+  if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
+    return next(new ErrorHandler("Not authorized to review this booking", 403));
+  }
+
+  // Check if user already reviewed this booking
+  const existingReview = await Review.findOne({
+    booking: bookingId,
+    reviewer: req.user._id
+  });
+
+  if (existingReview) {
+    return next(new ErrorHandler("You have already reviewed this booking", 400));
+  }
+
   // Determine who is being reviewed (the other party in the booking)
-  const revieweeId = booking.requester.toString() === reviewerId.toString()
+  const revieweeId = booking.requester.toString() === req.user._id.toString()
     ? booking.provider
     : booking.requester;
 
   const review = await Review.create({
     booking: bookingId,
-    reviewer: reviewerId,
+    reviewer: req.user._id,
     reviewee: revieweeId,
-    rating,
-    comments
+    rating: ratingNum,
+    comments: comments ? comments.trim() : ""
   });
 
   res.status(201).json({
@@ -62,8 +133,15 @@ export const createReview = catchAsyncError(async (req, res, next) => {
 });
 
 // Get review statistics for a user
-export const getUserReviewStats = catchAsyncError(async (req, res) => {
+export const getUserReviewStats = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
   const { userId } = req.params;
+
+  // Validate userId format
+  if (!userId || !userId.match(/^[0-9a-fA-F]{24}$/)) {
+    return next(new ErrorHandler("Invalid user ID format", 400));
+  }
 
   const stats = await Review.aggregate([
     { $match: { reviewee: userId } },
@@ -91,7 +169,7 @@ export const getUserReviewStats = catchAsyncError(async (req, res) => {
     success: true,
     stats: {
       totalReviews: result.totalReviews,
-      averageRating: Math.round(result.averageRating * 10) / 10,
+      averageRating: result.averageRating ? Math.round(result.averageRating * 10) / 10 : 0,
       distribution
     }
   });

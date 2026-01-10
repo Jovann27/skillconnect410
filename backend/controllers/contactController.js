@@ -7,7 +7,7 @@ export const sendContactMessage = async (req, res) => {
   if (!name || !email || !subject || !message) {
     return res.status(400).json({
       success: false,
-      error: "All fields (name, email, subject, message) are required"
+      message: "All fields (name, email, subject, message) are required"
     });
   }
 
@@ -16,7 +16,7 @@ export const sendContactMessage = async (req, res) => {
   if (!emailRegex.test(email)) {
     return res.status(400).json({
       success: false,
-      error: "Please provide a valid email address"
+      message: "Please provide a valid email address"
     });
   }
 
@@ -25,7 +25,7 @@ export const sendContactMessage = async (req, res) => {
     console.error("Email configuration missing");
     return res.status(500).json({
       success: false,
-      error: "Email service is not configured"
+      message: "Email service is not configured"
     });
   }
 
@@ -87,7 +87,7 @@ This message was sent from the SkillConnect contact form.`,
     console.error("Email error:", err.message);
     res.status(500).json({
       success: false,
-      error: `Failed to send message: ${err.message}`
+      message: `Failed to send message: ${err.message}`
     });
   }
 };
