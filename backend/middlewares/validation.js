@@ -14,6 +14,72 @@ export const handleValidationErrors = (req, res, next) => {
   next();
 };
 
+// Security logging middleware
+export const securityLogger = (req, res, next) => {
+  const timestamp = new Date().toISOString();
+  const ip = req.ip || req.connection.remoteAddress;
+  const userAgent = req.get('User-Agent') || 'Unknown';
+  const method = req.method;
+  const url = req.originalUrl;
+  const userId = req.user ? req.user._id : 'unauthenticated';
+  const adminId = req.admin ? req.admin._id : null;
+
+  // Log security events
+  if (req.method !== 'GET' && req.method !== 'OPTIONS') {
+    console.log(`[${timestamp}] SECURITY: ${method} ${url} - IP: ${ip} - User: ${userId}${adminId ? ` - Admin: ${adminId}` : ''} - UA: ${userAgent.substring(0, 100)}`);
+  }
+
+  // Log potential security threats
+  if (req.body && typeof req.body === 'object') {
+    const bodyString = JSON.stringify(req.body);
+    if (bodyString.length > 10000) {
+      console.warn(`[${timestamp}] LARGE_PAYLOAD: ${method} ${url} - Size: ${bodyString.length} - IP: ${ip}`);
+    }
+
+    // Check for suspicious patterns
+    const suspiciousPatterns = ['<script', 'javascript:', 'onload=', 'onerror=', 'eval(', 'document.cookie'];
+    for (const pattern of suspiciousPatterns) {
+      if (bodyString.toLowerCase().includes(pattern)) {
+        console.warn(`[${timestamp}] SUSPICIOUS_PATTERN: ${pattern} in ${method} ${url} - IP: ${ip} - User: ${userId}`);
+        break;
+      }
+    }
+  }
+
+  next();
+};
+
+// CSRF protection middleware (basic implementation for sensitive operations)
+export const csrfProtection = (req, res, next) => {
+  // Skip CSRF check for GET, HEAD, OPTIONS requests
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    return next();
+  }
+
+  // For state-changing operations, verify origin/referer
+  const origin = req.get('origin');
+  const referer = req.get('referer');
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',').map(s => s.trim());
+
+  // Check if request comes from allowed origin
+  let isAllowed = false;
+  if (origin) {
+    isAllowed = allowedOrigins.some(allowedOrigin => origin.startsWith(allowedOrigin));
+  } else if (referer) {
+    isAllowed = allowedOrigins.some(allowedOrigin => referer.startsWith(allowedOrigin));
+  }
+
+  if (!isAllowed && process.env.NODE_ENV === 'production') {
+    console.warn(`[${new Date().toISOString()}] CSRF_ATTEMPT: ${req.method} ${req.originalUrl} - Origin: ${origin} - Referer: ${referer} - IP: ${req.ip}`);
+    return res.status(403).json({
+      success: false,
+      message: 'CSRF protection: Invalid origin'
+    });
+  }
+
+  next();
+};
+
 // Validation rules for service requests
 export const validateServiceRequest = [
   body('name')
@@ -203,7 +269,7 @@ export const validateMongoId = [
     .withMessage('Invalid ID format')
 ];
 
-// Sanitization middleware
+// Enhanced sanitization middleware
 export const sanitizeInput = (req, res, next) => {
   // Recursively sanitize strings in the request body
   const sanitize = (obj) => {
@@ -211,7 +277,15 @@ export const sanitizeInput = (req, res, next) => {
       if (typeof obj[key] === 'string') {
         // Remove potentially dangerous HTML/script content
         obj[key] = obj[key].replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+        obj[key] = obj[key].replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+        obj[key] = obj[key].replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
+        obj[key] = obj[key].replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '');
         obj[key] = obj[key].replace(/<[^>]*>/g, ''); // Remove HTML tags
+
+        // Remove null bytes and other dangerous characters
+        obj[key] = obj[key].replace(/\0/g, '');
+        obj[key] = obj[key].replace(/[\u0000-\u001F\u007F-\u009F]/g, ''); // Remove control characters
+
         obj[key] = obj[key].trim();
       } else if (typeof obj[key] === 'object' && obj[key] !== null) {
         sanitize(obj[key]);
@@ -222,6 +296,50 @@ export const sanitizeInput = (req, res, next) => {
   if (req.body) sanitize(req.body);
   if (req.query) sanitize(req.query);
   if (req.params) sanitize(req.params);
+
+  next();
+};
+
+// File upload validation middleware
+export const validateFileUpload = (req, res, next) => {
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return next(); // No files to validate
+  }
+
+  const allowedTypes = [
+    'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+    'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ];
+
+  const maxSize = 5 * 1024 * 1024; // 5MB
+
+  for (const [fieldName, file] of Object.entries(req.files)) {
+    // Check file type
+    if (!allowedTypes.includes(file.mimetype)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid file type for ${fieldName}. Allowed types: JPEG, PNG, GIF, WebP, PDF, DOC, DOCX`
+      });
+    }
+
+    // Check file size
+    if (file.size > maxSize) {
+      return res.status(400).json({
+        success: false,
+        message: `File ${fieldName} is too large. Maximum size: 5MB`
+      });
+    }
+
+    // Check for malicious file extensions in filename
+    const dangerousExtensions = ['.exe', '.bat', '.cmd', '.scr', '.pif', '.com', '.jar', '.js', '.php', '.asp', '.jsp'];
+    const fileName = file.name.toLowerCase();
+    if (dangerousExtensions.some(ext => fileName.includes(ext))) {
+      return res.status(400).json({
+        success: false,
+        message: `Dangerous file extension detected in ${fieldName}`
+      });
+    }
+  }
 
   next();
 };
