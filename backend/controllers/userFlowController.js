@@ -637,7 +637,9 @@ export const sendMessage = [
     success: true,
     message: chatMessage
   });
-});
+})];
+
+
 
 export const getChatList = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));

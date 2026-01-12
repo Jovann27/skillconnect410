@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,8 @@ import {
   FlatList,
   Alert,
   RefreshControl,
-  ScrollView,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+  ScrollView,=} from 'react-native';
+import Icon fro/m 'react-native-vector-icons/FontAwesome';
 import { useMainContext } from '../contexts/MainContext';
 import Loader from '../components/Loader';
 
@@ -22,53 +21,45 @@ const AvailableRequestsScreen = () => {
 
   const fetchCurrentRequests = async () => {
     try {
-      console.log('AvailableRequests - Fetching available requests with hybrid recommendations...');
-
       // Use hybrid recommendation endpoint for workers
       try {
         const { data } = await api.get("/user/available-service-requests?useRecommendations=true", { withCredentials: true });
         if (data.success && data.requests) {
-          console.log('AvailableRequests - Got requests with recommendations:', data.requests.length);
-          console.log('Algorithm used:', data.algorithm);
           setRequests(data.requests);
           setLoading(false);
           return;
         }
       } catch (recommendationError) {
-        console.log('AvailableRequests - Recommendation endpoint not available, trying standard endpoint');
+        // Recommendation endpoint not available, trying standard endpoint
       }
 
       // Fallback: Try the matching requests endpoint
       try {
         const { data } = await api.get("/user/matching-requests", { withCredentials: true });
         if (data.success && data.requests && data.requests.length > 0) {
-          console.log('AvailableRequests - Got requests from matching-requests:', data.requests.length);
           setRequests(data.requests);
           setLoading(false);
           return;
         }
       } catch (matchingError) {
-        console.log('AvailableRequests - matching-requests endpoint not available, trying alternatives');
+        // Matching-requests endpoint not available, trying alternatives
       }
 
       // Fallback: Try to get service requests (this will get filtered requests for the provider)
       try {
         const { data } = await api.get("/user/service-requests", { withCredentials: true });
         if (data.success && data.requests) {
-          console.log('AvailableRequests - Got requests from service-requests endpoint:', data.requests.length);
           setRequests(data.requests);
           setLoading(false);
           return;
         }
       } catch (requestsError) {
-        console.log('AvailableRequests - service-requests endpoint not available either');
+        // Service-requests endpoint not available either
       }
 
       // If all endpoints fail, set empty array
-      console.log('AvailableRequests - No available requests found from any endpoint');
       setRequests([]);
     } catch (err) {
-      console.error("Error fetching available requests:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -87,28 +78,24 @@ const AvailableRequestsScreen = () => {
 
   const filteredRequests = requests.filter((request) => {
     if (!request) {
-      console.warn("Invalid request structure:", request);
       return false;
     }
 
     // Ensure request is truly available (not accepted, working, or completed)
     const isAvailableRequest = request.status === "Waiting" || request.status === "Open";
     if (!isAvailableRequest) {
-      console.log("Excluding non-available request:", request._id, "Status:", request.status);
       return false;
     }
 
     // Exclude current user's own requests
     const isNotOwnRequest = request.requester?._id !== user._id && request.requesterId !== user._id;
     if (!isNotOwnRequest) {
-      console.log("Excluding own request:", request._id, "Requester:", request.requester?._id, "Current user:", user._id);
       return false;
     }
 
     // Exclude requests that are already assigned to someone else
     const isNotAssigned = !request.serviceProvider || request.serviceProvider._id === user._id;
     if (!isNotAssigned) {
-      console.log("Excluding already assigned request:", request._id, "Provider:", request.serviceProvider?._id);
       return false;
     }
 
@@ -121,13 +108,11 @@ const AvailableRequestsScreen = () => {
       : true; // If no user services, show all requests (this shouldn't happen for providers)
 
     if (!matchesUserServices) {
-      console.log("Excluding request not matching user's services:", request._id, "Request service:", request.typeOfWork, "User services:", user.services?.map(s => s.name));
       return false;
     }
 
     // Ensure request has required fields for display
     if (!request.typeOfWork || !request.budget) {
-      console.log("Excluding incomplete request:", request._id, "Missing required fields");
       return false;
     }
 
