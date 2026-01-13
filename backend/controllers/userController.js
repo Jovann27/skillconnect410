@@ -10,6 +10,7 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import logger from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -262,9 +263,9 @@ export const updateProfile = catchAsyncError(async (req, res) => {
   const userId = req.user._id;
   const updates = req.body || {};
 
-  console.log('updateProfile called with userId:', userId);
-  console.log('req.body:', req.body);
-  console.log('req.files:', req.files);
+  logger.debug('updateProfile called with userId:', userId);
+  logger.debug('req.body:', req.body);
+  logger.debug('req.files:', req.files);
 
   delete updates.password;
   delete updates._id;
@@ -300,7 +301,7 @@ export const updateProfile = catchAsyncError(async (req, res) => {
 
   // Handle profile picture upload if provided
   if (req.files?.profilePic) {
-    console.log('Processing profile picture:', req.files.profilePic);
+    logger.debug('Processing profile picture:', req.files.profilePic);
     if (!req.files.profilePic.mimetype.startsWith("image/")) {
       throw new ErrorHandler("Profile picture must be an image file (JPG, PNG, etc.)", 400);
     }
@@ -309,7 +310,7 @@ export const updateProfile = catchAsyncError(async (req, res) => {
     try {
       fs.renameSync(req.files.profilePic.tempFilePath, profilePicPath);
       updates.profilePic = `/uploads/${profilePicFilename}`;
-      console.log('Profile picture saved:', profilePicPath);
+      logger.debug('Profile picture saved:', profilePicPath);
     } catch (error) {
       console.error("Error saving profile picture:", error);
       throw new ErrorHandler("Failed to save profile picture", 500);

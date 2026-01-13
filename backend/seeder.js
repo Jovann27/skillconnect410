@@ -87,7 +87,7 @@ for (let i = 0; i < 50; i++) {
 }
 
 await Settings.insertMany(settingsData);
-console.log("50 settings created");
+logger.info("50 settings created");
 
 // Create 50 HelpRequests
 const helpCategories = ["Technical", "Account", "General", "Billing", "Other"];
@@ -101,7 +101,7 @@ for (let i = 0; i < 50; i++) {
 }
 
 await HelpRequest.insertMany(helpRequestsData);
-console.log("50 help requests created");
+logger.info("50 help requests created");
 
 // Create 50 JobFairs
 const jobFairLocations = ["Barangay Hall", "Community Center", "School Gym", "Town Plaza"];
@@ -164,7 +164,7 @@ function generateAddress() {
 }
 
 await JobFair.insertMany(jobFairsData);
-console.log("50 job fairs created");
+logger.info("50 job fairs created");
 
 // Create 50 Residents
 const residentsData = [];
@@ -180,7 +180,7 @@ for (let i = 0; i < 50; i++) {
 }
 
 await Resident.insertMany(residentsData);
-console.log("50 residents created");
+logger.info("50 residents created");
 
 // Generate birthdate (18-60 years old)
 function generateBirthdate() {
@@ -269,7 +269,7 @@ for (let i = 0; i < 50; i++) {
 }
 
 const users = await User.create(usersData);
-console.log("50 users created");
+logger.info("50 users created");
 
 // Get user providers and members
 const providers = users.filter(u => u.role === "Service Provider");
@@ -304,7 +304,7 @@ for (let i = 0; i < 50; i++) {
 }
 
 const serviceRequests = await ServiceRequest.insertMany(serviceRequestsData);
-console.log("50 service requests created");
+logger.info("50 service requests created");
 
 // Create 50 Bookings (link to serviceRequests with their assigned providers)
 const bookingsData = serviceRequests.map(sr => ({
@@ -315,7 +315,7 @@ const bookingsData = serviceRequests.map(sr => ({
 }));
 
 const bookings = await Booking.insertMany(bookingsData);
-console.log("50 bookings created");
+logger.info("50 bookings created");
 
 // Create 50 Reviews (for bookings)
 const reviewsData = bookings.map(booking => ({
@@ -327,7 +327,7 @@ const reviewsData = bookings.map(booking => ({
 }));
 
 const reviews = await Review.insertMany(reviewsData);
-console.log("50 reviews created");
+logger.info("50 reviews created");
 
 // Create 50 Reports (from members to providers)
 const reportsData = [];
@@ -343,7 +343,7 @@ for (let i = 0; i < 50; i++) {
 }
 
 await Report.insertMany(reportsData);
-console.log("50 reports created");
+logger.info("50 reports created");
 
 // Create 50 Notifications
 const notificationsData = [];
@@ -357,7 +357,7 @@ for (let i = 0; i < 50; i++) {
 }
 
 const notifications = await Notification.insertMany(notificationsData);
-console.log("50 notifications created");
+logger.info("50 notifications created");
 
 // Update users with notifications
 for (const notif of notifications) {
@@ -377,7 +377,7 @@ for (let i = 0; i < 50; i++) {
 }
 
 await VerificationAppointment.insertMany(verificationsData);
-console.log("50 verification appointments created");
+logger.info("50 verification appointments created");
 
 // Create 50 Chats
 const chatsData = [];
@@ -393,7 +393,7 @@ for (let i = 0; i < 50; i++) {
 }
 
 await Chat.insertMany(chatsData);
-console.log("50 chats created");
+logger.info("50 chats created");
 
 // Create comprehensive services covering all barangay community needs
 const servicesData = [
@@ -491,7 +491,7 @@ const servicesData = [
 ];
 
 await Service.insertMany(servicesData);
-console.log(`${servicesData.length} comprehensive services created`);
+logger.info(`${servicesData.length} comprehensive services created`);
 
 // Update users with bookings where applicable
 for (const booking of bookings) {
@@ -499,5 +499,5 @@ for (const booking of bookings) {
   await User.findByIdAndUpdate(booking.provider, { $push: { bookings: booking._id } });
 }
 
-console.log("Seeding completed successfully!");
+logger.info("Seeding completed successfully!");
 process.exit();

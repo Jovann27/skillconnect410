@@ -332,7 +332,7 @@ const startServer = async () => {
     });
 
     server.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      logger.info(`Server is running on port ${PORT}`);
     });
 
   } catch (error) {

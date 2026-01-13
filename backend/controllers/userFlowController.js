@@ -1468,7 +1468,7 @@ export const sendDirectServiceOffer = catchAsyncError(async (req, res, next) => 
     minBudget: parseFloat(minBudget),
     maxBudget: parseFloat(maxBudget),
     preferredDate: preferredDateTime,
-    status: "Pending"
+    status: "Open"
   });
 
   await sendNotification(

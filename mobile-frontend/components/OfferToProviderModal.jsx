@@ -121,14 +121,9 @@ const OfferToProviderModal = ({ serviceRequestId, onClose, onSuccess }) => {
 
   const renderStars = (rating) => {
     const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
     for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
+      if (i < rating) {
         stars.push('★');
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push('☆');
       } else {
         stars.push('☆');
       }
@@ -178,7 +173,7 @@ const OfferToProviderModal = ({ serviceRequestId, onClose, onSuccess }) => {
         <Text style={styles.skillsTitle}>Skills:</Text>
         <View style={styles.skillsContainer}>
           {item.skills?.slice(0, 3).map((skill, index) => (
-            <Text key={index} style={styles.skillTag}>{skill}</Text>
+            <Text key={skill} style={styles.skillTag}>{skill}</Text>
           ))}
         </View>
 
