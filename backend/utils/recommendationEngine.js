@@ -15,6 +15,7 @@ import ServiceRequest from "../models/serviceRequest.js";
 import Booking from "../models/booking.js";
 import Review from "../models/review.js";
 import mongoose from "mongoose";
+import logger from './logger.js';
 
 // User Behavior Tracking Schema (for future use)
 const userBehaviorSchema = new mongoose.Schema({
@@ -231,7 +232,7 @@ export const getRecommendedWorkers = async (serviceRequest, options = {}) => {
 
     return recommendedWorkers;
   } catch (error) {
-    console.error('Error in getRecommendedWorkers:', error);
+    logger.error('Error in getRecommendedWorkers:', error);
     throw error;
   }
 };
@@ -340,7 +341,7 @@ export const getRecommendedServiceRequests = async (worker, options = {}) => {
 
     return recommended;
   } catch (error) {
-    console.error('Error in getRecommendedServiceRequests:', error);
+    logger.error('Error in getRecommendedServiceRequests:', error);
     throw error;
   }
 };
@@ -461,7 +462,7 @@ const calculateEnhancedCollaborativeScore = async (worker, serviceRequest, reque
     }
 
   } catch (error) {
-    console.error('Error in enhanced collaborative scoring:', error);
+    logger.error('Error in enhanced collaborative scoring:', error);
     // Fallback to basic collaborative score
     return calculateCollaborativeScoreSync(worker, serviceRequest, [], []);
   }
@@ -488,7 +489,7 @@ export const trackUserBehavior = async (userId, action, targetType, targetId, me
       timestamp: new Date()
     });
   } catch (error) {
-    console.error('Error tracking user behavior:', error);
+    logger.error('Error tracking user behavior:', error);
   }
 };
 
@@ -626,7 +627,7 @@ export const getAdvancedRecommendedWorkers = async (serviceRequest, options = {}
 
     return recommendedWorkers;
   } catch (error) {
-    console.error('Error in getAdvancedRecommendedWorkers:', error);
+    logger.error('Error in getAdvancedRecommendedWorkers:', error);
     // Fallback to basic recommendation
     return getRecommendedWorkers(serviceRequest, options);
   }
@@ -670,7 +671,7 @@ export const getRecommendationAnalytics = async () => {
       }
     };
   } catch (error) {
-    console.error('Error getting recommendation analytics:', error);
+    logger.error('Error getting recommendation analytics:', error);
     return null;
   }
 };

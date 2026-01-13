@@ -1,5 +1,105 @@
 import { body, param, query, validationResult } from 'express-validator';
 
+// Schema-based validation function
+export const validateSchema = (schema, location = 'body') => {
+  const validations = [];
+
+  for (const [field, rules] of Object.entries(schema)) {
+    let validator;
+
+    // Choose validator based on location
+    switch (location) {
+      case 'body':
+        validator = body(field);
+        break;
+      case 'param':
+        validator = param(field);
+        break;
+      case 'query':
+        validator = query(field);
+        break;
+      default:
+        validator = body(field);
+    }
+
+    // Apply rules based on schema
+    if (rules.required) {
+      validator = validator.exists({ checkFalsy: true }).withMessage(`${field} is required`);
+    } else if (rules.required === false) {
+      validator = validator.optional();
+    } else {
+      validator = validator.optional();
+    }
+
+    if (rules.type === 'string') {
+      validator = validator.isString().withMessage(`${field} must be a string`);
+    } else if (rules.type === 'number') {
+      validator = validator.isFloat().withMessage(`${field} must be a number`);
+    } else if (rules.type === 'boolean') {
+      validator = validator.isBoolean().withMessage(`${field} must be a boolean`);
+    } else if (rules.type === 'array') {
+      validator = validator.isArray().withMessage(`${field} must be an array`);
+    } else if (rules.type === 'object') {
+      validator = validator.isObject().withMessage(`${field} must be an object`);
+    }
+
+    if (rules.minLength !== undefined) {
+      validator = validator.isLength({ min: rules.minLength }).withMessage(`${field} must be at least ${rules.minLength} characters long`);
+    }
+
+    if (rules.maxLength !== undefined) {
+      validator = validator.isLength({ max: rules.maxLength }).withMessage(`${field} cannot exceed ${rules.maxLength} characters`);
+    }
+
+    if (rules.min !== undefined) {
+      validator = validator.isFloat({ min: rules.min }).withMessage(`${field} must be at least ${rules.min}`);
+    }
+
+    if (rules.max !== undefined) {
+      validator = validator.isFloat({ max: rules.max }).withMessage(`${field} cannot exceed ${rules.max}`);
+    }
+
+    if (rules.pattern) {
+      validator = validator.matches(rules.pattern).withMessage(`${field} format is invalid`);
+    }
+
+    if (rules.enum) {
+      validator = validator.isIn(rules.enum).withMessage(`${field} must be one of: ${rules.enum.join(', ')}`);
+    }
+
+    // Handle array items validation
+    if (rules.type === 'array' && rules.items) {
+      const itemRules = rules.items;
+      if (itemRules.type === 'string') {
+        validator = validator.custom((value) => {
+          if (!Array.isArray(value)) return true;
+          for (const item of value) {
+            if (typeof item !== 'string') {
+              throw new Error(`${field} must contain only strings`);
+            }
+            if (itemRules.minLength && item.length < itemRules.minLength) {
+              throw new Error(`Each ${field} item must be at least ${itemRules.minLength} characters long`);
+            }
+            if (itemRules.maxLength && item.length > itemRules.maxLength) {
+              throw new Error(`Each ${field} item cannot exceed ${itemRules.maxLength} characters`);
+            }
+          }
+          return true;
+        });
+      }
+    }
+
+    // Custom validation
+    if (rules.custom) {
+      validator = validator.custom(rules.custom);
+    }
+
+    validations.push(validator);
+  }
+
+  return validations;
+};
+
 // Handle validation errors
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);

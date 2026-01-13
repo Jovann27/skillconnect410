@@ -15,6 +15,7 @@ import User from "../models/userSchema.js";
 import { sendEmail } from "./emailService.js";
 import { sendPushNotification } from "./pushNotificationService.js";
 import { sendNotification as sendSocketNotification } from "./socketNotify.js";
+import logger from './logger.js';
 
 // Notification templates
 const NOTIFICATION_TEMPLATES = {
@@ -113,7 +114,7 @@ export const sendComprehensiveNotification = async (userId, title, message, opti
     const user = await User.findById(userId).select('email notificationPreferences deviceTokens');
 
     if (!user) {
-      console.error('User not found for notification:', userId);
+      logger.error('User not found for notification:', userId);
       return;
     }
 
@@ -142,7 +143,7 @@ export const sendComprehensiveNotification = async (userId, title, message, opti
 
     return notification;
   } catch (error) {
-    console.error('Error sending comprehensive notification:', error);
+    logger.error('Error sending comprehensive notification:', error);
     throw error;
   }
 };
@@ -175,7 +176,7 @@ const sendEmailNotification = async (user, type, title, message, meta) => {
 
     await sendEmail(emailData);
   } catch (error) {
-    console.error('Error sending email notification:', error);
+    logger.error('Error sending email notification:', error);
   }
 };
 
@@ -210,7 +211,7 @@ const sendPushNotificationToUser = async (user, type, title, message, meta) => {
       }
     });
   } catch (error) {
-    console.error('Error sending push notification:', error);
+    logger.error('Error sending push notification:', error);
   }
 };
 
@@ -271,7 +272,7 @@ export const scheduleNotification = async (userId, scheduledTime, title, message
 
     return notification;
   } catch (error) {
-    console.error('Error scheduling notification:', error);
+    logger.error('Error scheduling notification:', error);
     throw error;
   }
 };
@@ -287,7 +288,7 @@ export const updateNotificationPreferences = async (userId, preferences) => {
       notificationPreferences: preferences
     });
   } catch (error) {
-    console.error('Error updating notification preferences:', error);
+    logger.error('Error updating notification preferences:', error);
     throw error;
   }
 };
@@ -305,7 +306,7 @@ export const getNotificationPreferences = async (userId) => {
       inApp: true
     };
   } catch (error) {
-    console.error('Error getting notification preferences:', error);
+    logger.error('Error getting notification preferences:', error);
     return { email: true, push: true, inApp: true };
   }
 };
@@ -324,7 +325,7 @@ export const registerDeviceToken = async (userId, deviceToken, platform = 'andro
       }
     });
   } catch (error) {
-    console.error('Error registering device token:', error);
+    logger.error('Error registering device token:', error);
     throw error;
   }
 };
@@ -342,7 +343,7 @@ export const unregisterDeviceToken = async (userId, deviceToken) => {
       }
     });
   } catch (error) {
-    console.error('Error unregistering device token:', error);
+    logger.error('Error unregistering device token:', error);
     throw error;
   }
 };
@@ -390,7 +391,7 @@ export const getNotificationStats = async (filters = {}) => {
       byType: []
     };
   } catch (error) {
-    console.error('Error getting notification stats:', error);
+    logger.error('Error getting notification stats:', error);
     throw error;
   }
 };

@@ -5,7 +5,7 @@ import Booking from "../models/booking.js";
 import Settings from "../models/settings.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { sendNotification } from "../utils/socketNotify.js";
-import { io, onlineUsers } from "../server.js";
+import { io } from "../server.js";
 
 export const getSkilledUsers = async (req, res) => {
   try {

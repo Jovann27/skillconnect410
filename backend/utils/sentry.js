@@ -35,26 +35,37 @@ export const initializeSentry = () => {
     });
 
     logger.info('Sentry initialized successfully');
-  } else {
-    logger.warn('SENTRY_DSN not provided, Sentry will not be initialized');
   }
+  // Removed warning log when SENTRY_DSN not provided
 };
 
 // Middleware for Express error handling
-export const sentryErrorHandler = Sentry.Handlers.errorHandler({
-  shouldHandleError: (error) => {
-    // Don't report 4xx errors as they're client errors
-    return error.status >= 500;
-  },
-});
+export const sentryErrorHandler = (err, req, res, next) => {
+  if (process.env.SENTRY_DSN && Sentry && Sentry.Handlers && Sentry.Handlers.errorHandler) {
+    const handler = Sentry.Handlers.errorHandler({
+      shouldHandleError: (error) => {
+        // Don't report 4xx errors as they're client errors
+        return error.status >= 500;
+      },
+    });
+    return handler(err, req, res, next);
+  }
+  next(err);
+};
 
 // Middleware for request handling
-export const sentryRequestHandler = Sentry.Handlers.requestHandler({
-  shouldCreateTransactionForRequest: (req) => {
-    // Only create transactions for API requests
-    return req.url?.startsWith('/api/');
-  },
-});
+export const sentryRequestHandler = (req, res, next) => {
+  if (process.env.SENTRY_DSN && Sentry && Sentry.Handlers && Sentry.Handlers.requestHandler) {
+    const handler = Sentry.Handlers.requestHandler({
+      shouldCreateTransactionForRequest: (req) => {
+        // Only create transactions for API requests
+        return req.url?.startsWith('/api/');
+      },
+    });
+    return handler(req, res, next);
+  }
+  next();
+};
 
 // Capture exceptions manually
 export const captureException = (error, context = {}) => {

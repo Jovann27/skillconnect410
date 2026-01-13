@@ -9,11 +9,13 @@ import {
 
 import { isAdminAuthenticated } from "../middlewares/auth.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import { validateSchema, handleValidationErrors } from "../middlewares/validation.js";
+import { verificationAppointmentSchema } from "../validators/schemas.js";
 
 const router = express.Router();
 
 // Admin-only routes
-router.post("/", isAdminAuthenticated, authorizeRoles("Admin"), createVerificationAppointment);
+router.post("/", isAdminAuthenticated, authorizeRoles("Admin"), validateSchema(verificationAppointmentSchema), handleValidationErrors, createVerificationAppointment);
 router.get("/", isAdminAuthenticated, authorizeRoles("Admin"), getAllVerificationAppointments);
 router.get("/provider/:id", isAdminAuthenticated, authorizeRoles("Admin"), getProviderAppointments);
 router.put("/:id", isAdminAuthenticated, authorizeRoles("Admin"), updateVerificationAppointment);

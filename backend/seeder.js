@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import logger from "./utils/logger.js";
 import Admin from "./models/adminSchema.js";
 import User from "./models/userSchema.js";
 import Booking from "./models/booking.js";
@@ -34,7 +35,7 @@ await ServiceRequest.deleteMany({});
 await Settings.deleteMany({});
 await VerificationAppointment.deleteMany({});
 
-console.log("Cleared existing data");
+logger.info("Cleared existing data");
 
 const DEFAULT_PASSWORD = process.env.ADMIN_SEED_PASSWORD || null;
 
@@ -47,7 +48,7 @@ if (!passwordToUse) {
 let admin = null;
 const existingAdmin = await Admin.findOne({ email: "skillconnect@gmail.com" });
 if (existingAdmin) {
-  console.log("Admin already exists, skipping admin creation.");
+  logger.info("Admin already exists, skipping admin creation.");
   admin = existingAdmin;
 } else {
   admin = await Admin.create({
@@ -57,7 +58,7 @@ if (existingAdmin) {
     password: passwordToUse,
     role: "Admin"
   });
-  console.log("Admin created successfully.");
+  logger.info("Admin created successfully.");
 }
 
 // Create 50 Settings

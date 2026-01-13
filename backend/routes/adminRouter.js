@@ -15,10 +15,12 @@ import {
 import { getSettings, updateSettings } from "../controllers/settingsController.js";
 import { isAdminAuthenticated } from "../middlewares/auth.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import { validateSchema, handleValidationErrors } from "../middlewares/validation.js";
+import { jobFairSchema, settingsSchema } from "../validators/schemas.js";
 
 const router = express.Router();
 
-router.post("/jobfairs", isAdminAuthenticated, createJobFair);
+router.post("/jobfairs", isAdminAuthenticated, validateSchema(jobFairSchema), handleValidationErrors, createJobFair);
 router.get("/service-requests", isAdminAuthenticated, adminGetAllServiceRequests);
 router.get("/dashboard-metrics", isAdminAuthenticated, getDashboardMetrics);
 router.get("/users", isAdminAuthenticated, authorizeRoles("Admin"), getAllUsers);
@@ -34,6 +36,6 @@ router.put("/reject-service-provider/:id", isAdminAuthenticated, authorizeRoles(
 
 // Settings Management
 router.get("/settings", isAdminAuthenticated, authorizeRoles("Admin"), getSettings);
-router.put("/settings", isAdminAuthenticated, authorizeRoles("Admin"), updateSettings);
+router.put("/settings", isAdminAuthenticated, authorizeRoles("Admin"), validateSchema(settingsSchema), handleValidationErrors, updateSettings);
 
 export default router;

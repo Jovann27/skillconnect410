@@ -1,10 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import logger from './logger.js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 export const generateAIRecommendations = async (analyticsData) => {
-  console.log('AI Service called with analytics data:', JSON.stringify(analyticsData, null, 2));
+  logger.debug('AI Service called with analytics data:', JSON.stringify(analyticsData, null, 2));
   try {
     const prompt = `You are an expert AI consultant for a barangay (local community) skill-sharing platform called SkillConnect. Based on the following system analytics data, provide intelligent, actionable recommendations for:
 
@@ -106,13 +107,13 @@ IMPORTANT: Return ONLY valid JSON. Do not include any explanatory text, markdown
 
     const result = await model.generateContent(prompt);
     const response = result.response.text();
-    console.log('AI Response:', response);
-    console.log('Analytics Data passed to AI:', JSON.stringify(analyticsData, null, 2));
+    logger.debug('AI Response:', response);
+    logger.debug('Analytics Data passed to AI:', JSON.stringify(analyticsData, null, 2));
 
     // Parse the JSON response
     try {
       const recommendations = JSON.parse(response);
-      console.log('Parsed AI recommendations:', recommendations);
+      logger.debug('Parsed AI recommendations:', recommendations);
 
       // Check if recommendations are empty and provide fallbacks if needed
       if (
@@ -121,20 +122,20 @@ IMPORTANT: Return ONLY valid JSON. Do not include any explanatory text, markdown
         (!recommendations.communityPrograms || recommendations.communityPrograms.length === 0) &&
         (!recommendations.priorityActions || recommendations.priorityActions.length === 0)
       ) {
-        console.log('AI returned empty recommendations, providing fallback recommendations');
+        logger.debug('AI returned empty recommendations, providing fallback recommendations');
         return generateFallbackRecommendations(analyticsData);
       }
 
       return recommendations;
     } catch (parseError) {
-      console.error('Failed to parse AI response as JSON:', parseError);
-      console.error('Raw AI response that failed to parse:', response);
+      logger.error('Failed to parse AI response as JSON:', parseError);
+      logger.error('Raw AI response that failed to parse:', response);
       // Fallback to basic recommendations if parsing fails
       return generateFallbackRecommendations(analyticsData);
     }
 
   } catch (error) {
-    console.error('AI Service Error:', error);
+    logger.error('AI Service Error:', error);
     // Return fallback recommendations instead of throwing error
     return generateFallbackRecommendations(analyticsData);
   }
@@ -142,7 +143,7 @@ IMPORTANT: Return ONLY valid JSON. Do not include any explanatory text, markdown
 
 // Fallback function to generate basic recommendations when AI fails or returns empty results
 const generateFallbackRecommendations = (analyticsData) => {
-  console.log('Generating fallback recommendations based on analytics data');
+  logger.debug('Generating fallback recommendations based on analytics data');
 
   const recommendations = {
     barangayProjects: [],
@@ -253,6 +254,6 @@ const generateFallbackRecommendations = (analyticsData) => {
     priority: "Medium"
   });
 
-  console.log('Generated fallback recommendations:', recommendations);
+  logger.debug('Generated fallback recommendations:', recommendations);
   return recommendations;
 };

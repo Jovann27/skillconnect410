@@ -1,4 +1,5 @@
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
+import logger from './logger.js';
 
 /**
  * Format date
@@ -11,7 +12,7 @@ export const formatDate = (date, formatStr = 'PP') => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
     return format(dateObj, formatStr);
   } catch (error) {
-    console.error('Error formatting date:', error);
+    logger.error('Error formatting date:', error);
     return date.toString();
   }
 };
@@ -28,7 +29,7 @@ export const getRelativeTime = (date) => {
       addSuffix: true
     });
   } catch (error) {
-    console.error('Error getting relative time:', error);
+    logger.error('Error getting relative time:', error);
     return date.toString();
   }
 };

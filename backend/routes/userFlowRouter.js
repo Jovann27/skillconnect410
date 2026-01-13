@@ -2,11 +2,25 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import { isUserAuthenticated, isUserVerified } from "../middlewares/auth.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
+import { validateSchema, handleValidationErrors } from "../middlewares/validation.js";
 import ErrorHandler from "../middlewares/error.js";
 import User from "../models/userSchema.js";
 import ServiceRequest from '../models/serviceRequest.js';
 import Review from '../models/review.js';
 import Notification from '../models/notification.js';
+import {
+  serviceRequestSchema,
+  reviewSchema,
+  chatMessageSchema,
+  profileUpdateSchema,
+  applicationSchema,
+  applicationResponseSchema,
+  offerResponseSchema,
+  bookingStatusSchema,
+  savedSearchSchema,
+  deviceTokenSchema,
+  notificationPreferencesSchema
+} from '../validators/schemas.js';
 
 // Stricter rate limiting for critical operations like accepting offers/requests
 const criticalOperationLimiter = rateLimit({
@@ -393,20 +407,20 @@ router.get('/recommended-jobs', isUserAuthenticated, isUserVerified, catchAsyncE
 // Booking routes
 router.get('/bookings', isUserAuthenticated, isUserVerified, getBookings);
 router.get('/booking/:id', isUserAuthenticated, isUserVerified, getBooking);
-router.put('/booking/:id/status', isUserAuthenticated, isUserVerified, updateBookingStatus);
+router.put('/booking/:id/status', isUserAuthenticated, isUserVerified, validateSchema(bookingStatusSchema), handleValidationErrors, updateBookingStatus);
 router.put('/booking/:id/complete', isUserAuthenticated, isUserVerified, completeBooking);
-router.post('/review', isUserAuthenticated, isUserVerified, leaveReview);
+router.post('/review', isUserAuthenticated, isUserVerified, validateSchema(reviewSchema), handleValidationErrors, leaveReview);
 
 // Service Request routes
 router.get('/available-service-requests', isUserAuthenticated, isUserVerified, getAvailableServiceRequests);
-router.post('/post-service-request', isUserAuthenticated, isUserVerified, postServiceRequest);
+router.post('/post-service-request', isUserAuthenticated, isUserVerified, validateSchema(serviceRequestSchema), handleValidationErrors, postServiceRequest);
 router.get('/service-request/:id', isUserAuthenticated, isUserVerified, getServiceRequest);
 router.delete('/service-request/:id/cancel', isUserAuthenticated, isUserVerified, cancelServiceRequest);
 router.post('/service-request/:id/accept', criticalOperationLimiter, isUserAuthenticated, isUserVerified, acceptServiceRequest);
 
 // Service Profile routes
 router.get('/service-profile', isUserAuthenticated, isUserVerified, getServiceProfile);
-router.post('/service-profile', isUserAuthenticated, isUserVerified, updateServiceProfile);
+router.post('/service-profile', isUserAuthenticated, isUserVerified, validateSchema(profileUpdateSchema), handleValidationErrors, updateServiceProfile);
 router.put('/service-status', isUserAuthenticated, isUserVerified, updateServiceStatus);
 
 // User services route
@@ -429,7 +443,7 @@ router.post('/offer/:requestId/reject', isUserAuthenticated, isUserVerified, rej
 // Chat routes
 router.get("/chat-history", isUserAuthenticated, isUserVerified, getChatHistory);
 router.get("/chat-list", isUserAuthenticated, isUserVerified, getChatList);
-router.post("/send-message", isUserAuthenticated, isUserVerified, sendMessage);
+router.post("/send-message", isUserAuthenticated, isUserVerified, validateSchema(chatMessageSchema), handleValidationErrors, sendMessage);
 router.put("/chat/:appointmentId/mark-seen", isUserAuthenticated, isUserVerified, markMessagesAsSeen);
 
 // Notification routes
@@ -472,9 +486,9 @@ router.get('/notification-preferences', isUserAuthenticated, isUserVerified, cat
 // Provider Dashboard routes
 router.get('/provider-offers', isUserAuthenticated, isUserVerified, getProviderOffers);
 router.get('/provider-applications', isUserAuthenticated, isUserVerified, getProviderApplications);
-router.post('/apply-to-request/:requestId', isUserAuthenticated, isUserVerified, applyToServiceRequest);
-router.post('/respond-to-offer/:offerId', isUserAuthenticated, isUserVerified, respondToServiceOffer);
-router.post('/respond-to-application/:bookingId', isUserAuthenticated, isUserVerified, respondToApplication);
+router.post('/apply-to-request/:requestId', isUserAuthenticated, isUserVerified, validateSchema(applicationSchema, 'param'), handleValidationErrors, applyToServiceRequest);
+router.post('/respond-to-offer/:offerId', isUserAuthenticated, isUserVerified, validateSchema(offerResponseSchema, 'param'), handleValidationErrors, respondToServiceOffer);
+router.post('/respond-to-application/:bookingId', isUserAuthenticated, isUserVerified, validateSchema(applicationResponseSchema, 'param'), handleValidationErrors, respondToApplication);
 router.post('/update-profile-picture', isUserAuthenticated, isUserVerified, updateProfilePicture);
 
 // Additional endpoints for frontend compatibility

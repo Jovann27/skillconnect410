@@ -1,5 +1,7 @@
 import express from "express";
 import { isAdminAuthenticated } from "../middlewares/auth.js";
+import { validateSchema, handleValidationErrors } from "../middlewares/validation.js";
+import { verificationAppointmentSchema } from "../validators/schemas.js";
 import {
   scheduleVerificationAppointment,
   updateVerificationAppointment,
@@ -14,7 +16,7 @@ import {
 
 const router = express.Router();
 
-router.post("/verification/schedule", isAdminAuthenticated, scheduleVerificationAppointment);
+router.post("/verification/schedule", isAdminAuthenticated, validateSchema(verificationAppointmentSchema), handleValidationErrors, scheduleVerificationAppointment);
 router.put("/verification/:id", isAdminAuthenticated, updateVerificationAppointment);
 router.post("/schedule-interview", isAdminAuthenticated, scheduleInterview);
 router.get("/verification/pending", isAdminAuthenticated, getPendingProviderApplications);

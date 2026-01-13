@@ -11,6 +11,7 @@
 
 import admin from 'firebase-admin';
 import User from '../models/userSchema.js';
+import logger from './logger.js';
 
 // Initialize Firebase Admin SDK
 let firebaseApp = null;
@@ -25,9 +26,9 @@ const initializeFirebase = () => {
         projectId: process.env.FIREBASE_PROJECT_ID
       });
     } catch (error) {
-      console.error('Error initializing Firebase:', error);
+      logger.error('Error initializing Firebase:', error);
       // Fallback: log that push notifications are disabled
-      console.log('Push notifications disabled - Firebase not configured');
+      logger.warn('Push notifications disabled - Firebase not configured');
     }
   }
   return firebaseApp;
@@ -42,7 +43,7 @@ const initializeFirebase = () => {
 export const sendPushNotification = async (deviceTokens, notification, data = {}) => {
   const app = initializeFirebase();
   if (!app) {
-    console.log('Firebase not initialized, skipping push notification');
+    logger.debug('Firebase not initialized, skipping push notification');
     return { success: false, reason: 'Firebase not initialized' };
   }
 
@@ -91,8 +92,8 @@ export const sendPushNotification = async (deviceTokens, notification, data = {}
       messageId: response.responses.filter(r => r.success).map(r => r.messageId)
     };
   } catch (error) {
-    console.error('Error sending push notification:', error);
-    return { success: false, error: error.message };
+    logger.error('Error sending push notification:', error);
+    throw error;
   }
 };
 
@@ -112,7 +113,7 @@ export const sendPushNotificationToUser = async (userId, notification, data = {}
 
     return await sendPushNotification(user.deviceTokens, notification, data);
   } catch (error) {
-    console.error('Error sending push notification to user:', error);
+    logger.error('Error sending push notification to user:', error);
     return { success: false, error: error.message };
   }
 };
@@ -140,7 +141,7 @@ export const sendSegmentedPushNotification = async (segmentCriteria, notificatio
 
     return await sendPushNotification(allTokens, notification, data);
   } catch (error) {
-    console.error('Error sending segmented push notification:', error);
+    logger.error('Error sending segmented push notification:', error);
     return { success: false, error: error.message };
   }
 };
@@ -169,7 +170,7 @@ export const schedulePushNotification = async (userId, scheduledTime, notificati
 
     return { success: true, scheduled: true, delay };
   } catch (error) {
-    console.error('Error scheduling push notification:', error);
+    logger.error('Error scheduling push notification:', error);
     return { success: false, error: error.message };
   }
 };
@@ -186,9 +187,9 @@ const cleanupInvalidTokens = async (invalidTokens) => {
       { $pull: { deviceTokens: { token: { $in: invalidTokens } } } }
     );
 
-    console.log(`Cleaned up ${invalidTokens.length} invalid device tokens`);
+    logger.info(`Cleaned up ${invalidTokens.length} invalid device tokens`);
   } catch (error) {
-    console.error('Error cleaning up invalid tokens:', error);
+    logger.error('Error cleaning up invalid tokens:', error);
   }
 };
 
@@ -231,7 +232,7 @@ export const getPushNotificationStats = async (filters = {}) => {
       period: filters.period || '30d'
     };
   } catch (error) {
-    console.error('Error getting push notification stats:', error);
+    logger.error('Error getting push notification stats:', error);
     throw error;
   }
 };

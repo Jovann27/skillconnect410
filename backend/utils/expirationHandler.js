@@ -1,4 +1,5 @@
 import ServiceRequest from "../models/serviceRequest.js";
+import logger from './logger.js';
 
 // Function to check and update expired service requests
 export const checkAndUpdateExpiredRequests = async () => {
@@ -23,12 +24,12 @@ export const checkAndUpdateExpiredRequests = async () => {
         }
       );
 
-      console.log(`Updated ${expiredRequests.length} expired service requests to "No Longer Available"`);
+      logger.info(`Updated ${expiredRequests.length} expired service requests to "No Longer Available"`);
     }
 
     return expiredRequests.length;
   } catch (error) {
-    console.error("Error checking and updating expired requests:", error);
+    logger.error("Error checking and updating expired requests:", error);
     return 0;
   }
 };

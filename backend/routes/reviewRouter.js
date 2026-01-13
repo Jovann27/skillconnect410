@@ -1,5 +1,7 @@
 import express from "express";
 import { isUserAuthenticated } from "../middlewares/auth.js";
+import { validateSchema, handleValidationErrors } from "../middlewares/validation.js";
+import { reviewSchema } from "../validators/schemas.js";
 import {
   getUserReviews,
   createReview,
@@ -15,6 +17,6 @@ router.get("/user/:userId", getUserReviews);
 router.get("/stats/:userId", getUserReviewStats);
 
 // Create a new review (requires authentication)
-router.post("/", isUserAuthenticated, createReview);
+router.post("/", isUserAuthenticated, validateSchema(reviewSchema), handleValidationErrors, createReview);
 
 export default router;

@@ -1,5 +1,6 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../middlewares/error.js";
+import logger from '../utils/logger.js';
 import VerificationAppointment from "../models/verificationSchema.js";
 import User from "../models/userSchema.js";
 import Notification from "../models/notification.js";
@@ -13,7 +14,7 @@ const sendNotification = async (userId, title, message, meta = {}) => {
     const n = await Notification.create({ user: userId, title, message, meta });
     return n;
   } catch (err) {
-    console.error("sendNotification error:", err);
+    logger.error("sendNotification error:", err);
     return null;
   }
 };
@@ -53,9 +54,9 @@ export const scheduleVerificationAppointment = catchAsyncError(async (req, res, 
         notification,
       });
     }
-    console.log("Sent real-time notification to provider");
+    logger.debug("Sent real-time notification to provider");
   } else {
-    console.log("Provider not online, real-time notification not sent");
+    logger.debug("Provider not online, real-time notification not sent");
   }
 
   res.status(201).json({ success: true, appt });
@@ -122,7 +123,7 @@ export const addUserService = async (req, res) => {
 
     res.json({ success: true, services: user.services });
   } catch (error) {
-    console.error("addUserService error:", error);
+    logger.error("addUserService error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -209,9 +210,9 @@ export const scheduleInterview = catchAsyncError(async (req, res, next) => {
         notification,
       });
     }
-    console.log("Sent real-time interview notification to applicant");
+    logger.debug("Sent real-time interview notification to applicant");
   } else {
-    console.log("Applicant not online, real-time notification not sent");
+    logger.debug("Applicant not online, real-time notification not sent");
   }
 
   // Send email notification
@@ -258,9 +259,9 @@ export const scheduleInterview = catchAsyncError(async (req, res, next) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("Interview email sent successfully");
+    logger.info("Interview email sent successfully");
   } catch (emailError) {
-    console.error("Failed to send interview email:", emailError);
+    logger.error("Failed to send interview email:", emailError);
     // Don't fail the request if email fails
   }
 

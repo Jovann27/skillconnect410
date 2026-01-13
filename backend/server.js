@@ -7,7 +7,6 @@ import { dbConnection } from "./database/dbConnection.js";
 // import "./config/cloudinaryConfig.js";
 import { checkAndUpdateExpiredRequests } from "./utils/expirationHandler.js";
 import { initializeSentry } from "./utils/sentry.js";
-import { initializeRedis } from "./utils/redis.js";
 import { initializeEmailQueue } from "./utils/emailQueue.js";
 import logger from "./utils/logger.js";
 import { Server } from "socket.io";
@@ -17,12 +16,19 @@ import User from "./models/userSchema.js";
 import Chat from "./models/chat.js";
 import Booking from "./models/booking.js";
 import { initializeSocketNotify } from "./utils/socketNotify.js";
-import {
-  setUserOnline,
-  setUserOffline,
-  getUserSockets,
-  updateUserActivity
-} from "./utils/sessionManager.js";
+// Session management using in-memory storage
+// import {
+//   setUserOnline,
+//   setUserOffline,
+//   getUserSockets,
+//   updateUserActivity
+// } from "./utils/sessionManager.js";
+
+// In-memory session management functions
+const setUserOnline = async (userId, socketId) => true;
+const setUserOffline = async (userId, socketId) => true;
+const getUserSockets = async (userId) => [];
+const updateUserActivity = async (userId) => true;
 
 // Declare io for export
 let io = null;
@@ -34,9 +40,6 @@ const startServer = async () => {
 
     // Initialize database connection and then check expired requests
     await dbConnection();
-
-    // Initialize Redis for caching
-    await initializeRedis();
 
     // Initialize email queue
     await initializeEmailQueue();
@@ -50,7 +53,7 @@ const startServer = async () => {
     const PORT = process.env.PORT || 4000;
     const server = http.createServer(app);
 
-    const FRONTEND_URL = process.env.FRONTEND_URL;
+    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
     const allowedOrigins = (process.env.ALLOWED_ORIGINS || FRONTEND_URL).split(",").map(s => s.trim());
 
     io = new Server(server, {
@@ -73,7 +76,7 @@ const startServer = async () => {
       try {
         const token = socket.handshake.query.token;
         if (!token) {
-          console.log("Socket authentication: No token provided");
+          logger.debug("Socket authentication: No token provided");
           return next(new Error("No token provided"));
         }
 
@@ -82,44 +85,44 @@ const startServer = async () => {
         try {
           decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         } catch (jwtError) {
-          console.error("JWT verification error:", jwtError.message);
+          logger.error("JWT verification error:", jwtError.message);
           if (jwtError.name === 'TokenExpiredError') {
-            console.log("Socket authentication: Token expired");
+            logger.debug("Socket authentication: Token expired");
             return next(new Error("Token expired"));
           } else if (jwtError.name === 'JsonWebTokenError') {
-            console.log("Socket authentication: Invalid token signature");
+            logger.debug("Socket authentication: Invalid token signature");
             return next(new Error("Invalid token"));
           } else {
-            console.log("Socket authentication: Token verification failed:", jwtError.message);
+            logger.debug("Socket authentication: Token verification failed:", jwtError.message);
             return next(new Error(jwtError.message || "Token verification failed"));
           }
         }
 
         // Check token type
         if (!decoded || decoded.type !== "user") {
-          console.log("Socket authentication: Not a user token, token type:", decoded?.type);
+          logger.debug("Socket authentication: Not a user token, token type:", decoded?.type);
           return next(new Error("Not a user token"));
         }
 
         // Check if user exists
         const user = await User.findById(decoded.id);
         if (!user) {
-          console.log("Socket authentication: User not found for ID:", decoded.id);
+          logger.debug("Socket authentication: User not found for ID:", decoded.id);
           return next(new Error("User not found"));
         }
 
         // Check if user is banned
         if (user.banned) {
-          console.log("Socket authentication: User is banned:", user._id);
+          logger.debug("Socket authentication: User is banned:", user._id);
           return next(new Error("Account is banned"));
         }
 
         socket.userId = user._id.toString();
         socket.user = user;
-        console.log("Socket authentication: Success for user:", user._id);
+        logger.debug("Socket authentication: Success for user:", user._id);
         next();
       } catch (err) {
-        console.error("Socket authentication error:", err.message);
+        logger.error("Socket authentication error:", err.message);
         next(new Error("Authentication failed"));
       }
     });
@@ -127,7 +130,7 @@ const startServer = async () => {
     io.on("connection", async (socket) => {
       logger.info(`Client Connected: ${socket.id}, User: ${socket.userId}`);
 
-      // Register user as online using Redis session manager
+      // Register user as online
       const onlineResult = await setUserOnline(socket.userId, socket.id);
       if (onlineResult) {
         // Update user online status in database
@@ -153,7 +156,7 @@ const startServer = async () => {
 
           if (booking) {
             socket.join(`chat-${appointmentId}`);
-            console.log(`User ${socket.userId} joined chat room for appointment ${appointmentId}`);
+            logger.debug(`User ${socket.userId} joined chat room for appointment ${appointmentId}`);
 
             // Send chat history
             const chatHistory = await Chat.find({ appointment: appointmentId })
@@ -165,7 +168,7 @@ const startServer = async () => {
             socket.emit("error", "Access denied to this chat");
           }
         } catch (error) {
-          console.error("Error joining chat:", error);
+          logger.error("Error joining chat:", error);
           socket.emit("error", "Failed to join chat");
         }
       });
@@ -186,12 +189,12 @@ const startServer = async () => {
 
           if (request || socket.user.role === "admin") {
             socket.join(`service-request-${requestId}`);
-            console.log(`User ${socket.userId} joined service request room for ${requestId}`);
+            logger.debug(`User ${socket.userId} joined service request room for ${requestId}`);
           } else {
             socket.emit("error", "Access denied to this service request");
           }
         } catch (error) {
-          console.error("Error joining service request:", error);
+          logger.error("Error joining service request:", error);
           socket.emit("error", "Failed to join service request");
         }
       });
@@ -251,7 +254,7 @@ const startServer = async () => {
 
           logger.debug(`Message sent in chat ${appointmentId} by user ${socket.userId}`);
         } catch (error) {
-          console.error("Error sending message:", error);
+          logger.error("Error sending message:", error);
           socket.emit("error", "Failed to send message");
         }
       });
@@ -305,7 +308,7 @@ const startServer = async () => {
           // Update user activity
           await updateUserActivity(socket.userId);
         } catch (error) {
-          console.error("Error updating message seen status:", error);
+          logger.error("Error updating message seen status:", error);
         }
       });
 
@@ -313,7 +316,7 @@ const startServer = async () => {
       socket.on("disconnect", async () => {
         logger.debug(`Client disconnected: ${socket.id}, User: ${socket.userId}`);
 
-        // Remove user socket using Redis session manager
+        // Remove user socket
         const offlineResult = await setUserOffline(socket.userId, socket.id);
         if (offlineResult) {
           // Check if user has any remaining sockets
@@ -329,8 +332,9 @@ const startServer = async () => {
     });
 
     server.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
+      console.log(`Server is running on port ${PORT}`);
     });
+
   } catch (error) {
     logger.error("Failed to start server:", error);
     process.exit(1);

@@ -1,17 +1,19 @@
 import express from "express";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
-import { isAuthenticated } from "../middlewares/auth.js";
+import { isUserAuthenticated } from "../middlewares/auth.js";
 import { sendComprehensiveNotification } from "../utils/notificationService.js";
 import { getNotificationPreferences, updateNotificationPreferences } from "../utils/notificationService.js";
 import { registerDeviceToken, unregisterDeviceToken } from "../utils/notificationService.js";
 import { getNotificationStats } from "../utils/notificationService.js";
 import { isAdminAuthenticated } from "../middlewares/auth.js";
+import { validateSchema, handleValidationErrors } from "../middlewares/validation.js";
+import { notificationPreferencesSchema, deviceTokenSchema } from "../validators/schemas.js";
 import Notification from "../models/notification.js";
 
 const router = express.Router();
 
 // Get user's notifications
-router.get("/", isAuthenticated, catchAsyncError(async (req, res) => {
+router.get("/", isUserAuthenticated, catchAsyncError(async (req, res) => {
   const { page = 1, limit = 20, unreadOnly = false } = req.query;
   const userId = req.user._id;
 
@@ -39,7 +41,7 @@ router.get("/", isAuthenticated, catchAsyncError(async (req, res) => {
 }));
 
 // Mark notification as read
-router.put("/:id/read", isAuthenticated, catchAsyncError(async (req, res) => {
+router.put("/:id/read", isUserAuthenticated, catchAsyncError(async (req, res) => {
   const { id } = req.params;
   const userId = req.user._id;
 
@@ -63,7 +65,7 @@ router.put("/:id/read", isAuthenticated, catchAsyncError(async (req, res) => {
 }));
 
 // Mark all notifications as read
-router.put("/read-all", isAuthenticated, catchAsyncError(async (req, res) => {
+router.put("/read-all", isUserAuthenticated, catchAsyncError(async (req, res) => {
   const userId = req.user._id;
 
   await Notification.updateMany(
@@ -78,7 +80,7 @@ router.put("/read-all", isAuthenticated, catchAsyncError(async (req, res) => {
 }));
 
 // Get notification preferences
-router.get("/preferences", isAuthenticated, catchAsyncError(async (req, res) => {
+router.get("/preferences", isUserAuthenticated, catchAsyncError(async (req, res) => {
   const preferences = await getNotificationPreferences(req.user._id);
 
   res.status(200).json({
@@ -88,7 +90,7 @@ router.get("/preferences", isAuthenticated, catchAsyncError(async (req, res) => 
 }));
 
 // Update notification preferences
-router.put("/preferences", isAuthenticated, catchAsyncError(async (req, res) => {
+router.put("/preferences", isUserAuthenticated, validateSchema(notificationPreferencesSchema), handleValidationErrors, catchAsyncError(async (req, res) => {
   const { preferences } = req.body;
 
   await updateNotificationPreferences(req.user._id, preferences);
@@ -100,7 +102,7 @@ router.put("/preferences", isAuthenticated, catchAsyncError(async (req, res) => 
 }));
 
 // Register device token for push notifications
-router.post("/device-token", isAuthenticated, catchAsyncError(async (req, res) => {
+router.post("/device-token", isUserAuthenticated, validateSchema(deviceTokenSchema), handleValidationErrors, catchAsyncError(async (req, res) => {
   const { deviceToken, platform = 'android', deviceId } = req.body;
 
   if (!deviceToken) {
@@ -119,7 +121,7 @@ router.post("/device-token", isAuthenticated, catchAsyncError(async (req, res) =
 }));
 
 // Unregister device token
-router.delete("/device-token/:token", isAuthenticated, catchAsyncError(async (req, res) => {
+router.delete("/device-token/:token", isUserAuthenticated, catchAsyncError(async (req, res) => {
   const { token } = req.params;
 
   await unregisterDeviceToken(req.user._id, token);
@@ -131,7 +133,7 @@ router.delete("/device-token/:token", isAuthenticated, catchAsyncError(async (re
 }));
 
 // Send test notification (for development/testing)
-router.post("/test", isAuthenticated, catchAsyncError(async (req, res) => {
+router.post("/test", isUserAuthenticated, catchAsyncError(async (req, res) => {
   const { title = "Test Notification", message = "This is a test notification" } = req.body;
 
   await sendComprehensiveNotification(req.user._id, title, message, {
@@ -157,7 +159,7 @@ router.get("/admin/stats", isAdminAuthenticated, catchAsyncError(async (req, res
 }));
 
 // Delete old notifications (cleanup)
-router.delete("/cleanup", isAuthenticated, catchAsyncError(async (req, res) => {
+router.delete("/cleanup", isUserAuthenticated, catchAsyncError(async (req, res) => {
   const userId = req.user._id;
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
