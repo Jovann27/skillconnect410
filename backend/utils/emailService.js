@@ -1,4 +1,7 @@
 import nodemailer from 'nodemailer';
+import logger from './logger.js';
+import { addEmailToQueue } from './emailQueue.js';
+import { targetedRequestNotificationTemplate } from './emailTemplates.js';
 
 // Create transporter
 const transporter = nodemailer.createTransport({
@@ -9,47 +12,54 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Send email function
-export const sendEmail = async (to, subject, html) => {
-  try {
-    const mailOptions = {
-      from: process.env.SMTP_EMAIL,
-      to,
-      subject,
-      html
-    };
+// Send email function with retry mechanism
+export const sendEmail = async (to, subject, html, maxRetries = 3) => {
+  let lastError;
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', result.messageId);
-    return result;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const mailOptions = {
+        from: process.env.SMTP_EMAIL,
+        to,
+        subject,
+        html
+      };
+
+      const result = await transporter.sendMail(mailOptions);
+      logger.info(`Email sent successfully on attempt ${attempt}:`, result.messageId);
+      return result;
+    } catch (error) {
+      logger.warn(`Email send attempt ${attempt} failed:`, error.message);
+      lastError = error;
+
+      // If this is not the last attempt, wait before retrying
+      if (attempt < maxRetries) {
+        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 30000); // Exponential backoff, max 30 seconds
+        logger.info(`Retrying email send in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  // All retries failed
+  logger.error('All email send attempts failed after', maxRetries, 'retries');
+  throw lastError;
+};
+
+// Queue email for processing
+export const queueEmail = async (to, subject, html, options = {}) => {
+  try {
+    return await addEmailToQueue(to, subject, html, options);
   } catch (error) {
-    console.error('Error sending email:', error);
+    logger.error('Failed to queue email:', error);
     throw error;
   }
 };
 
 // Send targeted service request notification
-export const sendTargetedRequestNotification = async (providerEmail, providerName, requesterName, serviceType, requestId) => {
+export const sendTargetedRequestNotification = async (providerEmail, providerName, requesterName, serviceType, requestId, requestDetails = '') => {
   const subject = `New Targeted Service Request - ${serviceType}`;
-  const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #667eea;">New Targeted Service Request</h2>
-      <p>Hi ${providerName},</p>
-      <p>You have received a targeted service request from <strong>${requesterName}</strong> for <strong>${serviceType}</strong>.</p>
-      <p>Please check your dashboard to view and respond to this request.</p>
-      <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <p><strong>Service Type:</strong> ${serviceType}</p>
-        <p><strong>Requester:</strong> ${requesterName}</p>
-        <p><strong>Request ID:</strong> ${requestId}</p>
-      </div>
-      <p style="color: #666; font-size: 14px;">
-        This is a targeted request specifically offered to you by the customer.
-      </p>
-      <a href="${process.env.FRONTEND_URL}/dashboard" style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 20px;">
-        View Request
-      </a>
-    </div>
-  `;
+  const html = targetedRequestNotificationTemplate(providerName, requesterName, serviceType, requestId, requestDetails);
 
-  return await sendEmail(providerEmail, subject, html);
+  return await queueEmail(providerEmail, subject, html);
 };

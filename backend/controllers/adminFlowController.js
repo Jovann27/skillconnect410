@@ -4,7 +4,8 @@ import VerificationAppointment from "../models/verificationSchema.js";
 import User from "../models/userSchema.js";
 import Notification from "../models/notification.js";
 import Service from "../models/service.js";
-import { io, onlineUsers } from "../server.js";
+import { io } from "../server.js";
+import { getUserSockets } from "../utils/sessionManager.js";
 
 // simple notify helper
 const sendNotification = async (userId, title, message, meta = {}) => {
@@ -36,20 +37,22 @@ export const scheduleVerificationAppointment = catchAsyncError(async (req, res, 
   });
 
   const notification = await sendNotification(
-    provider._id, 
-    "Verification Appointment Scheduled", 
-    `Your verification appointment is scheduled on ${appt.appointmentDate.toISOString()}`, { 
+    provider._id,
+    "Verification Appointment Scheduled",
+    `Your verification appointment is scheduled on ${appt.appointmentDate.toISOString()}`, {
       apptId: appt._id }
   );
-  
-  const providerSocketId = onlineUsers.get(provider._id.toString());
-  if (providerSocketId) {
-    io.to(providerSocketId).emit("appointment-notification", {
-      title: "Verification Appointment Scheduled",
-      message: `Your verification appointment is scheduled on ${appt.appointmentDate.toLocaleString()}`,
-      appointment: appt,
-      notification,
-    });
+
+  const providerSockets = await getUserSockets(provider._id.toString());
+  if (providerSockets && providerSockets.length > 0) {
+    for (const socketId of providerSockets) {
+      io.to(socketId).emit("appointment-notification", {
+        title: "Verification Appointment Scheduled",
+        message: `Your verification appointment is scheduled on ${appt.appointmentDate.toLocaleString()}`,
+        appointment: appt,
+        notification,
+      });
+    }
     console.log("Sent real-time notification to provider");
   } else {
     console.log("Provider not online, real-time notification not sent");
@@ -196,14 +199,16 @@ export const scheduleInterview = catchAsyncError(async (req, res, next) => {
   );
 
   // Send real-time notification if user is online
-  const applicantSocketId = onlineUsers.get(applicant._id.toString());
-  if (applicantSocketId) {
-    io.to(applicantSocketId).emit("interview-notification", {
-      title: "Interview Scheduled",
-      message: `Your interview has been scheduled for ${formattedDate} at ${location}`,
-      interview,
-      notification,
-    });
+  const applicantSockets = await getUserSockets(applicant._id.toString());
+  if (applicantSockets && applicantSockets.length > 0) {
+    for (const socketId of applicantSockets) {
+      io.to(socketId).emit("interview-notification", {
+        title: "Interview Scheduled",
+        message: `Your interview has been scheduled for ${formattedDate} at ${location}`,
+        interview,
+        notification,
+      });
+    }
     console.log("Sent real-time interview notification to applicant");
   } else {
     console.log("Applicant not online, real-time notification not sent");

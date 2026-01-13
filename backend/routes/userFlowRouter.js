@@ -1,4 +1,5 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import { isUserAuthenticated, isUserVerified } from "../middlewares/auth.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../middlewares/error.js";
@@ -6,6 +7,18 @@ import User from "../models/userSchema.js";
 import ServiceRequest from '../models/serviceRequest.js';
 import Review from '../models/review.js';
 import Notification from '../models/notification.js';
+
+// Stricter rate limiting for critical operations like accepting offers/requests
+const criticalOperationLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 10, // 10 critical operations per 5 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many critical operations, please try again later."
+  }
+});
 
 import {
   getBookings,
@@ -26,7 +39,6 @@ import {
   offerToProvider,
   acceptOffer,
   rejectOffer,
-  reverseGeocode,
   getChatHistory,
   sendMessage,
   getChatList,
@@ -390,7 +402,7 @@ router.get('/available-service-requests', isUserAuthenticated, isUserVerified, g
 router.post('/post-service-request', isUserAuthenticated, isUserVerified, postServiceRequest);
 router.get('/service-request/:id', isUserAuthenticated, isUserVerified, getServiceRequest);
 router.delete('/service-request/:id/cancel', isUserAuthenticated, isUserVerified, cancelServiceRequest);
-router.post('/service-request/:id/accept', isUserAuthenticated, isUserVerified, acceptServiceRequest);
+router.post('/service-request/:id/accept', criticalOperationLimiter, isUserAuthenticated, isUserVerified, acceptServiceRequest);
 
 // Service Profile routes
 router.get('/service-profile', isUserAuthenticated, isUserVerified, getServiceProfile);
@@ -411,7 +423,7 @@ router.get('/recommended-providers', isUserAuthenticated, isUserVerified, getRec
 // Offer routes
 router.post('/send-direct-service-offer', isUserAuthenticated, isUserVerified, sendDirectServiceOffer);
 router.post('/offer-to-provider', isUserAuthenticated, isUserVerified, offerToProvider);
-router.post('/offer/:requestId/accept', isUserAuthenticated, isUserVerified, acceptOffer);
+router.post('/offer/:requestId/accept', criticalOperationLimiter, isUserAuthenticated, isUserVerified, acceptOffer);
 router.post('/offer/:requestId/reject', isUserAuthenticated, isUserVerified, rejectOffer);
 
 // Chat routes
@@ -455,8 +467,7 @@ router.get('/notification-preferences', isUserAuthenticated, isUserVerified, cat
   });
 }));
 
-// Reverse geocoding route
-router.get('/reverse-geocode', isUserAuthenticated, isUserVerified, reverseGeocode);
+
 
 // Provider Dashboard routes
 router.get('/provider-offers', isUserAuthenticated, isUserVerified, getProviderOffers);

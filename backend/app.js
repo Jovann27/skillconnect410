@@ -8,6 +8,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import hpp from "hpp";
 import mongoSanitize from "express-mongo-sanitize";
+import morgan from "morgan";
 
 // import "./config/cloudinaryConfig.js";
 
@@ -23,11 +24,16 @@ import verificationRouter from "./routes/verificationRouter.js";
 import helpRouter from "./routes/helpRouter.js";
 import reviewRouter from "./routes/reviewRouter.js";
 import residentRouter from "./routes/residentRouter.js";
+import notificationRouter from "./routes/notificationRouter.js";
+import searchRouter from "./routes/searchRouter.js";
 
 import mvpRoutes from "./routes/mvpRoutes.js";
 
 import { errorMiddleware } from "./middlewares/error.js";
 import { validateFileUpload, securityLogger, csrfProtection } from "./middlewares/validation.js";
+import { sentryRequestHandler, sentryErrorHandler } from "./utils/sentry.js";
+
+import { swaggerUi, specs } from "./utils/swagger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +41,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 app.set("trust proxy", 1);
+
+// Sentry request handler (must be first)
+app.use(sentryRequestHandler);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -49,9 +58,35 @@ app.use(cors({
   credentials: true,
 }));
 
+
+
 app.use(cookieParser());
 app.use(express.json({ limit: '10mb' })); // Limit request body size
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+import logger from "./utils/logger.js";
+
+// Morgan middleware for HTTP request logging
+const morganStream = {
+  write: (message) => {
+    logger.http(message.trim());
+  },
+};
+
+// HTTP request logging with Morgan
+app.use(morgan(
+  process.env.NODE_ENV === 'production'
+    ? 'combined'
+    : 'dev',
+  {
+    stream: morganStream,
+    skip: (req, res) => {
+      // Skip logging for health checks and static files in production
+      return process.env.NODE_ENV === 'production' &&
+             (req.url === '/api/v1/ping' || req.url.startsWith('/uploads/'));
+    }
+  }
+));
 
 // Security logging
 app.use(securityLogger);
@@ -133,6 +168,18 @@ const searchLimiter = rateLimit({
   }
 });
 
+// Stricter rate limiting for critical operations like accepting offers/requests
+const criticalOperationLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 10, // 10 critical operations per 5 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many critical operations, please try again later."
+  }
+});
+
 // Apply general rate limiting
 app.use(generalLimiter);
 
@@ -166,6 +213,7 @@ app.use(validateFileUpload);
 app.use("/api/v1/user", userAuthRouter); // User authentication routes (register, login)
 app.use("/api/v1/user", csrfProtection, userFlowRouter); // User flow routes (dashboard, bookings, etc.) - CSRF protected
 app.use("/api/v1/user", csrfProtection, mvpRoutes); // MVP service request and offer routes - CSRF protected
+app.use("/api/v1/notifications", csrfProtection, notificationRouter); // Notification management routes - CSRF protected
 app.use("/api/v1/admin/auth", adminAuthRouter);
 app.use("/api/v1/admin", csrfProtection, adminFlowRouter);
 app.use("/api/v1/admin", csrfProtection, adminRouter);
@@ -176,9 +224,30 @@ app.use("/api/v1/reports", csrfProtection, reportRoutes);
 app.use("/api/v1/verification", csrfProtection, verificationRouter);
 app.use("/api/v1/help", helpRouter);
 app.use("/api/v1/review", csrfProtection, reviewRouter);
+app.use("/api/v1/search", searchRouter);
+
+// API Documentation
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'SkillConnect API Documentation',
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      docExpansion: 'none',
+      filter: true,
+      showExtensions: true,
+      showCommonExtensions: true,
+    }
+  }));
+}
 
 // health
 app.get("/api/v1/ping", (req, res) => res.json({ success: true, message: "pong" }));
+
+// Sentry error handler (must be before other error middleware)
+app.use(sentryErrorHandler);
 
 app.use(errorMiddleware);
 

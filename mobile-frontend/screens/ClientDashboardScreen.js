@@ -86,7 +86,6 @@ const ClientDashboardScreen = () => {
         setProviders(response.data.workers);
       }
     } catch (error) {
-      console.error('Error fetching providers:', error);
       Alert.alert('Error', 'Failed to load providers');
     } finally {
       setLoading(false);
@@ -103,7 +102,6 @@ const ClientDashboardScreen = () => {
         setApplications([]);
       }
     } catch (error) {
-      console.error('Error fetching applications:', error);
       setApplications([]);
     } finally {
       setApplicationsLoading(false);
@@ -118,7 +116,6 @@ const ClientDashboardScreen = () => {
         setMyRequests(response.data.requests);
       }
     } catch (error) {
-      console.error('Error fetching service requests:', error);
       Alert.alert('Error', 'Failed to load service requests');
     } finally {
       setRequestsLoading(false);

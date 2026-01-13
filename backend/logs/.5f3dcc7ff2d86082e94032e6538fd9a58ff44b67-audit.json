@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\logs\\.5f3dcc7ff2d86082e94032e6538fd9a58ff44b67-audit.json",
+    "files": [
+        {
+            "date": 1768281138343,
+            "name": "C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\logs\\error-2026-01-13.log",
+            "hash": "e67e639f57816f5d0cb5c420be6930be10674b50cfc94ed493a8be1ca1fd1b55"
+        }
+    ],
+    "hashType": "sha256"
+}

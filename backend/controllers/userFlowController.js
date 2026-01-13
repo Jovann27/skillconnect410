@@ -97,7 +97,7 @@ export const updateBookingStatus = catchAsyncError(async (req, res, next) => {
   const booking = await Booking.findById(id);
   if (!booking) return next(new ErrorHandler("Booking not found", 404));
 
-  const allowed = ["Available", "Working", "Complete", "Cancelled"];
+  const allowed = ["Accepted", "In Progress", "Completed", "Cancelled"];
   if (!allowed.includes(status)) return next(new ErrorHandler("Invalid status", 400));
 
   if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
@@ -122,7 +122,7 @@ export const leaveReview = catchAsyncError(async (req, res, next) => {
 
   const booking = await Booking.findById(bookingId);
   if (!booking) return next(new ErrorHandler("Booking not found", 404));
-  if (booking.status !== "Complete") return next(new ErrorHandler("Booking not completed yet", 400));
+  if (booking.status !== "Completed") return next(new ErrorHandler("Booking not completed yet", 400));
   if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
     return next(new ErrorHandler("Not authorized", 403));
   }
@@ -161,7 +161,7 @@ export const cancelServiceRequest = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Not authorized to cancel this request", 403));
   }
 
-  if(["Complete", "Cancelled"].includes(request.status)) {
+  if(["Completed", "Cancelled"].includes(request.status)) {
     return next(new ErrorHandler("Cannot cancel a request that is already completed or cancelled", 400));
   }
 
@@ -177,22 +177,46 @@ export const cancelServiceRequest = catchAsyncError(async (req, res, next) => {
 export const acceptServiceRequest = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
   const { id } = req.params;
-  const request = await ServiceRequest.findById(id).populate('requester');
-  if (!request) return next(new ErrorHandler("Service Request not found", 404));
-  if (request.status !== "Open") return next(new ErrorHandler("Request is not available", 400));
 
   const provider = await User.findById(req.user._id);
   if (!provider || provider.role !== "Service Provider") return next(new ErrorHandler("Not a provider", 403));
 
-  // Check if provider already has a request on the same preferred date
+  // Use findOneAndUpdate to atomically check and update the request status to prevent race conditions
+  const request = await ServiceRequest.findOneAndUpdate(
+    {
+      _id: id,
+      status: "Open" // Only accept if still in Open status
+    },
+    {
+      status: "In Progress",
+      serviceProvider: req.user._id,
+      eta: new Date(Date.now() + 30 * 60 * 1000)
+    },
+    { new: true }
+  ).populate('requester');
+
+  if (!request) {
+    // Check if request exists
+    const checkRequest = await ServiceRequest.findById(id);
+    if (!checkRequest) return next(new ErrorHandler("Service Request not found", 404));
+    if (checkRequest.status !== "Open") {
+      return next(new ErrorHandler("Request is not available", 400));
+    }
+    return next(new ErrorHandler("Failed to accept request due to concurrent request", 409));
+  }
+
+  // Check if provider already has a request on the same preferred date (after atomic update)
   if (request.preferredDate) {
     const existingRequest = await ServiceRequest.findOne({
       serviceProvider: req.user._id,
-      status: "Working",
-      preferredDate: request.preferredDate
+      status: "In Progress", // Changed from "Working" to "In Progress"
+      preferredDate: request.preferredDate,
+      _id: { $ne: id } // Exclude current request
     });
 
     if (existingRequest) {
+      // Revert the status change since we can't proceed
+      await ServiceRequest.findByIdAndUpdate(id, { status: "Open", serviceProvider: null, eta: null });
       return next(new ErrorHandler("You already have a confirmed request on this date. Please complete or cancel it before accepting another request.", 400));
     }
   }
@@ -201,13 +225,8 @@ export const acceptServiceRequest = catchAsyncError(async (req, res, next) => {
     requester: request.requester._id,
     provider: provider._id,
     serviceRequest: request._id,
-    status: "Working",
+    status: "In Progress",
   });
-
-  request.status = "Working";
-  request.serviceProvider = provider._id;
-  request.eta = new Date(Date.now() + 30 * 60 * 1000);
-  await request.save();
 
   await sendNotification(
     request.requester._id,
@@ -955,7 +974,7 @@ export const offerToProvider = catchAsyncError(async (req, res, next) => {
     { requestId: request._id, type: "service-offer" }
   );
 
-  // Send email to provider
+  // Send email to provider with retry mechanism
   try {
     await sendTargetedRequestNotification(
       provider.email,
@@ -965,8 +984,19 @@ export const offerToProvider = catchAsyncError(async (req, res, next) => {
       request._id
     );
   } catch (emailError) {
-    console.error("Error sending email notification:", emailError);
-    // Don't fail the request if email fails, just log it
+    console.error("Failed to send email notification after all retry attempts:", {
+      providerEmail: provider.email,
+      providerName: `${provider.firstName} ${provider.lastName}`,
+      requesterName: `${request.requester.firstName} ${request.requester.lastName}`,
+      serviceType: request.typeOfWork,
+      requestId: request._id,
+      error: emailError.message,
+      stack: emailError.stack
+    });
+
+    // TODO: Consider implementing a job queue system for failed emails
+    // For now, email failure doesn't block the main request flow
+    // but we log detailed information for monitoring and debugging
   }
 
   // Emit socket event
@@ -983,23 +1013,46 @@ export const acceptOffer = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
   const { requestId } = req.params;
 
-  const request = await ServiceRequest.findById(requestId).populate('requester');
-  if (!request) return next(new ErrorHandler("Service request not found", 404));
+  // Use findOneAndUpdate to atomically check and update the request status to prevent race conditions
+  const request = await ServiceRequest.findOneAndUpdate(
+    {
+      _id: requestId,
+      targetProvider: req.user._id,
+      status: "Offered" // Only accept if still in Offered status
+    },
+    {
+      status: "In Progress",
+      serviceProvider: req.user._id,
+      eta: new Date(Date.now() + 30 * 60 * 1000)
+    },
+    { new: true }
+  ).populate('requester');
 
-  // Check if the provider is the target
-  if (String(request.targetProvider) !== String(req.user._id)) {
-    return next(new ErrorHandler("Not authorized to accept this offer", 403));
+  if (!request) {
+    // Check if request exists and user is authorized
+    const checkRequest = await ServiceRequest.findById(requestId);
+    if (!checkRequest) return next(new ErrorHandler("Service request not found", 404));
+    if (String(checkRequest.targetProvider) !== String(req.user._id)) {
+      return next(new ErrorHandler("Not authorized to accept this offer", 403));
+    }
+    if (checkRequest.status !== "Offered") {
+      return next(new ErrorHandler("This offer has already been accepted or is no longer available", 400));
+    }
+    return next(new ErrorHandler("Failed to accept offer due to concurrent request", 409));
   }
 
-  // Check if provider already has a request on the same preferred date
+  // Check if provider already has a request on the same preferred date (after atomic update)
   if (request.preferredDate) {
     const existingRequest = await ServiceRequest.findOne({
       serviceProvider: req.user._id,
-      status: "Working",
-      preferredDate: request.preferredDate
+      status: "In Progress", // Changed from "Working" to "In Progress"
+      preferredDate: request.preferredDate,
+      _id: { $ne: requestId } // Exclude current request
     });
 
     if (existingRequest) {
+      // Revert the status change since we can't proceed
+      await ServiceRequest.findByIdAndUpdate(requestId, { status: "Offered", serviceProvider: null, eta: null });
       return next(new ErrorHandler("You already have a confirmed request on this date. Please complete or cancel it before accepting another request.", 400));
     }
   }
@@ -1009,13 +1062,8 @@ export const acceptOffer = catchAsyncError(async (req, res, next) => {
     requester: request.requester._id,
     provider: req.user._id,
     serviceRequest: request._id,
-    status: "Working",
+    status: "In Progress",
   });
-
-  request.status = "Working";
-  request.serviceProvider = req.user._id;
-  request.eta = new Date(Date.now() + 30 * 60 * 1000);
-  await request.save();
 
   await sendNotification(
     request.requester._id,
@@ -1041,13 +1089,13 @@ export const completeBooking = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Not authorized", 403));
   }
 
-  booking.status = "Complete";
+  booking.status = "Completed";
   await booking.save();
 
   // Update service request status
   const serviceRequest = await ServiceRequest.findById(booking.serviceRequest);
   if (serviceRequest) {
-    serviceRequest.status = "Complete";
+    serviceRequest.status = "Completed";
     await serviceRequest.save();
   }
 
@@ -1198,22 +1246,7 @@ export const rejectOffer = catchAsyncError(async (req, res, next) => {
   res.status(200).json({ success: true, message: "Offer rejected successfully" });
 });
 
-export const reverseGeocode = catchAsyncError(async (req, res, next) => {
-  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
-  const { lat, lng } = req.query;
-  if (!lat || !lng) {
-    return next(new ErrorHandler("Latitude and longitude are required", 400));
-  }
-
-  // This is a placeholder implementation
-  // In a real application, you would use a geocoding service like Google Maps API
-  res.json({
-    success: true,
-    address: "Address lookup not implemented",
-    location: { lat: parseFloat(lat), lng: parseFloat(lng) }
-  });
-});
 
 // MVP Service Request Flow
 export const createServiceRequest = catchAsyncError(async (req, res, next) => {

@@ -27,4 +27,20 @@ const serviceRequestSchema = new mongoose.Schema({
 serviceRequestSchema.index({ requester: 1, typeOfWork: 1, status: 1 });
 serviceRequestSchema.index({ status: 1, createdAt: -1 });
 
+// Text index for full-text search
+serviceRequestSchema.index({
+  name: 'text',
+  typeOfWork: 'text',
+  notes: 'text',
+  address: 'text'
+}, {
+  weights: {
+    name: 10,
+    typeOfWork: 8,
+    notes: 3,
+    address: 2
+  },
+  name: 'serviceRequest_text_index'
+});
+
 export default mongoose.model("ServiceRequest", serviceRequestSchema);

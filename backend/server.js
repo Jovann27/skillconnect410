@@ -6,6 +6,10 @@ import app from "./app.js";
 import { dbConnection } from "./database/dbConnection.js";
 // import "./config/cloudinaryConfig.js";
 import { checkAndUpdateExpiredRequests } from "./utils/expirationHandler.js";
+import { initializeSentry } from "./utils/sentry.js";
+import { initializeRedis } from "./utils/redis.js";
+import { initializeEmailQueue } from "./utils/emailQueue.js";
+import logger from "./utils/logger.js";
 import { Server } from "socket.io";
 import http from "http";
 import jwt from "jsonwebtoken";
@@ -13,20 +17,34 @@ import User from "./models/userSchema.js";
 import Chat from "./models/chat.js";
 import Booking from "./models/booking.js";
 import { initializeSocketNotify } from "./utils/socketNotify.js";
+import {
+  setUserOnline,
+  setUserOffline,
+  getUserSockets,
+  updateUserActivity
+} from "./utils/sessionManager.js";
 
-// Declare io and onlineUsers for export
+// Declare io for export
 let io = null;
-let onlineUsers = null;
 
 const startServer = async () => {
   try {
+    // Initialize Sentry for error tracking
+    initializeSentry();
+
     // Initialize database connection and then check expired requests
     await dbConnection();
-    
+
+    // Initialize Redis for caching
+    await initializeRedis();
+
+    // Initialize email queue
+    await initializeEmailQueue();
+
     // Check and update expired service requests on server start
     const count = await checkAndUpdateExpiredRequests();
     if (count > 0) {
-      console.log(`Server startup: Updated ${count} expired service requests`);
+      logger.info(`Server startup: Updated ${count} expired service requests`);
     }
 
     const PORT = process.env.PORT || 4000;
@@ -47,10 +65,8 @@ const startServer = async () => {
       }
     });
 
-    onlineUsers = new Map();
-
-    // Initialize socketNotify with io and onlineUsers
-    initializeSocketNotify(io, onlineUsers);
+    // Initialize socketNotify with io (onlineUsers will be managed by sessionManager)
+    initializeSocketNotify(io, null);
 
     // Socket.IO authentication middleware
     io.use(async (socket, next) => {
@@ -108,17 +124,20 @@ const startServer = async () => {
       }
     });
 
-    io.on("connection", (socket) => {
-      console.log("Client Connected", socket.id, "User:", socket.userId);
+    io.on("connection", async (socket) => {
+      logger.info(`Client Connected: ${socket.id}, User: ${socket.userId}`);
 
-      // Register user as online
-      onlineUsers.set(socket.userId, socket.id);
-      console.log(`Registered user ${socket.userId} with socket ${socket.id}`);
+      // Register user as online using Redis session manager
+      const onlineResult = await setUserOnline(socket.userId, socket.id);
+      if (onlineResult) {
+        // Update user online status in database
+        User.findByIdAndUpdate(socket.userId, { isOnline: true })
+          .then(() => logger.debug(`User ${socket.userId} set as online in database`))
+          .catch(err => logger.error("Error updating online status in database:", err));
 
-      // Update user online status
-      User.findByIdAndUpdate(socket.userId, { isOnline: true })
-        .then(() => console.log(`User ${socket.userId} is now online`))
-        .catch(err => console.error("Error updating online status:", err));
+        const userSockets = await getUserSockets(socket.userId);
+        logger.debug(`User ${socket.userId} now has ${userSockets.length} active sockets`);
+      }
 
       // Handle joining chat rooms (appointment/booking based)
       socket.on("join-chat", async (appointmentId) => {
@@ -215,16 +234,22 @@ const startServer = async () => {
             ? booking.provider.toString()
             : booking.requester.toString();
 
-          const otherSocketId = onlineUsers.get(otherUserId);
-          if (otherSocketId && otherSocketId !== socket.id) {
-            io.to(otherSocketId).emit("message-notification", {
-              appointmentId,
-              message: chatMessage,
-              from: socket.user.firstName + " " + socket.user.lastName
-            });
+          const otherUserSockets = await getUserSockets(otherUserId);
+          if (otherUserSockets && otherUserSockets.length > 0) {
+            // Emit to all sockets of the other user
+            for (const socketId of otherUserSockets) {
+              io.to(socketId).emit("message-notification", {
+                appointmentId,
+                message: chatMessage,
+                from: socket.user.firstName + " " + socket.user.lastName
+              });
+            }
           }
 
-          console.log(`Message sent in chat ${appointmentId} by user ${socket.userId}`);
+          // Update user activity
+          await updateUserActivity(socket.userId);
+
+          logger.debug(`Message sent in chat ${appointmentId} by user ${socket.userId}`);
         } catch (error) {
           console.error("Error sending message:", error);
           socket.emit("error", "Failed to send message");
@@ -264,37 +289,50 @@ const startServer = async () => {
           // Notify sender that message was seen
           const message = await Chat.findById(messageId).populate('sender');
           if (message && message.sender._id.toString() !== socket.userId) {
-            const senderSocketId = onlineUsers.get(message.sender._id.toString());
-            if (senderSocketId) {
-              io.to(senderSocketId).emit("message-seen-update", {
-                messageId,
-                seenBy: socket.user.firstName + " " + socket.user.lastName,
-                appointmentId
-              });
+            const senderSockets = await getUserSockets(message.sender._id.toString());
+            if (senderSockets && senderSockets.length > 0) {
+              // Emit to all sockets of the sender
+              for (const socketId of senderSockets) {
+                io.to(socketId).emit("message-seen-update", {
+                  messageId,
+                  seenBy: socket.user.firstName + " " + socket.user.lastName,
+                  appointmentId
+                });
+              }
             }
           }
+
+          // Update user activity
+          await updateUserActivity(socket.userId);
         } catch (error) {
           console.error("Error updating message seen status:", error);
         }
       });
 
       // Handle disconnect
-      socket.on("disconnect", () => {
-        onlineUsers.delete(socket.userId);
-        console.log(`User ${socket.userId} disconnected`);
+      socket.on("disconnect", async () => {
+        logger.debug(`Client disconnected: ${socket.id}, User: ${socket.userId}`);
 
-        // Update user online status
-        User.findByIdAndUpdate(socket.userId, { isOnline: false })
-          .then(() => console.log(`User ${socket.userId} is now offline`))
-          .catch(err => console.error("Error updating offline status:", err));
+        // Remove user socket using Redis session manager
+        const offlineResult = await setUserOffline(socket.userId, socket.id);
+        if (offlineResult) {
+          // Check if user has any remaining sockets
+          const remainingSockets = await getUserSockets(socket.userId);
+          if (remainingSockets.length === 0) {
+            // Update user offline status in database
+            User.findByIdAndUpdate(socket.userId, { isOnline: false })
+              .then(() => logger.debug(`User ${socket.userId} set as offline in database`))
+              .catch(err => logger.error("Error updating offline status in database:", err));
+          }
+        }
       });
     });
 
     server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      logger.info(`Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error("Failed to start server:", error);
+    logger.error("Failed to start server:", error);
     process.exit(1);
   }
 };
@@ -305,5 +343,5 @@ startServer();
 // For Vercel deployment, export the app
 export default app;
 
-// Export io and onlineUsers for use in other modules
-export { io, onlineUsers };
+// Export io for use in other modules
+export { io };

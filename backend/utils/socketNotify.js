@@ -1,12 +1,12 @@
 import Notification from "../models/notification.js";
+import { getUserSockets } from "./sessionManager.js";
+import logger from "./logger.js";
 
 let io = null;
-let onlineUsers = null;
 
-// Initialize io and onlineUsers when available
-export const initializeSocketNotify = (socketIo, onlineUsersMap) => {
+// Initialize io when available
+export const initializeSocketNotify = (socketIo, onlineUsersMap = null) => {
     io = socketIo;
-    onlineUsers = onlineUsersMap;
 };
 
 export const sendNotification = async (userId, title, message, meta = {}) => {
@@ -19,26 +19,30 @@ export const sendNotification = async (userId, title, message, meta = {}) => {
             meta,
         });
 
-        // Send real-time notification if socket.io is available and user is online
-        if (io && onlineUsers) {
-            const socketId = onlineUsers.get(userId.toString());
-            if (socketId) {
-                io.to(socketId).emit("new-notification", {
-                    title,
-                    message,
-                    meta,
-                    createdAt: notification.createdAt,
-                });
-                console.log(`Real-time notification sent to user ${userId}`);
+        // Send real-time notification if socket.io is available
+        if (io) {
+            const userSockets = await getUserSockets(userId.toString());
+            if (userSockets && userSockets.length > 0) {
+                // Emit to all sockets for this user
+                for (const socketId of userSockets) {
+                    io.to(socketId).emit("new-notification", {
+                        title,
+                        message,
+                        meta,
+                        createdAt: notification.createdAt,
+                    });
+                }
+                logger.debug(`Real-time notification sent to user ${userId} (${userSockets.length} sockets)`);
+            } else {
+                logger.debug(`User ${userId} has no active sockets for real-time notification`);
             }
         } else {
-            console.log(`Socket.io not available for real-time notification to user ${userId} (notification saved to DB)`);
+            logger.debug(`Socket.io not available for real-time notification to user ${userId} (notification saved to DB)`);
         }
 
         return notification;
     } catch (err) {
-        console.error("Send Notification error:", err.message);
+        logger.error("Send Notification error:", err.message);
         return null;
     }
 };
-

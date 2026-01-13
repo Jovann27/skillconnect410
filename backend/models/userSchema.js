@@ -79,11 +79,24 @@ const userSchema = new mongoose.Schema({
   banned: { type: Boolean, default: false },
   suspended: { type: Boolean, default: false },
 
-  // Notification preferences
+  // Enhanced notification preferences
   notificationPreferences: {
-    emailNotifications: { type: Boolean, default: true },
-    pushNotifications: { type: Boolean, default: true }
+    email: { type: Boolean, default: true },
+    push: { type: Boolean, default: true },
+    inApp: { type: Boolean, default: true },
+    bookingRequests: { type: Boolean, default: true },
+    bookingUpdates: { type: Boolean, default: true },
+    paymentNotifications: { type: Boolean, default: true },
+    systemUpdates: { type: Boolean, default: false }
   },
+
+  // Device tokens for push notifications
+  deviceTokens: [{
+    token: { type: String, required: true },
+    platform: { type: String, enum: ['ios', 'android'], default: 'android' },
+    deviceId: { type: String },
+    addedAt: { type: Date, default: Date.now }
+  }],
 
   createdAt: { type: Date, default: Date.now },
 }, {
@@ -91,6 +104,28 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.index({ skills: 1 });
+
+// Text index for full-text search on service providers
+userSchema.index({
+  firstName: 'text',
+  lastName: 'text',
+  username: 'text',
+  skills: 'text',
+  occupation: 'text',
+  serviceDescription: 'text',
+  address: 'text'
+}, {
+  weights: {
+    firstName: 10,
+    lastName: 10,
+    username: 8,
+    skills: 9,
+    occupation: 6,
+    serviceDescription: 5,
+    address: 3
+  },
+  name: 'user_text_index'
+});
 
 userSchema.pre("save", async function(next) {
   if (!this.isModified("password")) return next();

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,9 @@ import {
   FlatList,
   Alert,
   RefreshControl,
-  ScrollView,=} from 'react-native';
-import Icon fro/m 'react-native-vector-icons/FontAwesome';
+  ActivityIndicator,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { useMainContext } from '../contexts/MainContext';
 import Loader from '../components/Loader';
 
@@ -18,54 +19,26 @@ const AvailableRequestsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null); // Track loading state for accept/decline actions
 
-  const fetchCurrentRequests = async () => {
+  const fetchCurrentRequests = useCallback(async () => {
     try {
-      // Use hybrid recommendation endpoint for workers
-      try {
-        const { data } = await api.get("/user/available-service-requests?useRecommendations=true", { withCredentials: true });
-        if (data.success && data.requests) {
-          setRequests(data.requests);
-          setLoading(false);
-          return;
-        }
-      } catch (recommendationError) {
-        // Recommendation endpoint not available, trying standard endpoint
+      setError(null);
+      const { data } = await api.get("/user/available-service-requests?useRecommendations=true", { withCredentials: true });
+      if (data.success) {
+        setRequests(data.requests || []);
+      } else {
+        throw new Error('Failed to fetch requests');
       }
-
-      // Fallback: Try the matching requests endpoint
-      try {
-        const { data } = await api.get("/user/matching-requests", { withCredentials: true });
-        if (data.success && data.requests && data.requests.length > 0) {
-          setRequests(data.requests);
-          setLoading(false);
-          return;
-        }
-      } catch (matchingError) {
-        // Matching-requests endpoint not available, trying alternatives
-      }
-
-      // Fallback: Try to get service requests (this will get filtered requests for the provider)
-      try {
-        const { data } = await api.get("/user/service-requests", { withCredentials: true });
-        if (data.success && data.requests) {
-          setRequests(data.requests);
-          setLoading(false);
-          return;
-        }
-      } catch (requestsError) {
-        // Service-requests endpoint not available either
-      }
-
-      // If all endpoints fail, set empty array
-      setRequests([]);
     } catch (err) {
-      setError(err.message);
+      console.error('Error fetching requests:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to load requests');
+      setRequests([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [api]);
 
   useEffect(() => {
     fetchCurrentRequests();
@@ -76,50 +49,48 @@ const AvailableRequestsScreen = () => {
     fetchCurrentRequests();
   };
 
-  const filteredRequests = requests.filter((request) => {
-    if (!request) {
-      return false;
-    }
+  const filteredAndSortedRequests = useMemo(() => {
+    const filtered = requests.filter((request) => {
+      if (!request) return false;
 
-    // Ensure request is truly available (not accepted, working, or completed)
-    const isAvailableRequest = request.status === "Waiting" || request.status === "Open";
-    if (!isAvailableRequest) {
-      return false;
-    }
+      // Ensure request is available
+      const isAvailableRequest = request.status === "Waiting" || request.status === "Open";
+      if (!isAvailableRequest) return false;
 
-    // Exclude current user's own requests
-    const isNotOwnRequest = request.requester?._id !== user._id && request.requesterId !== user._id;
-    if (!isNotOwnRequest) {
-      return false;
-    }
+      // Exclude current user's own requests
+      const isNotOwnRequest = request.requester?._id !== user._id && request.requesterId !== user._id;
+      if (!isNotOwnRequest) return false;
 
-    // Exclude requests that are already assigned to someone else
-    const isNotAssigned = !request.serviceProvider || request.serviceProvider._id === user._id;
-    if (!isNotAssigned) {
-      return false;
-    }
+      // Exclude requests assigned to someone else
+      const isNotAssigned = !request.serviceProvider || request.serviceProvider._id === user._id;
+      if (!isNotAssigned) return false;
 
-    // Match against user's services
-    const matchesUserServices = user.services && user.services.length > 0
-      ? user.services.some(service =>
-          request.typeOfWork?.toLowerCase().includes(service.name?.toLowerCase()) ||
-          service.name?.toLowerCase().includes(request.typeOfWork?.toLowerCase())
-        )
-      : true; // If no user services, show all requests (this shouldn't happen for providers)
+      // Match against user's services
+      const matchesUserServices = user.services && user.services.length > 0
+        ? user.services.some(service =>
+            request.typeOfWork?.toLowerCase().includes(service.name?.toLowerCase()) ||
+            service.name?.toLowerCase().includes(request.typeOfWork?.toLowerCase())
+          )
+        : true;
 
-    if (!matchesUserServices) {
-      return false;
-    }
+      if (!matchesUserServices) return false;
 
-    // Ensure request has required fields for display
-    if (!request.typeOfWork || !request.budget) {
-      return false;
-    }
+      // Ensure required fields exist
+      return request.typeOfWork && request.budget;
+    });
 
-    return true;
-  });
+    // Sort by recommendation score (highest first), then by date
+    return filtered.sort((a, b) => {
+      if (a.recommendationScore && b.recommendationScore) {
+        return b.recommendationScore - a.recommendationScore;
+      }
+      if (a.recommendationScore) return -1;
+      if (b.recommendationScore) return 1;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+  }, [requests, user._id, user.services]);
 
-  const handleAcceptRequest = async (request) => {
+  const handleAcceptRequest = useCallback(async (request) => {
     Alert.alert(
       'Accept Request',
       `Are you sure you want to accept this request for ${request.typeOfWork}?`,
@@ -129,6 +100,7 @@ const AvailableRequestsScreen = () => {
           text: 'Accept',
           onPress: async () => {
             try {
+              setActionLoading(request._id);
               const response = await api.post(`/user/service-request/${request._id}/accept`);
               if (response.data.success) {
                 Alert.alert('Success', 'Request accepted successfully!');
@@ -137,16 +109,17 @@ const AvailableRequestsScreen = () => {
                 Alert.alert('Error', 'Failed to accept request');
               }
             } catch (error) {
-              console.error('Error accepting request:', error);
               Alert.alert('Error', error.response?.data?.message || 'Failed to accept request');
+            } finally {
+              setActionLoading(null);
             }
           }
         }
       ]
     );
-  };
+  }, [api, fetchCurrentRequests]);
 
-  const handleDeclineRequest = (request) => {
+  const handleDeclineRequest = useCallback((request) => {
     Alert.alert(
       'Decline Request',
       'Are you sure you want to decline this request?',
@@ -156,13 +129,14 @@ const AvailableRequestsScreen = () => {
           text: 'Decline',
           style: 'destructive',
           onPress: () => {
+            // Remove from local state immediately for better UX
             setRequests(prev => prev.filter(req => req._id !== request._id));
             Alert.alert('Success', 'Request declined');
           }
         }
       ]
     );
-  };
+  }, []);
 
   const getStatusClass = (status) => {
     switch (status) {
@@ -176,93 +150,83 @@ const AvailableRequestsScreen = () => {
     }
   };
 
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
+  const renderRequestItem = ({ item: request }) => {
+    const isLoading = actionLoading === request._id;
+    const clientName = request.requester ?
+      `${request.requester.firstName || ""} ${request.requester.lastName || ""}`.trim() ||
+      request.requester.username ||
+      "Unknown Client" :
+      "N/A";
 
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push('★');
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push('☆');
-      } else {
-        stars.push('☆');
-      }
-    }
-    return stars.join('');
-  };
-
-  const renderRequestItem = ({ item: request }) => (
-    <View style={styles.requestRow}>
-      <View style={styles.statusCell}>
-        <View style={[styles.statusBadge, getStatusClass(request.status)]}>
-          <Text style={styles.statusText}>
-            {request.status === "Waiting" ? "Available" : request.status === "Completed" ? "Complete" : request.status === "Open" ? "Available" : request.status}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.matchScoreCell}>
-        {request.recommendationScore !== undefined ? (
-          <View style={styles.matchScoreContainer}>
-            <Icon name="line-chart" size={14} color="#007bff" />
-            <Text style={styles.matchScoreText}>
-              {Math.round(request.recommendationScore * 100)}%
+    return (
+      <View style={styles.requestCard}>
+        {/* Header with status and match score */}
+        <View style={styles.cardHeader}>
+          <View style={[styles.statusBadge, getStatusClass(request.status)]}>
+            <Text style={styles.statusText}>
+              {request.status === "Waiting" ? "Available" : request.status === "Completed" ? "Complete" : request.status === "Open" ? "Available" : request.status}
             </Text>
           </View>
-        ) : (
-          <Text style={styles.noMatchScore}>-</Text>
-        )}
-      </View>
+          {request.recommendationScore !== undefined && (
+            <View style={styles.matchScoreContainer}>
+              <Icon name="line-chart" size={14} color="#007bff" />
+              <Text style={styles.matchScoreText}>
+                {Math.round(request.recommendationScore * 100)}% match
+              </Text>
+            </View>
+          )}
+        </View>
 
-      <View style={styles.dateCell}>
-        <Text style={styles.dateText}>
-          {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : "-"}
-        </Text>
-      </View>
+        {/* Service details */}
+        <View style={styles.cardContent}>
+          <Text style={styles.serviceTitle}>{request.typeOfWork}</Text>
+          <Text style={styles.clientInfo}>
+            <Icon name="user" size={12} color="#666" /> {clientName}
+          </Text>
 
-      <View style={styles.clientCell}>
-        <Text style={styles.clientText}>
-          {request.requester ?
-            `${request.requester.firstName || ""} ${request.requester.lastName || ""}`.trim() ||
-            request.requester.username ||
-            "Unknown Client" :
-            "N/A"
-          }
-        </Text>
-      </View>
+          <View style={styles.detailsRow}>
+            <View style={styles.detailItem}>
+              <Icon name="calendar" size={12} color="#666" />
+              <Text style={styles.detailText}>
+                {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : "N/A"}
+              </Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Icon name="clock-o" size={12} color="#666" />
+              <Text style={styles.detailText}>{request.time || "Not specified"}</Text>
+            </View>
+          </View>
 
-      <View style={styles.serviceCell}>
-        <Text style={styles.serviceText}>{request.typeOfWork}</Text>
-      </View>
+          <View style={styles.budgetContainer}>
+            <Text style={styles.budgetLabel}>Budget:</Text>
+            <Text style={styles.budgetAmount}>₱{request.budget || "0"}</Text>
+          </View>
+        </View>
 
-      <View style={styles.budgetCell}>
-        <Text style={styles.budgetText}>₱{request.budget || "0"}</Text>
-      </View>
-
-      <View style={styles.timeCell}>
-        <Text style={styles.timeText}>{request.time || "Not specified"}</Text>
-      </View>
-
-      <View style={styles.actionsCell}>
-        <View style={styles.actionButtons}>
+        {/* Action buttons */}
+        <View style={styles.cardActions}>
           <TouchableOpacity
-            style={styles.acceptButton}
-            onPress={() => handleAcceptRequest(request)}
-          >
-            <Text style={styles.acceptButtonText}>Accept</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.declineButton}
+            style={[styles.declineButton, isLoading && styles.buttonDisabled]}
             onPress={() => handleDeclineRequest(request)}
+            disabled={isLoading}
           >
             <Text style={styles.declineButtonText}>Decline</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.acceptButton, isLoading && styles.buttonDisabled]}
+            onPress={() => handleAcceptRequest(request)}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.acceptButtonText}>Accept</Text>
+            )}
+          </TouchableOpacity>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   if (loading) {
     return <Loader />;
@@ -291,24 +255,8 @@ const AvailableRequestsScreen = () => {
         </Text>
       </View>
 
-      {/* Table Header */}
-      <View style={styles.tableHeader}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.tableHeaderRow}>
-            <Text style={[styles.headerCell, styles.statusHeader]}>Status</Text>
-            <Text style={[styles.headerCell, styles.matchScoreHeader]}>Match Score</Text>
-            <Text style={[styles.headerCell, styles.dateHeader]}>Request Date</Text>
-            <Text style={[styles.headerCell, styles.clientHeader]}>Client</Text>
-            <Text style={[styles.headerCell, styles.serviceHeader]}>Service Needed</Text>
-            <Text style={[styles.headerCell, styles.budgetHeader]}>Budget</Text>
-            <Text style={[styles.headerCell, styles.timeHeader]}>Preferred Time</Text>
-            <Text style={[styles.headerCell, styles.actionsHeader]}>Actions</Text>
-          </View>
-        </ScrollView>
-      </View>
-
       {/* Requests List */}
-      {filteredRequests.length === 0 ? (
+      {filteredAndSortedRequests.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Icon name="clipboard" size={64} color="#ccc" />
           <Text style={styles.emptyTitle}>No Available Requests</Text>
@@ -318,15 +266,7 @@ const AvailableRequestsScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={filteredRequests.sort((a, b) => {
-            // Sort by recommendation score if available (highest first)
-            if (a.recommendationScore && b.recommendationScore) {
-              return b.recommendationScore - a.recommendationScore;
-            }
-            if (a.recommendationScore) return -1;
-            if (b.recommendationScore) return 1;
-            return 0;
-          })}
+          data={filteredAndSortedRequests}
           renderItem={renderRequestItem}
           keyExtractor={(item) => item._id}
           refreshControl={
@@ -360,47 +300,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  tableHeader: {
-    backgroundColor: '#fff',
-    borderBottomWidth: 2,
-    borderBottomColor: '#e0e0e0',
-  },
-  tableHeaderRow: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  headerCell: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginHorizontal: 4,
-  },
-  statusHeader: {
-    width: 80,
-  },
-  matchScoreHeader: {
-    width: 80,
-  },
-  dateHeader: {
-    width: 100,
-  },
-  clientHeader: {
-    width: 120,
-  },
-  serviceHeader: {
-    width: 140,
-  },
-  budgetHeader: {
-    width: 80,
-  },
-  timeHeader: {
-    width: 100,
-  },
-  actionsHeader: {
-    width: 140,
-  },
+
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -453,22 +353,72 @@ const styles = StyleSheet.create({
   requestsList: {
     padding: 16,
   },
-  requestRow: {
-    flexDirection: 'row',
+  requestCard: {
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
-    marginBottom: 8,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    alignItems: 'center',
+    shadowRadius: 6,
+    elevation: 4,
   },
-  statusCell: {
-    width: 80,
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 12,
+  },
+  cardContent: {
+    marginBottom: 16,
+  },
+  serviceTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  clientInfo: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+  },
+  detailsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  detailText: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 6,
+  },
+  budgetContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  budgetLabel: {
+    fontSize: 14,
+    color: '#666',
+  },
+  budgetAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#28a745',
+  },
+  cardActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -489,10 +439,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'uppercase',
   },
-  matchScoreCell: {
-    width: 80,
-    alignItems: 'center',
-  },
   matchScoreContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -507,77 +453,33 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999',
   },
-  dateCell: {
-    width: 100,
-    alignItems: 'center',
-  },
-  dateText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  clientCell: {
-    width: 120,
-    alignItems: 'center',
-  },
-  clientText: {
-    fontSize: 12,
-    color: '#333',
-    fontWeight: 'bold',
-  },
-  serviceCell: {
-    width: 140,
-    alignItems: 'center',
-  },
-  serviceText: {
-    fontSize: 12,
-    color: '#333',
-  },
-  budgetCell: {
-    width: 80,
-    alignItems: 'center',
-  },
-  budgetText: {
-    fontSize: 12,
-    color: '#333',
-    fontWeight: 'bold',
-  },
-  timeCell: {
-    width: 100,
-    alignItems: 'center',
-  },
-  timeText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  actionsCell: {
-    width: 140,
-    alignItems: 'center',
-  },
-  actionButtons: {
-    flexDirection: 'row',
-  },
   acceptButton: {
     backgroundColor: '#28a745',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    marginRight: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    flex: 1,
+    marginLeft: 8,
   },
   acceptButtonText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   declineButton: {
     backgroundColor: '#dc3545',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    flex: 1,
+    marginRight: 8,
   },
   declineButtonText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

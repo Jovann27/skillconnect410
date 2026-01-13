@@ -383,3 +383,361 @@ export const updateReportStatus = catchAsyncError(async (req, res, next) => {
     report
   });
 });
+
+// Enhanced Analytics Dashboard
+export const getDashboardAnalytics = catchAsyncError(async (req, res, next) => {
+  try {
+    const { period = '30d', startDate, endDate } = req.query;
+
+    // Calculate date range
+    let dateRange = {};
+    if (startDate && endDate) {
+      dateRange = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    } else {
+      const days = period === '7d' ? 7 : period === '30d' ? 30 : period === '90d' ? 90 : 30;
+      dateRange = {
+        $gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+      };
+    }
+
+    // Real-time metrics
+    const [
+      userStats,
+      bookingStats,
+      serviceRequestStats,
+      revenueStats,
+      notificationStats
+    ] = await Promise.all([
+      getUserAnalytics(dateRange),
+      getBookingAnalytics(dateRange),
+      getServiceRequestAnalytics(dateRange),
+      getRevenueAnalytics(dateRange),
+      getNotificationAnalytics(dateRange)
+    ]);
+
+    // Top performing services
+    const topServices = await getTopPerformingServices(dateRange);
+
+    // Geographic distribution
+    const geographicStats = await getGeographicStats();
+
+    // User engagement metrics
+    const engagementStats = await getEngagementStats(dateRange);
+
+    res.status(200).json({
+      success: true,
+      period,
+      dateRange,
+      data: {
+        users: userStats,
+        bookings: bookingStats,
+        serviceRequests: serviceRequestStats,
+        revenue: revenueStats,
+        notifications: notificationStats,
+        topServices,
+        geographic: geographicStats,
+        engagement: engagementStats
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    return next(new ErrorHandler("Failed to fetch dashboard analytics", 500));
+  }
+});
+
+const getUserAnalytics = async (dateRange) => {
+  const totalUsers = await User.countDocuments();
+  const newUsers = await User.countDocuments({ createdAt: dateRange });
+  const activeUsers = await User.countDocuments({
+    lastLogin: dateRange,
+    banned: { $ne: true }
+  });
+  const verifiedProviders = await User.countDocuments({
+    role: "Service Provider",
+    verified: true,
+    banned: { $ne: true }
+  });
+
+  // User growth over time
+  const userGrowth = await User.aggregate([
+    { $match: { createdAt: dateRange } },
+    {
+      $group: {
+        _id: {
+          $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+        },
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { "_id": 1 } }
+  ]);
+
+  return {
+    total: totalUsers,
+    new: newUsers,
+    active: activeUsers,
+    verifiedProviders,
+    growth: userGrowth
+  };
+};
+
+const getBookingAnalytics = async (dateRange) => {
+  const totalBookings = await Booking.countDocuments();
+  const recentBookings = await Booking.countDocuments({ createdAt: dateRange });
+  const completedBookings = await Booking.countDocuments({
+    status: 'Completed',
+    createdAt: dateRange
+  });
+  const ongoingBookings = await Booking.countDocuments({
+    status: { $in: ['Working', 'In Progress'] }
+  });
+
+  // Booking trends
+  const bookingTrends = await Booking.aggregate([
+    { $match: { createdAt: dateRange } },
+    {
+      $group: {
+        _id: {
+          $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+        },
+        total: { $sum: 1 },
+        completed: {
+          $sum: { $cond: [{ $eq: ["$status", "Completed"] }, 1, 0] }
+        }
+      }
+    },
+    { $sort: { "_id": 1 } }
+  ]);
+
+  return {
+    total: totalBookings,
+    recent: recentBookings,
+    completed: completedBookings,
+    ongoing: ongoingBookings,
+    trends: bookingTrends,
+    completionRate: recentBookings > 0 ? (completedBookings / recentBookings * 100).toFixed(2) : 0
+  };
+};
+
+const getServiceRequestAnalytics = async (dateRange) => {
+  const totalRequests = await ServiceRequest.countDocuments();
+  const openRequests = await ServiceRequest.countDocuments({ status: "Open" });
+  const recentRequests = await ServiceRequest.countDocuments({ createdAt: dateRange });
+
+  // Service category distribution
+  const categoryDistribution = await ServiceRequest.aggregate([
+    { $match: { createdAt: dateRange } },
+    {
+      $group: {
+        _id: "$serviceCategory",
+        count: { $sum: 1 }
+      }
+    },
+    { $sort: { count: -1 } },
+    { $limit: 10 }
+  ]);
+
+  return {
+    total: totalRequests,
+    open: openRequests,
+    recent: recentRequests,
+    categoryDistribution
+  };
+};
+
+const getRevenueAnalytics = async (dateRange) => {
+  // Since payments are cash-based, we'll track service completion metrics
+  // In a real payment system, this would aggregate payment data
+  const completedBookings = await Booking.countDocuments({
+    status: 'Completed',
+    updatedAt: dateRange
+  });
+
+  // Estimate revenue based on average service rates
+  const avgServiceRate = 500; // Placeholder - in real system, get from service rates
+  const estimatedRevenue = completedBookings * avgServiceRate;
+
+  return {
+    totalRevenue: estimatedRevenue,
+    completedServices: completedBookings,
+    averageRevenuePerService: avgServiceRate,
+    period: Object.keys(dateRange).length > 0 ? `${dateRange.$gte.toISOString().split('T')[0]} to ${dateRange.$lte?.toISOString().split('T')[0] || 'now'}` : 'all_time'
+  };
+};
+
+const getNotificationAnalytics = async (dateRange) => {
+  const Notification = (await import("../models/notification.js")).default;
+
+  const totalNotifications = await Notification.countDocuments();
+  const recentNotifications = await Notification.countDocuments({ createdAt: dateRange });
+  const unreadNotifications = await Notification.countDocuments({
+    read: false,
+    createdAt: dateRange
+  });
+
+  // Notification types distribution
+  const typeDistribution = await Notification.aggregate([
+    { $match: { createdAt: dateRange } },
+    {
+      $group: {
+        _id: "$type",
+        count: { $sum: 1 },
+        read: { $sum: { $cond: ["$read", 1, 0] } }
+      }
+    },
+    { $sort: { count: -1 } }
+  ]);
+
+  return {
+    total: totalNotifications,
+    recent: recentNotifications,
+    unread: unreadNotifications,
+    readRate: recentNotifications > 0 ? ((recentNotifications - unreadNotifications) / recentNotifications * 100).toFixed(2) : 0,
+    typeDistribution
+  };
+};
+
+const getTopPerformingServices = async (dateRange) => {
+  const topServices = await Booking.aggregate([
+    {
+      $match: {
+        status: 'Completed',
+        updatedAt: dateRange
+      }
+    },
+    {
+      $lookup: {
+        from: 'servicerequests',
+        localField: 'serviceRequest',
+        foreignField: '_id',
+        as: 'serviceRequest'
+      }
+    },
+    { $unwind: '$serviceRequest' },
+    {
+      $group: {
+        _id: '$serviceRequest.serviceCategory',
+        bookings: { $sum: 1 },
+        avgRating: { $avg: '$serviceRequest.rating' }
+      }
+    },
+    {
+      $sort: { bookings: -1 }
+    },
+    { $limit: 10 }
+  ]);
+
+  return topServices;
+};
+
+const getGeographicStats = async () => {
+  const locationStats = await User.aggregate([
+    {
+      $match: {
+        address: { $exists: true, $ne: null },
+        banned: { $ne: true }
+      }
+    },
+    {
+      $group: {
+        _id: '$address.city',
+        users: { $sum: 1 },
+        providers: {
+          $sum: {
+            $cond: [{ $eq: ["$role", "Service Provider"] }, 1, 0]
+          }
+        }
+      }
+    },
+    { $sort: { users: -1 } },
+    { $limit: 10 }
+  ]);
+
+  return locationStats;
+};
+
+const getEngagementStats = async (dateRange) => {
+  // Calculate user engagement based on logins and activity
+  const activeUsers = await User.countDocuments({
+    lastLogin: dateRange,
+    banned: { $ne: true }
+  });
+
+  const totalUsers = await User.countDocuments({
+    banned: { $ne: true }
+  });
+
+  // Calculate retention (simplified)
+  const retentionRate = totalUsers > 0 ? (activeUsers / totalUsers * 100).toFixed(2) : 0;
+
+  return {
+    activeUsers,
+    totalUsers,
+    retentionRate: `${retentionRate}%`,
+    period: Object.keys(dateRange).length > 0 ? 'specified_period' : 'all_time'
+  };
+};
+
+// Export functionality for reports
+export const exportAnalyticsReport = catchAsyncError(async (req, res, next) => {
+  try {
+    const { format = 'json', period = '30d' } = req.query;
+
+    // Get analytics data
+    const analyticsData = await getDashboardAnalytics(req, res, next);
+
+    if (format === 'csv') {
+      // Convert to CSV format
+      const csvData = convertAnalyticsToCSV(analyticsData.data);
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="analytics_report_${period}_${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvData);
+    } else {
+      // JSON format
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="analytics_report_${period}_${new Date().toISOString().split('T')[0]}.json"`);
+      res.json(analyticsData);
+    }
+  } catch (err) {
+    console.error(err);
+    return next(new ErrorHandler("Failed to export analytics report", 500));
+  }
+});
+
+const convertAnalyticsToCSV = (data) => {
+  let csv = 'Category,Metric,Value\n';
+
+  // Users
+  csv += `Users,Total,${data.users.total}\n`;
+  csv += `Users,New,${data.users.new}\n`;
+  csv += `Users,Active,${data.users.active}\n`;
+  csv += `Users,Verified Providers,${data.users.verifiedProviders}\n`;
+
+  // Bookings
+  csv += `Bookings,Total,${data.bookings.total}\n`;
+  csv += `Bookings,Recent,${data.bookings.recent}\n`;
+  csv += `Bookings,Completed,${data.bookings.completed}\n`;
+  csv += `Bookings,Ongoing,${data.bookings.ongoing}\n`;
+  csv += `Bookings,Completion Rate,${data.bookings.completionRate}%\n`;
+
+  // Service Requests
+  csv += `Service Requests,Total,${data.serviceRequests.total}\n`;
+  csv += `Service Requests,Open,${data.serviceRequests.open}\n`;
+  csv += `Service Requests,Recent,${data.serviceRequests.recent}\n`;
+
+  // Revenue
+  csv += `Revenue,Total,₱${data.revenue.totalRevenue}\n`;
+  csv += `Revenue,Completed Services,${data.revenue.completedServices}\n`;
+
+  // Notifications
+  csv += `Notifications,Total,${data.notifications.total}\n`;
+  csv += `Notifications,Recent,${data.notifications.recent}\n`;
+  csv += `Notifications,Unread,${data.notifications.unread}\n`;
+  csv += `Notifications,Read Rate,${data.notifications.readRate}%\n`;
+
+  return csv;
+};
