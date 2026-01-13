@@ -15,6 +15,24 @@ import {
   FaChartLine, FaInfoCircle
 } from "react-icons/fa";
 
+// Helper function to render stars
+const renderStars = (rating) => {
+  const stars = [];
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 !== 0;
+
+  for (let i = 0; i < 5; i++) {
+    if (i < fullStars) {
+      stars.push(<FaStar key={i} className="text-yellow-400 fill-current" />);
+    } else if (i === fullStars && hasHalfStar) {
+      stars.push(<FaStar key={i} className="text-yellow-400 opacity-50" />);
+    } else {
+      stars.push(<FaStar key={i} className="text-gray-300" />);
+    }
+  }
+  return stars;
+};
+
 const ClientDashboard = () => {
   const { user, setOpenChatWithProvider } = useMainContext();
   const navigate = useNavigate();
@@ -377,22 +395,7 @@ const ClientDashboard = () => {
     }
   };
 
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
 
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push(<FaStar key={i} className="text-yellow-400 fill-current" />);
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push(<FaStar key={i} className="text-yellow-400 opacity-50" />);
-      } else {
-        stars.push(<FaStar key={i} className="text-gray-300" />);
-      }
-    }
-    return stars;
-  };
 
   // Pagination
   const totalPages = Math.ceil(filteredProviders.length / itemsPerPage);
@@ -1389,7 +1392,26 @@ const ClientDashboard = () => {
 
 // Application Card Component
 const ApplicationCard = ({ application, onAccept, onDecline, onViewProfile, onMessage }) => {
-  const { provider, serviceRequest, commissionFee, createdAt } = application;
+  const provider = application?.provider;
+  const serviceRequest = application?.serviceRequest;
+  const commissionFee = application?.commissionFee;
+  const createdAt = application?.createdAt;
+
+  if (!provider) {
+    return <div className="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">Provider information not available</div>;
+  }
+
+  const handleViewProfile = () => {
+    if (provider?._id) {
+      onViewProfile(provider._id);
+    }
+  };
+
+  const handleMessage = () => {
+    if (provider?._id) {
+      onMessage(provider._id);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
@@ -1468,14 +1490,14 @@ const ApplicationCard = ({ application, onAccept, onDecline, onViewProfile, onMe
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <button
-            onClick={() => onViewProfile(provider._id)}
+            onClick={handleViewProfile}
             className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm"
           >
             <FaEye className="mr-2" />
             View Profile
           </button>
           <button
-            onClick={() => onMessage(provider._id)}
+            onClick={handleMessage}
             className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm"
           >
             <FaEnvelope className="mr-2" />

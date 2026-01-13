@@ -2,12 +2,13 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import { isUserAuthenticated, isUserVerified } from "../middlewares/auth.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
-import { validateSchema, handleValidationErrors } from "../middlewares/validation.js";
+import { validateSchema, handleValidationErrors, validateApplicationResponse } from "../middlewares/validation.js";
 import ErrorHandler from "../middlewares/error.js";
 import User from "../models/userSchema.js";
 import ServiceRequest from '../models/serviceRequest.js';
 import Review from '../models/review.js';
 import Notification from '../models/notification.js';
+import Booking from '../models/booking.js';
 import {
   serviceRequestSchema,
   reviewSchema,
@@ -488,7 +489,7 @@ router.get('/provider-offers', isUserAuthenticated, isUserVerified, getProviderO
 router.get('/provider-applications', isUserAuthenticated, isUserVerified, getProviderApplications);
 router.post('/apply-to-request/:requestId', isUserAuthenticated, isUserVerified, validateSchema(applicationSchema, 'param'), handleValidationErrors, applyToServiceRequest);
 router.post('/respond-to-offer/:offerId', isUserAuthenticated, isUserVerified, validateSchema(offerResponseSchema, 'param'), handleValidationErrors, respondToServiceOffer);
-router.post('/respond-to-application/:bookingId', isUserAuthenticated, isUserVerified, validateSchema(applicationResponseSchema, 'param'), handleValidationErrors, respondToApplication);
+router.post('/respond-to-application/:bookingId', isUserAuthenticated, isUserVerified, validateApplicationResponse, handleValidationErrors, respondToApplication);
 router.post('/update-profile-picture', isUserAuthenticated, isUserVerified, updateProfilePicture);
 
 // Additional endpoints for frontend compatibility
