@@ -311,7 +311,7 @@ export const getUserSkillsWithConnections = catchAsyncError(async (req, res, nex
 
 // Deactivate skill - Pattern 2: Handling Related Data Modifications
 export const deactivateSkill = catchAsyncError(async (req, res, next) => {
-  const skillId = req.params.id;
+  const skillId = req.params.skillId;
 
   // Validate
   const skill = await Skill.findById(skillId);

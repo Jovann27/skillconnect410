@@ -275,11 +275,391 @@ export const adminBulkRepair = catchAsyncError(async (req, res, next) => {
   }
 });
 
+// Get all users for admin dashboard
+export const getAllUsers = catchAsyncError(async (req, res, next) => {
+  const users = await User.find().select('_id firstName lastName email phone role verified isOnline banned suspended createdAt');
+  
+  res.status(200).json({
+    success: true,
+    count: users.length,
+    users
+  });
+});
+
+// Get user with full profile including skills
+export const getUserWithSkills = catchAsyncError(async (req, res, next) => {
+  const { userId } = req.params;
+  
+  const user = await User.findById(userId)
+    .populate({
+      path: "skillsWithService.skill",
+      populate: { path: "serviceType" }
+    })
+    .populate("serviceTypes");
+  
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  
+  res.status(200).json({
+    success: true,
+    user
+  });
+});
+
+// Add skill to user (Admin endpoint)
+export const adminAddSkillToUser = catchAsyncError(async (req, res, next) => {
+  const { userId } = req.params;
+  const { skillId, yearsOfExperience, proficiency } = req.body;
+  
+  if (!userId || !skillId) {
+    return next(new ErrorHandler("User ID and Skill ID are required", 400));
+  }
+  
+  const user = await User.findById(userId);
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  
+  if (user.role !== "Service Provider") {
+    return next(new ErrorHandler("Only Service Providers can have skills", 403));
+  }
+  
+  const skill = await Skill.findById(skillId).populate("serviceType");
+  if (!skill) {
+    return next(new ErrorHandler("Skill not found", 404));
+  }
+  
+  if (!skill.isActive) {
+    return next(new ErrorHandler("Skill is inactive", 400));
+  }
+  
+  // Check not already assigned
+  const alreadyAssigned = user.skillsWithService.some(
+    s => s.skill.toString() === skillId
+  );
+  if (alreadyAssigned) {
+    return next(new ErrorHandler("Skill already assigned", 400));
+  }
+  
+  // Check skill limit
+  if (user.skillsWithService.length >= 3) {
+    return next(new ErrorHandler("Maximum 3 skills per provider", 400));
+  }
+  
+  // Add skill
+  user.skillsWithService.push({
+    skill: skillId,
+    yearsOfExperience: yearsOfExperience || 0,
+    proficiency: proficiency || "Intermediate",
+    addedAt: new Date()
+  });
+  
+  // Sync to legacy array
+  if (!user.skills.includes(skill.name)) {
+    user.skills.push(skill.name);
+  }
+  
+  // Add service type if not present
+  if (!user.serviceTypes.includes(skill.serviceType._id)) {
+    user.serviceTypes.push(skill.serviceType._id);
+  }
+  
+  await user.save();
+  
+  const updatedUserAfterAdd = await User.findById(userId).populate({
+    path: "skillsWithService.skill",
+    populate: { path: "serviceType" }
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Skill added successfully",
+    user: updatedUserAfterAdd
+  });
+});
+
+// Remove skill from user (Admin endpoint)
+export const adminRemoveSkillFromUser = catchAsyncError(async (req, res, next) => {
+  const { userId, skillId } = req.params;
+  
+  const user = await User.findById(userId);
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  
+  // Remove from structured array
+  const skillToRemove = user.skillsWithService.find(s => s.skill.toString() === skillId);
+  if (!skillToRemove) {
+    return next(new ErrorHandler("Skill not found for this user", 404));
+  }
+  
+  user.skillsWithService = user.skillsWithService.filter(
+    s => s.skill.toString() !== skillId
+  );
+  
+  // Also remove from legacy array
+  const skill = await Skill.findById(skillId);
+  if (skill) {
+    user.skills = user.skills.filter(s => s !== skill.name);
+    
+    // Check if service type still has remaining skills
+    const skillsInService = user.skillsWithService.filter(
+      s => s.skill.serviceType.toString() === skill.serviceType.toString()
+    );
+    if (skillsInService.length === 0) {
+      user.serviceTypes = user.serviceTypes.filter(
+        st => st.toString() !== skill.serviceType.toString()
+      );
+    }
+  }
+  
+  await user.save();
+  
+  const updatedUser = await User.findById(userId).populate({
+    path: "skillsWithService.skill",
+    populate: { path: "serviceType" }
+  });
+  
+  res.status(200).json({
+    success: true,
+    message: "Skill removed successfully",
+    user: updatedUser
+  });
+});
+
+// Update user skill details
+export const adminUpdateUserSkill = catchAsyncError(async (req, res, next) => {
+  const { userId, skillId } = req.params;
+  const { yearsOfExperience, proficiency } = req.body;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  const skillIndex = user.skillsWithService.findIndex(
+    s => s.skill.toString() === skillId
+  );
+
+  if (skillIndex === -1) {
+    return next(new ErrorHandler("Skill not found for this user", 404));
+  }
+
+  if (yearsOfExperience !== undefined) {
+    user.skillsWithService[skillIndex].yearsOfExperience = yearsOfExperience;
+  }
+
+  if (proficiency) {
+    user.skillsWithService[skillIndex].proficiency = proficiency;
+  }
+
+  await user.save();
+
+  const updatedUser = await User.findById(userId).populate({
+    path: "skillsWithService.skill",
+    populate: { path: "serviceType" }
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Skill updated successfully",
+    user: updatedUser
+  });
+});
+
+// Bulk update user skills (replace all skills)
+export const adminUpdateUserSkills = catchAsyncError(async (req, res, next) => {
+  const { userId } = req.params;
+  const { skills } = req.body; // Array of skill names (strings)
+
+  if (!Array.isArray(skills)) {
+    return next(new ErrorHandler("Skills must be an array", 400));
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  if (user.role !== "Service Provider") {
+    return next(new ErrorHandler("Only Service Providers can have skills", 403));
+  }
+
+  // Validate skill limits per service type (max 3 skills per service type)
+  const skillCountsByServiceType = {};
+
+  // Clear existing skills
+  user.skills = [];
+  user.skillsWithService = [];
+  user.serviceTypes = [];
+
+  // For each skill name, find the corresponding Skill document and validate
+  for (const skillName of skills) {
+    const skill = await Skill.findOne({ name: skillName, isActive: true }).populate("serviceType");
+    if (skill) {
+      const serviceTypeId = skill.serviceType._id.toString();
+
+      // Initialize count for this service type
+      if (!skillCountsByServiceType[serviceTypeId]) {
+        skillCountsByServiceType[serviceTypeId] = 0;
+      }
+
+      // Check limit per service type (max 3 skills per service type)
+      if (skillCountsByServiceType[serviceTypeId] >= 3) {
+        return next(new ErrorHandler(`Maximum 3 skills allowed per service type. Cannot add more ${skill.serviceType.name} skills.`, 400));
+      }
+
+      // Check if not already added (in case of duplicates in input)
+      const alreadyAdded = user.skillsWithService.some(s => s.skill.toString() === skill._id.toString());
+      if (!alreadyAdded) {
+        user.skillsWithService.push({
+          skill: skill._id,
+          yearsOfExperience: 0,
+          proficiency: "Intermediate",
+          addedAt: new Date()
+        });
+
+        // Add to legacy array
+        if (!user.skills.includes(skill.name)) {
+          user.skills.push(skill.name);
+        }
+
+        // Add service type if not present
+        if (!user.serviceTypes.includes(skill.serviceType._id)) {
+          user.serviceTypes.push(skill.serviceType._id);
+        }
+
+        // Increment count
+        skillCountsByServiceType[serviceTypeId]++;
+      }
+    }
+  }
+
+  // If no valid skills were found and user is a Service Provider,
+  // we need to handle the validation carefully
+  let shouldSkipValidation = false;
+  if (user.role === "Service Provider" && user.skills.length === 0 && user.serviceTypes.length === 0) {
+    // Allow admins to clear all skills if needed for management purposes
+    shouldSkipValidation = true;
+  }
+
+  // Save with or without validation based on the situation
+  await user.save({ validateBeforeSave: !shouldSkipValidation });
+
+  const updatedUser = await User.findById(userId).populate({
+    path: "skillsWithService.skill",
+    populate: { path: "serviceType" }
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Skills updated successfully",
+    user: updatedUser
+  });
+});
+
+// Update user services (service offerings with rates and descriptions)
+export const adminUpdateUserServices = catchAsyncError(async (req, res, next) => {
+  const { userId } = req.params;
+  const { services } = req.body; // Array of service objects: [{ name, rate, description }]
+
+  if (!Array.isArray(services)) {
+    return next(new ErrorHandler("Services must be an array", 400));
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  if (user.role !== "Service Provider") {
+    return next(new ErrorHandler("Only Service Providers can have services", 403));
+  }
+
+  // Validate services array
+  for (const service of services) {
+    if (!service.name || typeof service.name !== 'string') {
+      return next(new ErrorHandler("Each service must have a valid name", 400));
+    }
+    if (service.rate !== undefined && (isNaN(service.rate) || service.rate < 0)) {
+      return next(new ErrorHandler("Service rate must be a non-negative number", 400));
+    }
+  }
+
+  // Update the services array in the user document
+  user.services = services;
+  await user.save();
+
+  const updatedUserAfterServices = await User.findById(userId).populate({
+    path: "skillsWithService.skill",
+    populate: { path: "serviceType" }
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Services updated successfully",
+    user: updatedUserAfterServices
+  });
+});
+
+// Verify user account
+export const verifyUser = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id);
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  if (user.verified) {
+    return next(new ErrorHandler("User is already verified", 400));
+  }
+
+  user.verified = true;
+  user.verifiedBy = req.admin._id;
+  user.verificationDate = new Date();
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "User verified successfully"
+  });
+});
+
+// Ban user account
+export const banUser = catchAsyncError(async (req, res, next) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id);
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  user.banned = true;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "User banned successfully"
+  });
+});
+
 export default {
   adminRepairUserSkills,
   adminRebuildAllRatings,
   adminReconnectSkills,
   adminRunConsistencyCheck,
   adminFixExpiredRequests,
-  adminBulkRepair
+  adminBulkRepair,
+  getAllUsers,
+  getUserWithSkills,
+  adminAddSkillToUser,
+  adminRemoveSkillFromUser,
+  adminUpdateUserSkill,
+  adminUpdateUserSkills,
+  adminUpdateUserServices,
+  verifyUser,
+  banUser
 };

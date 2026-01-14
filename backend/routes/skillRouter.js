@@ -7,7 +7,7 @@ import {
   removeSkillFromUser,
   getAllSkills,
   getUserSkillsWithConnections,
-  deleteSkill,
+  deactivateSkill,
   updateSkill
 } from "../controllers/skillController.js";
 import { isAdminAuthenticated } from "../middlewares/auth.js";
@@ -51,7 +51,7 @@ router.delete(
   "/:skillId",
   isAdminAuthenticated,
   authorizeRoles("Admin"),
-  deleteSkill
+  deactivateSkill
 );
 
 // User skill management routes

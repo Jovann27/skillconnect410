@@ -8,11 +8,12 @@ const router = express.Router();
 
 // User authentication routes - handle both paths
 // Main paths for frontend compatibility
-router.post("/register", validateSchema(userRegistrationSchema), handleValidationErrors, catchAsyncError(register));
+// Note: Registration uses multipart/form-data, so schema validation is handled in controller
+router.post("/register", catchAsyncError(register));
 router.post("/login", validateSchema(userLoginSchema), handleValidationErrors, catchAsyncError(login));
 
 // Auth sub-paths (alternative)
-router.post("/auth/register", validateSchema(userRegistrationSchema), handleValidationErrors, catchAsyncError(register));
+router.post("/auth/register", catchAsyncError(register));
 router.post("/auth/login", validateSchema(userLoginSchema), handleValidationErrors, catchAsyncError(login));
 
 export default router;

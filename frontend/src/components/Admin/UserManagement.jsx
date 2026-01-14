@@ -133,17 +133,61 @@ const UserManagement = () => {
       const usersRes = await api.get("/admin/users");
       const usersData = Array.isArray(usersRes.data.users) ? usersRes.data.users : [];
 
+      // Filter out invalid users and ensure all required fields exist
+      const validUsers = usersData.filter(user =>
+        user &&
+        user._id &&
+        user.firstName &&
+        user.lastName &&
+        user.email
+      );
+
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const newUsersData = usersData.filter(user => new Date(user.createdAt) >= thirtyDaysAgo && !user.verified);
+      const newUsersData = validUsers.filter(user => {
+        try {
+          return new Date(user.createdAt) >= thirtyDaysAgo && !user.verified;
+        } catch {
+          return false; // Skip users with invalid dates
+        }
+      });
 
-      setUsers(usersData);
+      setUsers(validUsers);
       setNewRegisteredUsers(newUsersData);
     } catch (err) {
       console.error("Failed to fetch data:", err);
       setError(`Failed to fetch data: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch full user details with skills
+  const openUserDetails = async (user) => {
+    try {
+      // Show loading state
+      setSelectedUser({ ...user, _isLoading: true });
+      setModalSource("users");
+      setShowUserModal(true);
+
+      // Fetch detailed user data
+      const result = await api.get(`/admin/users/${user._id}`);
+
+      if (result.data.success && result.data.user) {
+        setSelectedUser({ ...result.data.user, _isLoaded: true });
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (err) {
+      console.error("Error fetching user details:", err);
+      // Fallback to basic user data with error indication
+      setSelectedUser({
+        ...user,
+        _hasError: true,
+        _errorMessage: err.response?.data?.message || err.message || "Failed to load user details"
+      });
+      setModalSource("users");
+      setShowUserModal(true);
     }
   };
 
@@ -300,6 +344,11 @@ const UserManagement = () => {
       return profilePic.startsWith('http') ? profilePic : `${API_BASE_URL}${profilePic}`;
     }
     return '/default-avatar.png';
+  };
+
+  const handleImageError = (e) => {
+    e.target.src = '/default-avatar.png';
+    e.target.onerror = null; // Prevent infinite loop
   };
 
 
@@ -1154,7 +1203,11 @@ const UserManagement = () => {
                     <option value="Community Member">Community Member</option>
                   </select>
                 </div>
-                <div className="um-card-header" style={{ marginTop: '1rem' }}>
+              </div>
+            </div>
+
+            {/* Search Section */}
+            <div className="um-card-header" style={{ borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
               <div className="um-card-header-content">
                 <div className="um-filter-section">
                   <label className="um-filter-label">Search Users:</label>
@@ -1227,8 +1280,6 @@ const UserManagement = () => {
                 </div>
               </div>
             </div>
-              </div>
-            </div>
             
             
 
@@ -1248,6 +1299,7 @@ const UserManagement = () => {
                             src={getProfileImageUrl(user.profilePic)}
                             alt={user.firstName}
                             className="um-avatar"
+                            onError={handleImageError}
                           />
                           {user.isOnline && <div className="um-online-indicator"></div>}
                         </div>
@@ -1263,11 +1315,7 @@ const UserManagement = () => {
                         </div>
                       </div>
                       <button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setModalSource("users");
-                          setShowUserModal(true);
-                        }}
+                        onClick={() => openUserDetails(user)}
                         className="um-view-btn"
                       >
                         View Details
@@ -1325,6 +1373,7 @@ const UserManagement = () => {
                             src={getProfileImageUrl(user.profilePic)}
                             alt={user.firstName}
                             className="um-avatar"
+                            onError={handleImageError}
                           />
                         </div>
                         <div className="um-user-details">
@@ -1341,11 +1390,7 @@ const UserManagement = () => {
                         </div>
                       </div>
                       <button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setModalSource("new-users");
-                          setShowUserModal(true);
-                        }}
+                        onClick={() => openUserDetails(user)}
                         className="um-view-btn review"
                       >
                         Review
@@ -1392,6 +1437,7 @@ const UserManagement = () => {
                     src={getProfileImageUrl(selectedUser.profilePic)}
                     alt={selectedUser.firstName}
                     className="um-modal-avatar"
+                    onError={handleImageError}
                   />
                   <div>
                     <h2 className="um-modal-name">{selectedUser.firstName} {selectedUser.lastName}</h2>
@@ -1407,203 +1453,244 @@ const UserManagement = () => {
             </div>
 
             <div className="um-modal-body">
-              <div className="um-detail-section">
-                <h3>👤 Account Information</h3>
-                <div className="um-detail-grid">
-                  <div className="um-detail-item">
-                    <label>Username</label>
-                    <p>{selectedUser.username}</p>
+              {selectedUser._isLoading && (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '3rem',
+                  color: '#64748b'
+                }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    border: '3px solid #e2e8f0',
+                    borderTopColor: '#2563eb',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                    margin: '0 auto 1rem'
+                  }}></div>
+                  <p>Loading user details...</p>
+                </div>
+              )}
+
+              {selectedUser._hasError && (
+                <div style={{
+                  background: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '0.5rem',
+                  padding: '1.5rem',
+                  marginBottom: '1.5rem',
+                  color: '#dc2626'
+                }}>
+                  <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', fontWeight: '600' }}>
+                    ⚠️ Failed to Load Details
+                  </h4>
+                  <p style={{ margin: '0', fontSize: '0.875rem' }}>
+                    {selectedUser._errorMessage || 'Unable to fetch detailed user information. Showing basic information only.'}
+                  </p>
+                </div>
+              )}
+
+              {!selectedUser._isLoading && (
+                <div className="um-detail-section">
+                  <h3>👤 Account Information</h3>
+                  <div className="um-detail-grid">
+                    <div className="um-detail-item">
+                      <label>Username</label>
+                      <p>{selectedUser.username || 'N/A'}</p>
+                    </div>
+                    <div className="um-detail-item">
+                      <label>Phone</label>
+                      <p>{selectedUser.phone || 'Not provided'}</p>
+                    </div>
+                    <div className="um-detail-item">
+                      <label>Role</label>
+                      <p>{selectedUser.role === 'Community Member' ? 'Community Resident' : selectedUser.role}</p>
+                    </div>
+                    <div className="um-detail-item">
+                      <label>Member Since</label>
+                      <p>{selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      }) : 'N/A'}</p>
+                    </div>
+                    {selectedUser.address && (
+                      <div className="um-detail-item full-width">
+                        <label>Address</label>
+                        <p>{selectedUser.address}</p>
+                      </div>
+                    )}
                   </div>
-                  <div className="um-detail-item">
-                    <label>Phone</label>
-                    <p>{selectedUser.phone || 'Not provided'}</p>
-                  </div>
-                  <div className="um-detail-item">
-                    <label>Role</label>
-                    <p>{selectedUser.role === 'Community Member' ? 'Community Resident' : selectedUser.role}</p>
-                  </div>
-                  <div className="um-detail-item">
-                    <label>Member Since</label>
-                    <p>{new Date(selectedUser.createdAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}</p>
-                  </div>
-                  {selectedUser.address && (
-                    <div className="um-detail-item full-width">
-                      <label>Address</label>
-                      <p>{selectedUser.address}</p>
+                </div>
+              )}
+
+              {/* Skills Section */}
+              {!selectedUser._hasError && selectedUser._isLoaded && (
+                <div className="um-detail-section">
+                  <h3>🔧 Skills & Expertise {selectedUser.skills && selectedUser.skills.length > 0 && `(${selectedUser.skills.length})`}</h3>
+
+                  {!isEditingSkills ? (
+                    <>
+                      {selectedUser.skills && selectedUser.skills.length > 0 ? (
+                        <div className="um-skills-grid">
+                          {selectedUser.skills.map((skill, index) => (
+                            <span key={index} className="um-skill-tag">{skill}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                          No skills configured yet
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <div style={{ background: 'white', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
+                      <h4 style={{ margin: '0 0 1rem 0', color: '#1e293b', fontSize: '1rem', fontWeight: '600' }}>
+                        Edit Skills
+                      </h4>
+
+                      {/* Add Skill Dropdown */}
+                      <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+                        <h5 style={{ margin: '0 0 1rem 0', color: '#374151', fontSize: '0.875rem', fontWeight: '600' }}>
+                          Add Skills by Service Category
+                        </h5>
+                        {Object.entries(SKILLS_OPTIONS).map(([serviceType, skills]) => {
+                          const availableSkills = skills.filter(skill => !editingSkills.includes(skill));
+                          if (availableSkills.length === 0) return null;
+
+                          return (
+                            <div key={serviceType} style={{ marginBottom: '1rem' }}>
+                              <label style={{
+                                display: 'block',
+                                fontSize: '0.75rem',
+                                color: '#6b7280',
+                                marginBottom: '0.5rem',
+                                fontWeight: '600'
+                              }}>
+                                {serviceType}
+                              </label>
+                              <select
+                                value=""
+                                onChange={(e) => {
+                                  if (e.target.value) {
+                                    addSkill(e.target.value);
+                                    e.target.value = ""; // Reset dropdown
+                                  }
+                                }}
+                                style={{
+                                  width: '100%',
+                                  padding: '0.5rem',
+                                  border: '1px solid #d1d5db',
+                                  borderRadius: '0.375rem',
+                                  fontSize: '0.875rem',
+                                  marginBottom: '0.5rem'
+                                }}
+                              >
+                                <option value="">{`Select ${serviceType} skill`}</option>
+                                {availableSkills.map((skill) => (
+                                  <option key={skill} value={skill}>{skill}</option>
+                                ))}
+                              </select>
+                            </div>
+                          );
+                        })}
+                        {Object.values(SKILLS_OPTIONS).every(skills => skills.every(skill => editingSkills.includes(skill))) && (
+                          <p style={{ margin: '0.5rem 0 0 0', color: '#6b7280', fontSize: '0.75rem' }}>
+                            All available skills have been added
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Current Skills */}
+                      {editingSkills.length > 0 && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <h5 style={{ margin: '0 0 1rem 0', color: '#374151', fontSize: '0.875rem', fontWeight: '600' }}>
+                            Current Skills ({editingSkills.length})
+                          </h5>
+                          <div className="um-skills-grid">
+                            {editingSkills.map((skill, index) => (
+                              <span key={index} className="um-skill-tag" style={{ position: 'relative', paddingRight: '2rem' }}>
+                                {skill}
+                                <button
+                                  onClick={() => removeSkill(skill)}
+                                  style={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    right: '0.25rem',
+                                    transform: 'translateY(-50%)',
+                                    background: '#ef4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '16px',
+                                    height: '16px',
+                                    fontSize: '0.75rem',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                  title="Remove skill"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Edit Action Buttons */}
+                      <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                        <button
+                          onClick={cancelEditingSkills}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#6b7280',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.875rem',
+                            fontWeight: '500',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={saveSkills}
+                          disabled={actionLoading === 'save-skills'}
+                          style={{
+                            padding: '0.5rem 1rem',
+                            background: '#2563eb',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '0.375rem',
+                            fontSize: '0.875rem',
+                            fontWeight: '500',
+                            cursor: actionLoading === 'save-skills' ? 'not-allowed' : 'pointer',
+                            opacity: actionLoading === 'save-skills' ? 0.5 : 1
+                          }}
+                        >
+                          {actionLoading === 'save-skills' ? 'Saving...' : 'Save Skills'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {!isEditingSkills && (
+                    <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                      <button
+                        onClick={() => startEditingSkills(selectedUser)}
+                        className="um-action-btn edit"
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                      >
+                        ✏️ Edit Skills
+                      </button>
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Skills Section */}
-              <div className="um-detail-section">
-                <h3>🔧 Skills & Expertise {selectedUser.skills && selectedUser.skills.length > 0 && `(${selectedUser.skills.length})`}</h3>
-
-                {!isEditingSkills ? (
-                  <>
-                    {selectedUser.skills && selectedUser.skills.length > 0 ? (
-                      <div className="um-skills-grid">
-                        {selectedUser.skills.map((skill, index) => (
-                          <span key={index} className="um-skill-tag">{skill}</span>
-                        ))}
-                      </div>
-                    ) : (
-                      <p style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
-                        No skills configured yet
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  <div style={{ background: 'white', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                    <h4 style={{ margin: '0 0 1rem 0', color: '#1e293b', fontSize: '1rem', fontWeight: '600' }}>
-                      Edit Skills
-                    </h4>
-
-                    {/* Add Skill Dropdown */}
-                    <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
-                      <h5 style={{ margin: '0 0 1rem 0', color: '#374151', fontSize: '0.875rem', fontWeight: '600' }}>
-                        Add Skills by Service Category
-                      </h5>
-                      {Object.entries(SKILLS_OPTIONS).map(([serviceType, skills]) => {
-                        const availableSkills = skills.filter(skill => !editingSkills.includes(skill));
-                        if (availableSkills.length === 0) return null;
-
-                        return (
-                          <div key={serviceType} style={{ marginBottom: '1rem' }}>
-                            <label style={{
-                              display: 'block',
-                              fontSize: '0.75rem',
-                              color: '#6b7280',
-                              marginBottom: '0.5rem',
-                              fontWeight: '600'
-                            }}>
-                              {serviceType}
-                            </label>
-                            <select
-                              value=""
-                              onChange={(e) => {
-                                if (e.target.value) {
-                                  addSkill(e.target.value);
-                                  e.target.value = ""; // Reset dropdown
-                                }
-                              }}
-                              style={{
-                                width: '100%',
-                                padding: '0.5rem',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '0.375rem',
-                                fontSize: '0.875rem',
-                                marginBottom: '0.5rem'
-                              }}
-                            >
-                              <option value="">{`Select ${serviceType} skill`}</option>
-                              {availableSkills.map((skill) => (
-                                <option key={skill} value={skill}>{skill}</option>
-                              ))}
-                            </select>
-                          </div>
-                        );
-                      })}
-                      {Object.values(SKILLS_OPTIONS).every(skills => skills.every(skill => editingSkills.includes(skill))) && (
-                        <p style={{ margin: '0.5rem 0 0 0', color: '#6b7280', fontSize: '0.75rem' }}>
-                          All available skills have been added
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Current Skills */}
-                    {editingSkills.length > 0 && (
-                      <div style={{ marginBottom: '1.5rem' }}>
-                        <h5 style={{ margin: '0 0 1rem 0', color: '#374151', fontSize: '0.875rem', fontWeight: '600' }}>
-                          Current Skills ({editingSkills.length})
-                        </h5>
-                        <div className="um-skills-grid">
-                          {editingSkills.map((skill, index) => (
-                            <span key={index} className="um-skill-tag" style={{ position: 'relative', paddingRight: '2rem' }}>
-                              {skill}
-                              <button
-                                onClick={() => removeSkill(skill)}
-                                style={{
-                                  position: 'absolute',
-                                  top: '50%',
-                                  right: '0.25rem',
-                                  transform: 'translateY(-50%)',
-                                  background: '#ef4444',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '50%',
-                                  width: '16px',
-                                  height: '16px',
-                                  fontSize: '0.75rem',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                                title="Remove skill"
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Edit Action Buttons */}
-                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-                      <button
-                        onClick={cancelEditingSkills}
-                        style={{
-                          padding: '0.5rem 1rem',
-                          background: '#6b7280',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '0.375rem',
-                          fontSize: '0.875rem',
-                          fontWeight: '500',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={saveSkills}
-                        disabled={actionLoading === 'save-skills'}
-                        style={{
-                          padding: '0.5rem 1rem',
-                          background: '#2563eb',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '0.375rem',
-                          fontSize: '0.875rem',
-                          fontWeight: '500',
-                          cursor: actionLoading === 'save-skills' ? 'not-allowed' : 'pointer',
-                          opacity: actionLoading === 'save-skills' ? 0.5 : 1
-                        }}
-                      >
-                        {actionLoading === 'save-skills' ? 'Saving...' : 'Save Skills'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {!isEditingSkills && (
-                  <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-                    <button
-                      onClick={() => startEditingSkills(selectedUser)}
-                      className="um-action-btn edit"
-                      style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-                    >
-                      ✏️ Edit Skills
-                    </button>
-                  </div>
-                )}
-              </div>
+              )}
 
               {selectedUser.role === 'Service Provider' && (
                 <div className="um-detail-section">
@@ -1821,28 +1908,31 @@ const UserManagement = () => {
             </div>
 
             <div className="um-modal-actions">
-              {modalSource === "new-users" && !selectedUser.verified && (
-                <div className="um-actions-section">
-                  <div className="um-actions-header">
-                    <h4>✅ User Verification</h4>
-                    <p className="um-actions-subtitle">Verify this new user's account to grant full access</p>
-                  </div>
-                  <div className="um-action-buttons">
-                    <button
-                      className="um-action-btn verify"
-                      onClick={async () => {
-                        setActionLoading('verify');
-                        await verifyUser(selectedUser._id);
-                        setActionLoading(null);
-                        setShowUserModal(false);
-                      }}
-                      disabled={actionLoading === 'verify'}
-                    >
-                      {actionLoading === 'verify' ? '⏳ Verifying...' : '✓ Verify User'}
-                    </button>
-                  </div>
+              <div className="um-actions-section">
+                <div className="um-actions-header">
+                  <h4>✅ User Verification</h4>
+                  <p className="um-actions-subtitle">
+                    {selectedUser.verified
+                      ? "This user account has been verified"
+                      : "Verify this user's account to grant full access"
+                    }
+                  </p>
                 </div>
-              )}
+                <div className="um-action-buttons">
+                  <button
+                    className="um-action-btn verify"
+                    onClick={async () => {
+                      setActionLoading('verify');
+                      await verifyUser(selectedUser._id);
+                      setActionLoading(null);
+                      setShowUserModal(false);
+                    }}
+                    disabled={actionLoading === 'verify' || selectedUser.verified}
+                  >
+                    {actionLoading === 'verify' ? '⏳ Verifying...' : selectedUser.verified ? '✓ Already Verified' : '✓ Verify User'}
+                  </button>
+                </div>
+              </div>
 
               <div className="um-actions-section">
                 <div className="um-actions-header">

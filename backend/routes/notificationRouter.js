@@ -175,4 +175,19 @@ router.delete("/cleanup", isUserAuthenticated, catchAsyncError(async (req, res) 
   });
 }));
 
+// Get unread notification count
+router.get("/unread-count", isUserAuthenticated, catchAsyncError(async (req, res) => {
+  const userId = req.user._id;
+  
+  const count = await Notification.countDocuments({
+    user: userId,
+    read: false
+  });
+
+  res.status(200).json({
+    success: true,
+    unreadCount: count
+  });
+}));
+
 export default router;

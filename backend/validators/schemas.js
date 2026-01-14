@@ -42,11 +42,25 @@ export const serviceRequestSchema = {
 };
 
 export const userRegistrationSchema = {
-  name: {
+  username: {
     type: 'string',
     required: true,
-    minLength: 2,
-    maxLength: 100,
+    minLength: 3,
+    maxLength: 50,
+    pattern: /^[a-zA-Z0-9_-]+$/
+  },
+  firstName: {
+    type: 'string',
+    required: true,
+    minLength: 1,
+    maxLength: 50,
+    pattern: /^[a-zA-Z\s\-_.]+$/
+  },
+  lastName: {
+    type: 'string',
+    required: true,
+    minLength: 1,
+    maxLength: 50,
     pattern: /^[a-zA-Z\s\-_.]+$/
   },
   email: {
@@ -54,21 +68,49 @@ export const userRegistrationSchema = {
     required: true,
     pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   },
+  phone: {
+    type: 'string',
+    required: true,
+    pattern: /^(\+63|0)[0-9]{10}$/
+  },
+  address: {
+    type: 'string',
+    required: true,
+    minLength: 5,
+    maxLength: 200
+  },
+  birthdate: {
+    type: 'string',
+    required: true,
+    // Will be validated as date in controller
+  },
   password: {
     type: 'string',
     required: true,
     minLength: 8,
-    maxLength: 128,
-    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/
+    maxLength: 128
   },
-  phone: {
+  confirmPassword: {
     type: 'string',
-    pattern: /^[\+]?[1-9][\d]{0,15}$/
+    required: true,
+    minLength: 8,
+    maxLength: 128
   },
   role: {
     type: 'string',
-    enum: ['Client', 'Provider']
-  }
+    required: true,
+    enum: ['Community Member', 'Service Provider']
+  },
+  employed: {
+    type: 'string',
+    enum: ['employed', 'unemployed']
+  },
+  occupation: {
+    type: 'string',
+    maxLength: 100
+  },
+  // File fields will be handled by multer/express-fileupload, not schema validation
+  // validId, profilePic, certificates, workProofs, skills, serviceTypes
 };
 
 export const userLoginSchema = {

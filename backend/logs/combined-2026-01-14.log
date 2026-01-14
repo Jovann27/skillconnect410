@@ -433,3 +433,136 @@
 {"level":"info","message":"50 verification appointments created","timestamp":"2026-01-14T06:23:30.631Z"}
 {"level":"info","message":"50 chats created","timestamp":"2026-01-14T06:23:30.660Z"}
 {"level":"info","message":"Seeding completed successfully!","timestamp":"2026-01-14T06:23:31.001Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T06:45:48.051Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T06:45:48.055Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T06:45:48.507Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T06:46:14.630Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T06:46:14.661Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T06:46:14.969Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T06:49:31.168Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T06:49:31.171Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T06:49:31.586Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T06:53:55.910Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T06:53:55.935Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T06:53:56.302Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T06:55:02.783Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T06:55:02.878Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T06:55:03.232Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T06:56:20.743Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T06:56:20.751Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T06:56:20.864Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T06:57:08.900Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T06:57:08.904Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T06:57:09.052Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T06:57:28.120Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T06:57:28.123Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T06:57:28.297Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T06:58:07.551Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T06:58:07.567Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T06:58:07.695Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:03:07.626Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:03:07.704Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:03:07.993Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:03:22.060Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:03:22.218Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:03:22.820Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:03:58.258Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:03:58.264Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:04:00.790Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:10:38.970Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:10:38.973Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:10:39.312Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:23:39.681Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:23:39.685Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:23:39.983Z"}
+{"context":{},"level":"error","message":"Request Error At least one skill must be selected","method":"PUT","stack":"Error: At least one skill must be selected\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/adminController.js:541:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","statusCode":400,"timestamp":"2026-01-14T07:24:18.971Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:33:11.606Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:33:11.620Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:33:11.842Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:33:37.472Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:33:37.535Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:33:37.806Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:34:02.672Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:34:02.675Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:34:02.805Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:34:20.991Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:34:20.995Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:35:31.729Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:35:31.757Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:35:31.911Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:35:32.382Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:35:32.388Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:36:01.523Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:36:01.525Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:36:01.630Z"}
+{"level":"info","message":"Client Connected: yb6N0tgtF-AOt5N9AAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T07:53:37.824Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T07:53:37.959Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T07:53:37.960Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T07:53:37.962Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"pipe installation\",\"leak repair\",\"generator installation\"], occupation=","timestamp":"2026-01-14T07:53:38.010Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 4 patterns","timestamp":"2026-01-14T07:53:38.078Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T07:53:38.126Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T07:53:38.128Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T07:53:38.207Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T07:53:38.209Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T07:53:38.210Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"pipe installation\",\"leak repair\",\"generator installation\"], occupation=","timestamp":"2026-01-14T07:53:38.275Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 4 patterns","timestamp":"2026-01-14T07:53:38.303Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T07:53:38.342Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T07:53:38.345Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T07:53:38.426Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T07:53:38.427Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T07:53:38.428Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"pipe installation\",\"leak repair\",\"generator installation\"], occupation=","timestamp":"2026-01-14T07:53:38.479Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 4 patterns","timestamp":"2026-01-14T07:53:38.497Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T07:53:38.503Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T07:53:38.508Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T07:53:38.541Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T07:53:38.543Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T07:53:38.544Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"pipe installation\",\"leak repair\",\"generator installation\"], occupation=","timestamp":"2026-01-14T07:53:38.559Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 4 patterns","timestamp":"2026-01-14T07:53:38.566Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T07:53:38.574Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T07:53:38.575Z"}
+{"context":{},"level":"error","message":"Request Error Unauthorized","method":"GET","stack":"Error: Unauthorized\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/reviewController.js:8:30\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/middlewares/catchAsyncError.js:2:19\n    at Layer.handle [as handle_request] (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n    at param (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n    at param (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n    at Function.process_params (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)","statusCode":401,"timestamp":"2026-01-14T07:53:50.628Z","url":"/api/v1/review/user/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"context":{},"level":"error","message":"Request Error Unauthorized","method":"GET","stack":"Error: Unauthorized\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/reviewController.js:146:30\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/middlewares/catchAsyncError.js:2:19\n    at Layer.handle [as handle_request] (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n    at param (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n    at param (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n    at Function.process_params (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)","statusCode":401,"timestamp":"2026-01-14T07:53:50.636Z","url":"/api/v1/review/stats/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"context":{},"level":"error","message":"Request Error Unauthorized","method":"GET","stack":"Error: Unauthorized\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/reviewController.js:8:30\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/middlewares/catchAsyncError.js:2:19\n    at Layer.handle [as handle_request] (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n    at param (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n    at param (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n    at Function.process_params (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)","statusCode":401,"timestamp":"2026-01-14T07:53:50.683Z","url":"/api/v1/review/user/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"context":{},"level":"error","message":"Request Error Unauthorized","method":"GET","stack":"Error: Unauthorized\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/reviewController.js:146:30\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/middlewares/catchAsyncError.js:2:19\n    at Layer.handle [as handle_request] (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n    at param (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n    at param (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n    at Function.process_params (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)","statusCode":401,"timestamp":"2026-01-14T07:53:50.690Z","url":"/api/v1/review/stats/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:55:27.192Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:55:27.195Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:55:27.330Z"}
+{"level":"info","message":"Client Connected: KFl1FSjknd_32-cEAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T07:55:28.360Z"}
+{"context":{},"level":"error","message":"Request Error At least one skill must be selected","method":"PUT","stack":"Error: At least one skill must be selected\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/adminController.js:541:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","statusCode":400,"timestamp":"2026-01-14T07:57:13.157Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:57:27.954Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:57:27.957Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:57:28.162Z"}
+{"level":"info","message":"Client Connected: SbOrN6LLl6Lz0XeGAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T07:57:29.898Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T07:57:43.841Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T07:57:43.845Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T07:57:44.272Z"}
+{"level":"info","message":"Client Connected: p3e9hldsxKANy_OZAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T07:57:44.591Z"}
+{"context":{},"level":"error","message":"Request Error At least one skill must be selected","method":"PUT","stack":"Error: At least one skill must be selected\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/adminController.js:541:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","statusCode":400,"timestamp":"2026-01-14T07:59:20.236Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"context":{},"level":"error","message":"Request Error At least one skill must be selected","method":"PUT","stack":"Error: At least one skill must be selected\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/adminController.js:541:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","statusCode":400,"timestamp":"2026-01-14T07:59:41.068Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T08:01:05.618Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T08:01:05.623Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T08:01:05.736Z"}
+{"level":"info","message":"Client Connected: 8M9aLnyDDfgxx5lwAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:01:05.955Z"}
+{"context":{},"level":"error","message":"Request Error User validation failed: skills: Service providers must select at least one skill, serviceTypes: Service providers must select at least one service type","method":"PUT","stack":"ValidationError: User validation failed: skills: Service providers must select at least one skill, serviceTypes: Service providers must select at least one service type\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T08:01:53.767Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T08:04:05.548Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T08:04:05.753Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T08:04:06.287Z"}
+{"level":"info","message":"Client Connected: bOyS6VcHKvpdTYsJAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:04:09.145Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T08:04:47.693Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T08:04:47.752Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T08:04:47.993Z"}
+{"level":"info","message":"Client Connected: 3obI2iMOozb5fLyxAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:04:48.365Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T08:05:03.594Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T08:05:03.603Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T08:05:03.843Z"}
+{"level":"info","message":"Client Connected: dNftYj2iiFHnaiHtAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:05:05.375Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T08:05:18.102Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T08:05:18.119Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T08:05:18.462Z"}
+{"level":"info","message":"Client Connected: SxcFZJCHAuhbyLM0AAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:05:20.338Z"}
+{"context":{},"level":"error","message":"Request Error User validation failed: skills: Service providers must select at least one skill, serviceTypes: Service providers must select at least one service type","method":"PUT","stack":"ValidationError: User validation failed: skills: Service providers must select at least one skill, serviceTypes: Service providers must select at least one service type\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T08:08:47.762Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"context":{},"level":"error","message":"Request Error User validation failed: skills: Service providers must select at least one skill, serviceTypes: Service providers must select at least one service type","method":"PUT","stack":"ValidationError: User validation failed: skills: Service providers must select at least one skill, serviceTypes: Service providers must select at least one service type\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T08:09:12.740Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}

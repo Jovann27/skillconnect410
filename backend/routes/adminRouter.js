@@ -1,17 +1,15 @@
 import express from "express";
+import { getServiceProviders } from "../controllers/userFlowController.js";
 import {
-  createJobFair,
-  adminGetAllServiceRequests,
-  verifyUser,
-  banUser ,
   getAllUsers,
-  getServiceProviders,
-  getDashboardMetrics,
-  approveServiceProvider,
-  rejectServiceProvider,
-  getServiceProviderApplicants,
-  updateUserServiceProfile,
-  updateUserSkills,
+  getUserWithSkills,
+  adminAddSkillToUser,
+  adminRemoveSkillFromUser,
+  adminUpdateUserSkill,
+  adminUpdateUserSkills,
+  adminUpdateUserServices,
+  verifyUser,
+  banUser
 } from "../controllers/adminController.js";
 import { getSettings, updateSettings } from "../controllers/settingsController.js";
 import { isAdminAuthenticated } from "../middlewares/auth.js";
@@ -21,20 +19,30 @@ import { jobFairSchema, settingsSchema } from "../validators/schemas.js";
 
 const router = express.Router();
 
-router.post("/jobfairs", isAdminAuthenticated, validateSchema(jobFairSchema), handleValidationErrors, createJobFair);
-router.get("/service-requests", isAdminAuthenticated, adminGetAllServiceRequests);
-router.get("/dashboard-metrics", isAdminAuthenticated, getDashboardMetrics);
+// TODO: Implement jobfair route
+// router.post("/jobfairs", isAdminAuthenticated, validateSchema(jobFairSchema), handleValidationErrors, createJobFair);
+
+// User Management
 router.get("/users", isAdminAuthenticated, authorizeRoles("Admin"), getAllUsers);
+router.get("/users/:userId", isAdminAuthenticated, authorizeRoles("Admin"), getUserWithSkills);
 router.put("/user/verify/:id", isAdminAuthenticated, authorizeRoles("Admin"), verifyUser);
-router.put("/user/service-profile/:id", isAdminAuthenticated, authorizeRoles("Admin"), updateUserServiceProfile);
-router.put("/user/skills/:id", isAdminAuthenticated, authorizeRoles("Admin"), updateUserSkills);
 router.delete("/user/:id", isAdminAuthenticated, authorizeRoles("Admin"), banUser);
+
+// User Skills Management
+router.post("/user/:userId/skills", isAdminAuthenticated, authorizeRoles("Admin"), adminAddSkillToUser);
+router.put("/user/skills/:userId", isAdminAuthenticated, authorizeRoles("Admin"), adminUpdateUserSkills);
+router.put("/user/:userId/skills/:skillId", isAdminAuthenticated, authorizeRoles("Admin"), adminUpdateUserSkill);
+router.delete("/user/:userId/skills/:skillId", isAdminAuthenticated, authorizeRoles("Admin"), adminRemoveSkillFromUser);
+
+// User Services Management
+router.put("/user/service-profile/:userId", isAdminAuthenticated, authorizeRoles("Admin"), adminUpdateUserServices);
+
 router.get("/service-providers", isAdminAuthenticated, getServiceProviders);
 
-// Service Provider Application Management
-router.get("/service-provider-applicants", isAdminAuthenticated, authorizeRoles("Admin"), getServiceProviderApplicants);
-router.put("/approve-service-provider/:id", isAdminAuthenticated, authorizeRoles("Admin"), approveServiceProvider);
-router.put("/reject-service-provider/:id", isAdminAuthenticated, authorizeRoles("Admin"), rejectServiceProvider);
+// TODO: Implement the following routes
+// router.get("/service-provider-applicants", isAdminAuthenticated, authorizeRoles("Admin"), getServiceProviderApplicants);
+// router.put("/approve-service-provider/:id", isAdminAuthenticated, authorizeRoles("Admin"), approveServiceProvider);
+// router.put("/reject-service-provider/:id", isAdminAuthenticated, authorizeRoles("Admin"), rejectServiceProvider);
 
 // Settings Management
 router.get("/settings", isAdminAuthenticated, authorizeRoles("Admin"), getSettings);

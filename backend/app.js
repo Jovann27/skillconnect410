@@ -52,8 +52,21 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || FRONTEND_URL).split(",").map(s => s.trim());
 
+// Add common development origins
+const defaultOrigins = [
+  "http://localhost:5173",    // Vite dev server
+  "http://localhost:3000",    // React dev server
+  "http://127.0.0.1:5173",    // Alternative localhost
+  "http://127.0.0.1:3000",    // Alternative localhost
+  "http://192.168.1.10:5173", // Network IP for Vite
+  "http://192.168.1.10:3000", // Network IP for React
+];
+
+// Combine configured origins with defaults
+const allAllowedOrigins = [...new Set([...allowedOrigins, ...defaultOrigins])];
+
 app.use(cors({
-  origin: allowedOrigins, // Allow configured origins
+  origin: allAllowedOrigins, // Allow configured origins and common development origins
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,

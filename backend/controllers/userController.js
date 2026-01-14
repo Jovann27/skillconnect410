@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../models/userSchema.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../middlewares/error.js";
@@ -50,18 +51,26 @@ export const register = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Employment status must be Employed or Unemployed", 400));
   }
 
-  if (password !== confirmPassword) return next(new ErrorHandler("Passwords do not match", 400));
-  if (password.length < 8) return next(new ErrorHandler("Password must be at least 8 characters", 400));
+  if (password !== confirmPassword) {
+    return next(new ErrorHandler("Passwords do not match", 400));
+  }
+  if (password.length < 8) {
+    return next(new ErrorHandler("Password must be at least 8 characters", 400));
+  }
 
-  // Validate birthdate 
-
+  // Validate birthdate
   const birthDate = new Date(birthdate);
-  if (isNaN(birthDate.getTime())) return next(new ErrorHandler("Invalid birthdate format", 400));
-  if (birthDate > new Date()) return next(new ErrorHandler("Birthdate cannot be in the future", 400));
-
+  if (isNaN(birthDate.getTime())) {
+    return next(new ErrorHandler("Invalid birthdate format", 400));
+  }
+  if (birthDate > new Date()) {
+    return next(new ErrorHandler("Birthdate cannot be in the future", 400));
+  }
 
   // Validate phone number format
-  if (!/^(\+63|0)[0-9]{10}$/.test(phone)) return next(new ErrorHandler("Invalid phone number format. Use +63XXXXXXXXXX or 0XXXXXXXXXX", 400));
+  if (!/^(\+63|0)[0-9]{10}$/.test(phone)) {
+    return next(new ErrorHandler("Invalid phone number format. Use +63XXXXXXXXXX or 0XXXXXXXXXX", 400));
+  }
 
   const [isUsername, isPhone, isEmail] = await Promise.all([
     User.findOne({ username }),
@@ -142,7 +151,33 @@ export const register = catchAsyncError(async (req, res, next) => {
     let normalizedServiceTypes = [];
     if (req.body.serviceTypes) {
       const incoming = Array.isArray(req.body.serviceTypes) ? req.body.serviceTypes : (typeof req.body.serviceTypes === 'string' ? req.body.serviceTypes.split(',') : []);
-      normalizedServiceTypes = incoming.map(s => s.toString().trim()).filter(Boolean);
+      normalizedServiceTypes = incoming.map(s => {
+        try {
+          return new mongoose.Types.ObjectId(s.toString().trim());
+        } catch (error) {
+          console.log('Invalid ObjectId for serviceType:', s);
+          return null;
+        }
+      }).filter(Boolean);
+    }
+
+    // For Service Providers, populate skillsWithService based on selected skills
+    let skillsWithService = [];
+    if (normalizedSkills.length > 0) {
+      // Import Skill model if not already imported
+      const Skill = (await import("../models/skillSchema.js")).default;
+
+      for (const skillName of normalizedSkills) {
+        const skill = await Skill.findOne({ name: skillName, isActive: true }).populate("serviceType");
+        if (skill) {
+          skillsWithService.push({
+            skill: skill._id,
+            yearsOfExperience: 0,
+            proficiency: "Intermediate",
+            addedAt: new Date()
+          });
+        }
+      }
     }
 
     // Create user with Service Provider data
@@ -154,6 +189,7 @@ export const register = catchAsyncError(async (req, res, next) => {
       certificates: uploadedFiles.certificates || [],
       skills: normalizedSkills,
       serviceTypes: normalizedServiceTypes,
+      skillsWithService: skillsWithService,
     });
 
     // Send notification for new Service Provider registration (non-blocking)

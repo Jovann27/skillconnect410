@@ -24,10 +24,10 @@ const userSchema = new mongoose.Schema({
         if (this.role === "Community Member") {
           return true;
         } else {
-          return skills.length >= 1 && skills.length <= 3;
+          return skills.length >= 1; // Allow more skills, validation handled per service type
         }
       },
-      message: 'Service providers must select between 1 and 3 skills'
+      message: 'Service providers must select at least one skill'
     },
     default: []
   },
@@ -84,6 +84,11 @@ const userSchema = new mongoose.Schema({
   availability: { type: String, enum: ["Available", "Currently Working", "Not Available"], default: "Not Available" },
   serviceRate: { type: Number, default: 0 },
   serviceDescription: { type: String, default: "" },
+  services: [{
+    name: { type: String, required: true },
+    rate: { type: Number, required: true, min: 0 },
+    description: { type: String, default: "" }
+  }],
   isOnline: { type: Boolean, default: true },
   
   // Ratings and reviews
