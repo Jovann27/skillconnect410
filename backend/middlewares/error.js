@@ -1,53 +1,38 @@
+import logger from "../utils/logger.js";
+
+// Pattern 6: Graceful Error Handling with Logging
 class ErrorHandler extends Error {
-  constructor(message, statusCode) {
+  constructor(message, statusCode, context = {}) {
     super(message);
     this.statusCode = statusCode;
+    this.context = context; // For logging context
+    this.timestamp = new Date().toISOString();
   }
 }
 
 export const errorMiddleware = (err, req, res, next) => {
-  // Log error details for debugging (without exposing to client)
-  if (process.env.NODE_ENV === "development") {
-    console.error("Error:", err);
-  } else {
-    // In production, log only essential error info without stack traces
-    console.error("Error:", {
-      message: err.message,
-      name: err.name,
-      statusCode: err.statusCode,
-      stack: err.stack?.split('\n')[0] // Only log the first line of stack trace
-    });
-  }
+  err.statusCode = err.statusCode || 500;
+  err.message = err.message || "Internal Server Error";
 
-  let safeMessage = "Internal Server Error";
-  let statusCode = err.statusCode || 500;
+  // Log error with context
+  const errorLog = {
+    timestamp: err.timestamp || new Date().toISOString(),
+    statusCode: err.statusCode,
+    message: err.message,
+    url: req.originalUrl,
+    method: req.method,
+    userId: req.user?.id || "anonymous",
+    context: err.context || {},
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined
+  };
 
-  if (process.env.NODE_ENV === "development") {
-    // In development, show detailed error messages
-    safeMessage = err.message || safeMessage;
-  } else {
-    // In production, use safe, generic messages
-    if (err.name === "JsonWebTokenError") {
-      safeMessage = "Authentication failed.";
-      statusCode = 401;
-    } else if (err.name === "TokenExpiredError") {
-      safeMessage = "Authentication expired.";
-      statusCode = 401;
-    } else if (err.name === "CastError") {
-      safeMessage = "Resource not found.";
-      statusCode = 404;
-    } else if (err.code === 11000) {
-      safeMessage = "Duplicate value entered.";
-      statusCode = 400;
-    } else if (err.statusCode) {
-      // For custom ErrorHandler instances, use the custom message if it's safe
-      safeMessage = err.message || safeMessage;
-    }
-  }
+  logger.error("Request Error", errorLog);
 
-  res.status(statusCode).json({
+  // Send response
+  res.status(err.statusCode).json({
     success: false,
-    message: safeMessage,
+    message: err.message,
+    error: process.env.NODE_ENV === "development" ? err : undefined
   });
 };
 

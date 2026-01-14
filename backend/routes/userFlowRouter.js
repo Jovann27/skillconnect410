@@ -77,8 +77,6 @@ router.get('/me', isUserAuthenticated, isUserVerified, catchAsyncError(async (re
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
   const user = await User.findById(req.user._id)
-    .populate('certificates')
-    .populate('workProof')
     .populate('bookings');
   if (!user) return next(new ErrorHandler("User not found", 404));
 
@@ -141,7 +139,7 @@ router.get('/my-certificates', isUserAuthenticated, isUserVerified, catchAsyncEr
 router.get('/my-work-proof', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
-  const user = await User.findById(req.user._id).populate('workProof');
+  const user = await User.findById(req.user._id);
   if (!user) return next(new ErrorHandler("User not found", 404));
 
   res.status(200).json({
@@ -510,10 +508,10 @@ router.get('/user-service-requests', isUserAuthenticated, isUserVerified, catchA
 router.get('/client-applications', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
-  // Get bookings where user is requester and status is "Applied"
+  // Get bookings where user is requester and status is "Applied" or "In Progress"
   const applications = await Booking.find({
     requester: req.user._id,
-    status: "Applied"
+    status: { $in: ["Applied", "In Progress"] }
   })
     .populate('provider', 'firstName lastName profilePic email phone skills averageRating totalReviews')
     .populate({

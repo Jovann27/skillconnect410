@@ -70,10 +70,18 @@ const CreateServiceRequest = ({ onClose }) => {
 
     setLoading(true);
     try {
-      // Prepare data for submission - convert date object to string
+      // Prepare data for submission - convert date object to string and budget range
       const submitData = {
-        ...formData,
-        preferredDate: formData.preferredDate ? formData.preferredDate.toISOString().split('T')[0] : null
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        serviceCategory: formData.serviceCategory,
+        preferredDate: formData.preferredDate ? formData.preferredDate.toISOString().split('T')[0] : null,
+        preferredTime: formData.preferredTime || "09:00", // Add default time if not provided
+        budgetRange: {
+          min: formData.budgetRange.min || 0,
+          max: formData.budgetRange.max || 0
+        }
       };
 
       const response = await api.post("/user/create-service-request", submitData);
@@ -85,7 +93,11 @@ const CreateServiceRequest = ({ onClose }) => {
       }
     } catch (error) {
       console.error("Error creating service request:", error);
-      toast.error("Failed to create service request");
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Failed to create service request");
+      }
     } finally {
       setLoading(false);
     }

@@ -62,7 +62,7 @@ const ReviewServiceRequest = () => {
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Service Requests Review</h1>
+            <h1 className="text-2xl font-bold text-slate-900">Service Requests Logs</h1>
             <p className="text-slate-600 mt-1">Review and manage all service requests from the platform</p>
           </div>
         </div>

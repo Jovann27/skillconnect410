@@ -182,219 +182,6 @@ for (let i = 0; i < 50; i++) {
 await Resident.insertMany(residentsData);
 logger.info("50 residents created");
 
-// Generate birthdate (18-60 years old)
-function generateBirthdate() {
-  const now = new Date();
-  const minAge = 18;
-  const maxAge = 60;
-  const age = Math.floor(Math.random() * (maxAge - minAge)) + minAge;
-  const birthYear = now.getFullYear() - age;
-  const birthMonth = Math.floor(Math.random() * 12);
-  const birthDay = Math.floor(Math.random() * 28) + 1;
-  return new Date(birthYear, birthMonth, birthDay);
-}
-
-// Skills
-const skills = ["Plumbing", "Electrical", "Cleaning", "Carpentry", "Painting"];
-
-// Function to get random skills
-function getRandomSkills(num) {
-  const shuffled = skills.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, num);
-}
-
-// Services
-const services = [
-  "Plumbing", "Electrical", "Cleaning", "Carpentry", "Painting", "Appliance Repair",
-  "Home Renovation", "Pest Control", "Gardening & Landscaping", "Air Conditioning & Ventilation", "Laundry / Labandera"
-];
-
-// Create 50 users
-const usersData = [];
-for (let i = 0; i < 50; i++) {
-  const name = generateName();
-  const email = generateEmail(name.firstName, name.lastName);
-  const phone = generatePhone();
-  const address = generateAddress();
-  const birthdate = generateBirthdate();
-  const employed = Math.random() > 0.5 ? "employed" : "unemployed";
-  const role = Math.random() > 0.5 ? "Service Provider" : "Community Member";
-
-  const userData = {
-    username: `${name.firstName}${name.lastName}${i}`,
-    firstName: name.firstName,
-    lastName: name.lastName,
-    email: email,
-    phone: phone,
-    address: address,
-    birthdate: birthdate,
-    occupation: role === "Service Provider" ? services[Math.floor(Math.random() * services.length)] : "",
-    employed: employed,
-    role: role,
-    profilePic: `https://picsum.photos/200/200?random=${i}`,
-    validId: "https://via.placeholder.com/300x200/cccccc/000000?text=Valid+ID",
-    password: "password123",
-    verified: Math.random() > 0.8 ? false : true // 80% verified, 20% pending
-  };
-
-  if (role === "Service Provider") {
-    const numSkills = Math.floor(Math.random() * 3) + 1; // 1-3 skills
-    userData.skills = getRandomSkills(numSkills);
-    userData.availability = ["Available", "Currently Working", "Not Available"][Math.floor(Math.random() * 3)];
-    userData.acceptedWork = Math.random() > 0.5; // Randomly set acceptedWork
-
-    // Create services array for service providers (1-3 services)
-    const numServices = Math.floor(Math.random() * 3) + 1;
-    userData.services = [];
-    for (let j = 0; j < numServices; j++) {
-      const serviceName = services[Math.floor(Math.random() * services.length)];
-      userData.services.push({
-        name: serviceName,
-        rate: Math.floor(Math.random() * 500) + 100,
-        description: `Professional ${serviceName.toLowerCase()} service. Quality work guaranteed.`
-      });
-    }
-
-    // Add certificates (50% chance)
-    if (Math.random() > 0.5) {
-      const numCertificates = Math.floor(Math.random() * 3) + 1;
-      userData.certificates = [];
-      for (let j = 0; j < numCertificates; j++) {
-        userData.certificates.push(`https://via.placeholder.com/300x200/cccccc/000000?text=Certificate+${j + 1}`);
-      }
-    }
-  }
-
-  usersData.push(userData);
-}
-
-const users = await User.create(usersData);
-logger.info("50 users created");
-
-// Get user providers and members
-const providers = users.filter(u => u.role === "Service Provider");
-const members = users.filter(u => u.role === "Community Member");
-
-// Service Request Statuses
-const srStatuses = ["Waiting", "Working", "Complete", "Cancelled", "No Longer Available"];
-
-// Booking Statuses
-const bookingStatuses = ["Available", "Working", "Complete", "Cancelled"];
-
-// Create 50 ServiceRequests (connected to members and assign providers)
-const serviceRequestsData = [];
-for (let i = 0; i < 50; i++) {
-  const member = members[Math.floor(Math.random() * members.length)];
-  const assignedProvider = providers[Math.floor(Math.random() * providers.length)];
-  serviceRequestsData.push({
-    requester: member._id,
-    serviceProvider: assignedProvider._id,
-    name: member.firstName + " " + member.lastName,
-    address: member.address,
-    phone: member.phone,
-    serviceProviderName: assignedProvider.firstName + " " + assignedProvider.lastName,
-    typeOfWork: services[Math.floor(Math.random() * services.length)],
-    time: `${Math.floor(Math.random() * 12) + 1}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')} PM`,
-    budget: Math.floor(Math.random() * 1000) + 200,
-    notes: "Sample service request notes",
-    status: srStatuses[Math.floor(Math.random() * srStatuses.length)],
-    serviceProviderPhone: assignedProvider.phone,
-    serviceProviderAddress: assignedProvider.address
-  });
-}
-
-const serviceRequests = await ServiceRequest.insertMany(serviceRequestsData);
-logger.info("50 service requests created");
-
-// Create 50 Bookings (link to serviceRequests with their assigned providers)
-const bookingsData = serviceRequests.map(sr => ({
-  requester: sr.requester,
-  provider: sr.serviceProvider,
-  serviceRequest: sr._id,
-  status: bookingStatuses[Math.floor(Math.random() * bookingStatuses.length)]
-}));
-
-const bookings = await Booking.insertMany(bookingsData);
-logger.info("50 bookings created");
-
-// Create 50 Reviews (for bookings)
-const reviewsData = bookings.map(booking => ({
-  booking: booking._id,
-  reviewer: booking.requester,
-  reviewee: booking.provider,
-  rating: Math.floor(Math.random() * 5) + 1,
-  comments: "Sample review comment"
-}));
-
-const reviews = await Review.insertMany(reviewsData);
-logger.info("50 reviews created");
-
-// Create 50 Reports (from members to providers)
-const reportsData = [];
-for (let i = 0; i < 50; i++) {
-  const member = members[Math.floor(Math.random() * members.length)];
-  const provider = providers[Math.floor(Math.random() * providers.length)];
-  reportsData.push({
-    reporter: member._id,
-    reportedUser: provider._id,
-    reason: "Sample reason",
-    description: "Sample description"
-  });
-}
-
-await Report.insertMany(reportsData);
-logger.info("50 reports created");
-
-// Create 50 Notifications
-const notificationsData = [];
-for (let i = 0; i < 50; i++) {
-  const user = users[Math.floor(Math.random() * users.length)];
-  notificationsData.push({
-    user: user._id,
-    title: `Notification ${i}`,
-    message: `This is a sample notification ${i} for ${user.firstName}.`
-  });
-}
-
-const notifications = await Notification.insertMany(notificationsData);
-logger.info("50 notifications created");
-
-// Update users with notifications
-for (const notif of notifications) {
-  await User.findByIdAndUpdate(notif.user, { $push: { notifications: notif._id } });
-}
-
-// Create 50 VerificationAppointments
-const verificationsData = [];
-for (let i = 0; i < 50; i++) {
-  const provider = providers[Math.floor(Math.random() * providers.length)];
-  verificationsData.push({
-    provider: provider._id,
-    scheduledBy: admin._id,
-    appointmentDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000),
-    location: "Barangay Hall, Sampaloc, Manila"
-  });
-}
-
-await VerificationAppointment.insertMany(verificationsData);
-logger.info("50 verification appointments created");
-
-// Create 50 Chats
-const chatsData = [];
-for (let i = 0; i < 50; i++) {
-  const booking = bookings[Math.floor(Math.random() * bookings.length)];
-  const sender = Math.random() > 0.5 ? booking.requester : booking.provider;
-  chatsData.push({
-    appointment: booking._id,
-    sender: sender,
-    message: `Sample chat message ${i}`,
-    status: ["sent", "delivered", "seen"][Math.floor(Math.random() * 3)]
-  });
-}
-
-await Chat.insertMany(chatsData);
-logger.info("50 chats created");
-
 // Create comprehensive services covering all barangay community needs
 const servicesData = [
   // Home & Property Maintenance
@@ -490,8 +277,211 @@ const servicesData = [
   { name: "Neighborhood Watch", description: "Community safety, security coordination, and watch programs", rate: 200, createdBy: admin._id }
 ];
 
-await Service.insertMany(servicesData);
+const services = await Service.insertMany(servicesData);
 logger.info(`${servicesData.length} comprehensive services created`);
+
+// Generate birthdate (18-60 years old)
+function generateBirthdate() {
+  const now = new Date();
+  const minAge = 18;
+  const maxAge = 60;
+  const age = Math.floor(Math.random() * (maxAge - minAge)) + minAge;
+  const birthYear = now.getFullYear() - age;
+  const birthMonth = Math.floor(Math.random() * 12);
+  const birthDay = Math.floor(Math.random() * 28) + 1;
+  return new Date(birthYear, birthMonth, birthDay);
+}
+
+// Skills
+const skills = ["Plumbing", "Electrical", "Cleaning", "Carpentry", "Painting"];
+
+// Function to get random skills
+function getRandomSkills(num) {
+  const shuffled = skills.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, num);
+}
+
+// Create 50 users
+const usersData = [];
+for (let i = 0; i < 50; i++) {
+  const name = generateName();
+  const email = generateEmail(name.firstName, name.lastName);
+  const phone = generatePhone();
+  const address = generateAddress();
+  const birthdate = generateBirthdate();
+  const employed = Math.random() > 0.5 ? "employed" : "unemployed";
+  const role = Math.random() > 0.5 ? "Service Provider" : "Community Member";
+
+  const userData = {
+    username: `${name.firstName}${name.lastName}${i}`,
+    firstName: name.firstName,
+    lastName: name.lastName,
+    email: email,
+    phone: phone,
+    address: address,
+    birthdate: birthdate,
+    occupation: role === "Service Provider" ? services[Math.floor(Math.random() * services.length)].name : "",
+    employed: employed,
+    role: role,
+    profilePic: `https://picsum.photos/200/200?random=${i}`,
+    validId: "https://via.placeholder.com/300x200/cccccc/000000?text=Valid+ID",
+    password: "password123",
+    verified: Math.random() > 0.8 ? false : true // 80% verified, 20% pending
+  };
+
+  if (role === "Service Provider") {
+    const numSkills = Math.floor(Math.random() * 3) + 1; // 1-3 skills
+    userData.skills = getRandomSkills(numSkills);
+    userData.availability = ["Available", "Currently Working", "Not Available"][Math.floor(Math.random() * 3)];
+
+    // Set serviceTypes for service providers (1-3 random service _ids)
+    const numServices = Math.floor(Math.random() * 3) + 1;
+    userData.serviceTypes = [];
+    for (let j = 0; j < numServices; j++) {
+      const randomService = services[Math.floor(Math.random() * services.length)];
+      userData.serviceTypes.push(randomService._id);
+    }
+
+    // Add certificates (50% chance)
+    if (Math.random() > 0.5) {
+      const numCertificates = Math.floor(Math.random() * 3) + 1;
+      userData.certificates = [];
+      for (let j = 0; j < numCertificates; j++) {
+        userData.certificates.push(`https://via.placeholder.com/300x200/cccccc/000000?text=Certificate+${j + 1}`);
+      }
+    }
+  }
+
+  usersData.push(userData);
+}
+
+const users = await User.create(usersData);
+logger.info("50 users created");
+
+// Get user providers and members
+const providers = users.filter(u => u.role === "Service Provider");
+const members = users.filter(u => u.role === "Community Member");
+
+// Service Request Statuses - Must match serviceRequest schema enum
+const srStatuses = ["Open", "Offered", "Accepted", "In Progress", "Completed", "Cancelled"];
+
+// Booking Statuses - Must match booking schema enum
+const bookingStatuses = ["Accepted", "In Progress", "Completed", "Cancelled"];
+
+// Create 50 ServiceRequests (connected to members and assign providers)
+const serviceRequestsData = [];
+for (let i = 0; i < 50; i++) {
+  const member = members[Math.floor(Math.random() * members.length)];
+  const assignedProvider = providers[Math.floor(Math.random() * providers.length)];
+  serviceRequestsData.push({
+    requester: member._id,
+    serviceProvider: assignedProvider._id,
+    name: member.firstName + " " + member.lastName,
+    address: member.address,
+    phone: member.phone,
+    serviceProviderName: assignedProvider.firstName + " " + assignedProvider.lastName,
+    typeOfWork: services[Math.floor(Math.random() * services.length)].name,
+    time: `${Math.floor(Math.random() * 12) + 1}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')} PM`,
+    budget: Math.floor(Math.random() * 1000) + 200,
+    notes: "Sample service request notes",
+    status: srStatuses[Math.floor(Math.random() * srStatuses.length)],
+    serviceProviderPhone: assignedProvider.phone,
+    serviceProviderAddress: assignedProvider.address
+  });
+}
+
+const serviceRequests = await ServiceRequest.insertMany(serviceRequestsData);
+logger.info("50 service requests created");
+
+// Create 50 Bookings (link to serviceRequests with their assigned providers)
+const bookingsData = serviceRequests.map(sr => ({
+  requester: sr.requester,
+  provider: sr.serviceProvider,
+  serviceRequest: sr._id,
+  status: bookingStatuses[Math.floor(Math.random() * bookingStatuses.length)]
+}));
+
+const bookings = await Booking.insertMany(bookingsData);
+logger.info("50 bookings created");
+
+// Create 50 Reviews (for bookings)
+const reviewsData = bookings.map(booking => ({
+  booking: booking._id,
+  reviewer: booking.requester,
+  reviewee: booking.provider,
+  rating: Math.floor(Math.random() * 5) + 1,
+  comments: "Sample review comment",
+  reviewType: "Client to Provider"
+}));
+
+const reviews = await Review.insertMany(reviewsData);
+logger.info("50 reviews created");
+
+// Create 50 Reports (from members to providers)
+const reportsData = [];
+for (let i = 0; i < 50; i++) {
+  const member = members[Math.floor(Math.random() * members.length)];
+  const provider = providers[Math.floor(Math.random() * providers.length)];
+  reportsData.push({
+    reporter: member._id,
+    reportedUser: provider._id,
+    reason: "Sample reason",
+    description: "Sample description"
+  });
+}
+
+await Report.insertMany(reportsData);
+logger.info("50 reports created");
+
+// Create 50 Notifications
+const notificationsData = [];
+for (let i = 0; i < 50; i++) {
+  const user = users[Math.floor(Math.random() * users.length)];
+  notificationsData.push({
+    user: user._id,
+    title: `Notification ${i}`,
+    message: `This is a sample notification ${i} for ${user.firstName}.`
+  });
+}
+
+const notifications = await Notification.insertMany(notificationsData);
+logger.info("50 notifications created");
+
+// Update users with notifications
+for (const notif of notifications) {
+  await User.findByIdAndUpdate(notif.user, { $push: { notifications: notif._id } });
+}
+
+// Create 50 VerificationAppointments
+const verificationsData = [];
+for (let i = 0; i < 50; i++) {
+  const provider = providers[Math.floor(Math.random() * providers.length)];
+  verificationsData.push({
+    provider: provider._id,
+    scheduledBy: admin._id,
+    appointmentDate: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000),
+    location: "Barangay Hall, Sampaloc, Manila"
+  });
+}
+
+await VerificationAppointment.insertMany(verificationsData);
+logger.info("50 verification appointments created");
+
+// Create 50 Chats
+const chatsData = [];
+for (let i = 0; i < 50; i++) {
+  const booking = bookings[Math.floor(Math.random() * bookings.length)];
+  const sender = Math.random() > 0.5 ? booking.requester : booking.provider;
+  chatsData.push({
+    appointment: booking._id,
+    sender: sender,
+    message: `Sample chat message ${i}`,
+    status: ["sent", "delivered", "seen"][Math.floor(Math.random() * 3)]
+  });
+}
+
+await Chat.insertMany(chatsData);
+logger.info("50 chats created");
 
 // Update users with bookings where applicable
 for (const booking of bookings) {

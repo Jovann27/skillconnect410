@@ -200,15 +200,16 @@ const ClientDashboard = () => {
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       const searchWords = searchTerm.split(' ').filter(word => word.length > 2);
-      
+
       filtered = filtered.filter(provider => {
+        const servicesText = provider.services?.map(service => `${service.name} ${service.description || ''}`).join(' ') || '';
         const searchableText = [
           provider.firstName,
           provider.lastName,
           provider.skills?.join(' '),
           provider.serviceDescription,
           provider.occupation,
-          ...(provider.skills || [])
+          servicesText
         ].join(' ').toLowerCase();
 
         return searchWords.some(word => searchableText.includes(word));
@@ -1332,17 +1333,48 @@ const ClientDashboard = () => {
                 </button>
               </div>
             ) : (
-              <div className="space-y-6">
-                {applications.map((application) => (
-                  <ApplicationCard
-                    key={application._id}
-                    application={application}
-                    onAccept={() => handleAcceptApplication(application._id)}
-                    onDecline={() => handleDeclineApplication(application._id)}
-                    onViewProfile={(providerId) => handleViewProfile(provider._id)}
-                    onMessage={(providerId) => handleSendMessage(provider._id)}
-                  />
-                ))}
+              <div className="space-y-8">
+                {/* Pending Applications */}
+                {applications.filter(app => app.status === 'Applied').length > 0 && (
+                  <div>
+                    <div className="flex items-center mb-4">
+                      <FaClock className="text-yellow-500 mr-2" />
+                      <h3 className="text-lg font-semibold text-gray-900">Pending Applications ({applications.filter(app => app.status === 'Applied').length})</h3>
+                    </div>
+                    <div className="space-y-4">
+                      {applications.filter(app => app.status === 'Applied').map((application) => (
+                        <ApplicationCard
+                          key={application._id}
+                          application={application}
+                          onAccept={() => handleAcceptApplication(application._id)}
+                          onDecline={() => handleDeclineApplication(application._id)}
+                          onViewProfile={(providerId) => handleViewProfile(providerId)}
+                          onMessage={(providerId) => handleSendMessage(providerId)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Accepted Applications */}
+                {applications.filter(app => app.status === 'In Progress').length > 0 && (
+                  <div>
+                    <div className="flex items-center mb-4">
+                      <FaCheckCircle className="text-green-500 mr-2" />
+                      <h3 className="text-lg font-semibold text-gray-900">Accepted Applications ({applications.filter(app => app.status === 'In Progress').length})</h3>
+                    </div>
+                    <div className="space-y-4">
+                      {applications.filter(app => app.status === 'In Progress').map((application) => (
+                        <AcceptedApplicationCard
+                          key={application._id}
+                          application={application}
+                          onViewProfile={(providerId) => handleViewProfile(providerId)}
+                          onMessage={(providerId) => handleSendMessage(providerId)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1520,6 +1552,132 @@ const ApplicationCard = ({ application, onAccept, onDecline, onViewProfile, onMe
             <FaThumbsUp className="mr-2" />
             Accept
           </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Accepted Application Card Component
+const AcceptedApplicationCard = ({ application, onViewProfile, onMessage }) => {
+  const provider = application?.provider;
+  const serviceRequest = application?.serviceRequest;
+  const commissionFee = application?.commissionFee;
+  const createdAt = application?.createdAt;
+
+  if (!provider) {
+    return <div className="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">Provider information not available</div>;
+  }
+
+  const handleViewProfile = () => {
+    if (provider?._id) {
+      onViewProfile(provider._id);
+    }
+  };
+
+  const handleMessage = () => {
+    if (provider?._id) {
+      onMessage(provider._id);
+    }
+  };
+
+  return (
+    <div className="bg-green-50 rounded-lg shadow-md p-6 border-l-4 border-green-500">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start space-x-4">
+          <img
+            src={provider.profilePic || "/default-profile.png"}
+            alt={`${provider.firstName} ${provider.lastName}`}
+            className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+          />
+          <div className="flex-1">
+            <div className="flex items-center space-x-2 mb-1">
+              <h4 className="text-lg font-semibold text-gray-900">
+                {provider.firstName} {provider.lastName}
+              </h4>
+              {provider.verified && (
+                <FaCheckCircle className="text-green-500" />
+              )}
+              <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                Accepted
+              </span>
+            </div>
+            <div className="flex items-center space-x-4 mb-2">
+              <div className="flex items-center">
+                {renderStars(provider.averageRating || 0)}
+                <span className="ml-2 text-sm text-gray-600">
+                  ({provider.totalReviews || 0} reviews)
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-1 mb-2">
+              {provider.skills?.slice(0, 4).map((skill, index) => (
+                <span key={index} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-2xl font-bold text-green-600 mb-1">
+            ₱{commissionFee?.toLocaleString() || 'N/A'}
+          </div>
+          <div className="text-sm text-gray-500">Commission Fee</div>
+          <div className="text-xs text-gray-400 mt-1">
+            Accepted {new Date(createdAt).toLocaleDateString()}
+          </div>
+        </div>
+      </div>
+
+      {/* Service Request Details */}
+      <div className="bg-white rounded-lg p-4 mb-4 border border-green-200">
+        <h5 className="font-semibold text-gray-900 mb-2">
+          Service Request: {serviceRequest?.name || 'N/A'}
+        </h5>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="font-medium text-gray-700">Type:</span> {serviceRequest?.typeOfWork || 'N/A'}
+          </div>
+          <div>
+            <span className="font-medium text-gray-700">Location:</span> {serviceRequest?.address || 'N/A'}
+          </div>
+          <div>
+            <span className="font-medium text-gray-700">Budget:</span> ₱{serviceRequest?.minBudget || 0} - ₱{serviceRequest?.maxBudget || 0}
+          </div>
+          <div>
+            <span className="font-medium text-gray-700">Date:</span> {serviceRequest?.preferredDate ? new Date(serviceRequest.preferredDate).toLocaleDateString() : 'Flexible'}
+          </div>
+        </div>
+        {serviceRequest?.notes && (
+          <div className="mt-3">
+            <span className="font-medium text-gray-700">Notes:</span>
+            <p className="text-sm text-gray-600 mt-1">{serviceRequest.notes}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Action Buttons - Only view profile and message for accepted applications */}
+      <div className="flex items-center justify-start">
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={handleViewProfile}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm"
+          >
+            <FaEye className="mr-2" />
+            View Profile
+          </button>
+          <button
+            onClick={handleMessage}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm"
+          >
+            <FaEnvelope className="mr-2" />
+            Message
+          </button>
+          <div className="ml-auto text-sm text-green-700 font-medium flex items-center">
+            <FaCheckCircle className="mr-1" />
+            Work in progress
+          </div>
         </div>
       </div>
     </div>

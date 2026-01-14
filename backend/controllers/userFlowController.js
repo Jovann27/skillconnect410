@@ -1,5 +1,6 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../middlewares/error.js";
+import logger from "../utils/logger.js";
 import {
   validateServiceRequest,
   validateChatMessage,
@@ -14,6 +15,12 @@ import {
   handleValidationErrors,
   sanitizeInput
 } from "../middlewares/validation.js";
+import {
+  canTransitionBookingStatus,
+  getValidBookingTransitions,
+  canTransitionRequestStatus,
+  getValidRequestTransitions
+} from "../utils/dataConsistency.js";
 import User from "../models/userSchema.js";
 import ServiceRequest from "../models/serviceRequest.js";
 import ServiceOffer from "../models/serviceOffer.js";
@@ -28,11 +35,36 @@ import { sendTargetedRequestNotification } from "../utils/emailService.js";
 
 export const postServiceRequest = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
-  const { name, address, phone, typeOfWork, preferredDate, time, budget, notes, targetProvider } = req.body;
+  
+  // Accept both old format (name, budget) and new format (title, budgetRange)
+  const { 
+    name, title,
+    address, 
+    phone, 
+    typeOfWork, serviceCategory,
+    preferredDate, 
+    time, preferredTime,
+    budget, budgetRange,
+    notes, 
+    description,
+    location,
+    targetProvider 
+  } = req.body;
+
+  // Use new field names if provided, fall back to old field names
+  const requestTitle = title || name;
+  const requestLocation = location || address;
+  const requestTypeOfWork = serviceCategory || typeOfWork;
+  const requestTime = preferredTime || time;
+  const requestDescription = description || notes;
+  const minBudgetAmount = budgetRange?.min || budget || 0;
+  const maxBudgetAmount = budgetRange?.max || budget || 0;
 
   // For inquiries (General Inquiry), address and phone are not required
-  const isInquiry = typeOfWork === 'General Inquiry';
-  if (!name || !typeOfWork || !time || (!isInquiry && (!address || !phone))) return next(new ErrorHandler("Missing required fields", 400));
+  const isInquiry = requestTypeOfWork === 'General Inquiry';
+  if (!requestTitle || !requestTypeOfWork || !requestTime || (!isInquiry && (!requestLocation || !phone))) {
+    return next(new ErrorHandler("Missing required fields: title/name, typeOfWork/serviceCategory, time/preferredTime, and location/address are required", 400));
+  }
 
   let preferredDateObj = null;
   let expiresAt;
@@ -42,7 +74,7 @@ export const postServiceRequest = catchAsyncError(async (req, res, next) => {
     if (isNaN(preferredDateObj.getTime())) {
       return next(new ErrorHandler("Invalid preferred date format", 400));
     }
-    const [hours, minutes] = time.split(':').map(Number);
+    const [hours, minutes] = requestTime.split(':').map(Number);
     const expirationDate = new Date(preferredDateObj);
     expirationDate.setHours(hours, minutes, 0, 0);
     expiresAt = expirationDate;
@@ -52,15 +84,15 @@ export const postServiceRequest = catchAsyncError(async (req, res, next) => {
 
   const request = await ServiceRequest.create({
     requester: req.user._id,
-    name,
-    address: isInquiry ? "" : address,
+    name: requestTitle,
+    address: isInquiry ? "" : requestLocation,
     phone: isInquiry ? "" : phone,
-    typeOfWork,
+    typeOfWork: requestTypeOfWork,
     preferredDate: preferredDateObj,
-    time,
-    minBudget: budget || 0,
-    maxBudget: budget || 0,
-    notes,
+    time: requestTime,
+    minBudget: minBudgetAmount,
+    maxBudget: maxBudgetAmount,
+    notes: requestDescription,
     targetProvider,
     status: "Open",
     expiresAt,
@@ -68,7 +100,7 @@ export const postServiceRequest = catchAsyncError(async (req, res, next) => {
 
   const matchingProviders = await User.find({
     role: "Service Provider",
-    skills: { $in: [typeOfWork.toLowerCase()] },
+    skills: { $in: [requestTypeOfWork.toLowerCase()] },
   }).select("_id");
 
   for (const provider of matchingProviders) {
@@ -83,32 +115,66 @@ export const postServiceRequest = catchAsyncError(async (req, res, next) => {
   await sendNotification(
     req.user._id,
     "Service Request Posted",
-    `Your "${typeOfWork}" request has been posted successfully.`,
+    `Your "${requestTypeOfWork}" request has been posted successfully.`,
     { requestId: request._id, type: "service-request-posted"}
   );
 
-  res.status(201).json({ success: true, request });
+  res.status(201).json({ success: true, serviceRequest: request });
 });
 
+// State Machine Validation - Pattern 4: State Machine Validation
 export const updateBookingStatus = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, notes } = req.body;
+
   const booking = await Booking.findById(id);
   if (!booking) return next(new ErrorHandler("Booking not found", 404));
 
-  const allowed = ["Accepted", "In Progress", "Completed", "Cancelled"];
-  if (!allowed.includes(status)) return next(new ErrorHandler("Invalid status", 400));
+  // Validate transition
+  if (!canTransitionBookingStatus(booking.status, status)) {
+    const validTransitions = getValidBookingTransitions(booking.status);
+    return next(new ErrorHandler(
+      `Cannot transition from ${booking.status} to ${status}. Valid transitions: ${validTransitions.join(", ")}`,
+      400
+    ));
+  }
 
   if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
     return next(new ErrorHandler("Not authorized", 403));
   }
 
+  // Handle specific transitions
+  if (status === "Completed") {
+    if (!notes) {
+      return next(new ErrorHandler("Completion notes required", 400));
+    }
+    booking.completionNotes = notes;
+  }
+
   booking.status = status;
+  booking.updatedAt = new Date();
   await booking.save();
 
+  // Trigger side effects based on transition
   const otherUser = String(booking.requester) === String(req.user._id) ? booking.provider : booking.requester;
-  await sendNotification(otherUser, `Booking ${status}`, `Booking ${booking._id} status changed to ${status}`);
+
+  if (status === "Completed") {
+    // Now eligible for reviews
+    await sendNotification(otherUser, "Booking Completed", `Booking ${booking._id} has been completed and is now available for review`, {
+      bookingId: booking._id,
+      type: "booking-completed"
+    });
+  } else if (status === "Cancelled") {
+    // Handle cancellation
+    await sendNotification(otherUser, "Booking Cancelled", `Booking ${booking._id} has been cancelled`, {
+      bookingId: booking._id,
+      type: "booking-cancelled"
+    });
+  } else {
+    await sendNotification(otherUser, `Booking ${status}`, `Booking ${booking._id} status changed to ${status}`);
+  }
 
   io.emit("booking-updated", { bookingId: booking._id, action: "status-updated", newStatus: status });
 
@@ -942,8 +1008,8 @@ export const offerToProvider = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Not authorized to offer this request", 403));
   }
 
-  // Check if the request can be offered (must be in Waiting status)
-  if (request.status !== "Waiting") {
+  // Check if the request can be offered (must be in Open status)
+  if (request.status !== "Open") {
     return next(new ErrorHandler("This request cannot be offered at this time", 400));
   }
 
@@ -1111,39 +1177,106 @@ export const getAvailableServiceRequests = catchAsyncError(async (req, res, next
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
   const { page = 1, limit = 20, skills, location, useRecommendations } = req.query;
-  const skip = (page - 1) * limit;
+  
+  logger.info(`[getAvailableServiceRequests] User: ${req.user._id} (${req.user.firstName} ${req.user.lastName}), Role: ${req.user.role}`);
+  logger.info(`[getAvailableServiceRequests] Params: useRecommendations=${useRecommendations}, limit=${limit}, page=${page}`);
 
-  // If user is a service provider and wants recommendations, use hybrid algorithm
-  if (req.user.role === "Service Provider" && useRecommendations === "true") {
+  // Service providers should get recommendations by default, unless explicitly disabled
+  const shouldUseRecommendations = req.user.role === "Service Provider" && useRecommendations !== "false";
+  
+  logger.info(`[getAvailableServiceRequests] shouldUseRecommendations=${shouldUseRecommendations}`);
+
+  if (shouldUseRecommendations) {
     try {
-      const worker = await User.findById(req.user._id);
+      // Get full worker profile with all necessary fields for recommendation
+      const worker = await User.findById(req.user._id)
+        .select('_id firstName lastName email phone skills serviceDescription serviceRate profilePic isOnline averageRating totalReviews address verified occupation yearsExperience totalJobsCompleted createdAt serviceTypes')
+        .populate('serviceTypes', 'name');
+
+      if (!worker) {
+        return next(new ErrorHandler("User not found", 404));
+      }
+      
+      logger.info(`[getAvailableServiceRequests] Worker profile loaded: skills=${JSON.stringify(worker.skills)}, occupation=${worker.occupation}`);
+
+      // Get ALL recommended service requests based on provider's offered services
       const recommendedRequests = await getRecommendedServiceRequests(worker, {
-        limit: parseInt(limit),
-        minScore: 0.3
+        limit: parseInt(limit) || 20,
+        minScore: 0.0, // Include all matching requests, sorted by score
+        page: parseInt(page) || 1
       });
+      
+      logger.info(`[getAvailableServiceRequests] Recommendation engine returned ${recommendedRequests.length} requests`);
 
       return res.json({
         success: true,
         count: recommendedRequests.length,
         requests: recommendedRequests,
         algorithm: "hybrid",
-        description: "Using hybrid recommendation algorithm to match service requests to your profile"
+        description: "Showing all available service requests that match your skills and expertise, ranked by relevance"
       });
     } catch (error) {
+      logger.error('Error in recommended service requests:', error);
       console.error('Error in recommended service requests:', error);
-      // Fall through to regular query
+      // Fall through to regular query if recommendation fails
     }
   }
 
+  // Fallback: Use basic filtering with optional provider skill matching
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
   // Build match conditions for aggregation pipeline
   const matchConditions = {
-    status: "Waiting",
+    status: "Open",
     expiresAt: { $gt: new Date() }
   };
 
+  // If this is a Service Provider with skills, match their skills by default
+  if (req.user.role === "Service Provider") {
+    const providerSkills = req.user.skills || [];
+    const providerOccupation = req.user.occupation || '';
+
+    logger.info(`[getAvailableServiceRequests Fallback] Skills: ${JSON.stringify(providerSkills)}, Occupation: ${providerOccupation}`);
+
+    // Build OR conditions for skill/occupation matching
+    if (providerSkills.length > 0 || providerOccupation) {
+      const orConditions = [];
+      
+      // Add skill patterns
+      if (providerSkills.length > 0) {
+        providerSkills.forEach(skill => {
+          orConditions.push(
+            { typeOfWork: new RegExp(skill, 'i') },
+            { serviceCategory: new RegExp(skill, 'i') },
+            { notes: new RegExp(skill, 'i') },
+            { description: new RegExp(skill, 'i') }
+          );
+        });
+      }
+      
+      // Add occupation pattern
+      if (providerOccupation) {
+        orConditions.push(
+          { typeOfWork: new RegExp(providerOccupation, 'i') },
+          { serviceCategory: new RegExp(providerOccupation, 'i') },
+          { notes: new RegExp(providerOccupation, 'i') },
+          { description: new RegExp(providerOccupation, 'i') }
+        );
+      }
+      
+      if (orConditions.length > 0) {
+        matchConditions.$or = orConditions;
+        logger.info(`[getAvailableServiceRequests Fallback] Using skill-based filtering with ${orConditions.length} conditions`);
+      } else {
+        logger.warn(`[getAvailableServiceRequests Fallback] Provider has no skills/occupation, returning all open requests`);
+      }
+    } else {
+      logger.warn(`[getAvailableServiceRequests Fallback] Provider skills array is empty and no occupation`);
+    }
+  }
+
+  // Apply explicit skills filter if provided (overrides provider skills)
   if (skills) {
-    // Use exact match instead of regex for better index utilization
-    // Split skills by comma and trim whitespace
     const skillArray = skills.split(',').map(s => s.trim().toLowerCase());
     matchConditions.typeOfWork = { $in: skillArray };
   }
@@ -1207,13 +1340,88 @@ export const getAvailableServiceRequests = catchAsyncError(async (req, res, next
   const result = await ServiceRequest.aggregate(aggregationPipeline);
   const requests = result[0].requests;
   const totalCount = result[0].totalCount[0]?.count || 0;
+  
+  logger.info(`[getAvailableServiceRequests] Fallback query returned ${totalCount} requests`);
+  
+  // If no matching requests found and provider has skill-based filter, try showing all open requests
+  if (totalCount === 0 && req.user.role === "Service Provider" && matchConditions.$or) {
+    logger.warn(`[getAvailableServiceRequests] No matching requests with skills, trying all open requests`);
+    const allRequestsPipeline = [
+      {
+        $match: {
+          status: "Open",
+          expiresAt: { $gt: new Date() }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'requester',
+          foreignField: '_id',
+          as: 'requester',
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+                profilePic: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'targetProvider',
+          foreignField: '_id',
+          as: 'targetProvider',
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $addFields: {
+          requester: { $arrayElemAt: ['$requester', 0] },
+          targetProvider: { $arrayElemAt: ['$targetProvider', 0] }
+        }
+      },
+      {
+        $facet: {
+          requests: [
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: parseInt(limit) }
+          ],
+          totalCount: [
+            { $count: "count" }
+          ]
+        }
+      }
+    ];
+    
+    const allResult = await ServiceRequest.aggregate(allRequestsPipeline);
+    return res.json({
+      success: true,
+      count: allResult[0].totalCount[0]?.count || 0,
+      requests: allResult[0].requests,
+      algorithm: "all_open",
+      description: "No requests matching your skills found. Showing all available open requests."
+    });
+  }
 
   res.json({
     success: true,
     count: totalCount,
     requests,
     algorithm: "filtered",
-    description: "Using optimized filtered search with aggregation pipeline"
+    description: "Using basic filtered search for available service requests"
   });
 });
 
@@ -1298,7 +1506,7 @@ export const createServiceRequest = catchAsyncError(async (req, res, next) => {
     minBudget: budgetRange ? budgetRange.min || 0 : 0,
     maxBudget: budgetRange ? budgetRange.max || 0 : 0,
     notes: description, // Map description to notes field
-    status: "Waiting",
+    status: "Open",
     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
   });
 
@@ -1666,7 +1874,7 @@ export const applyToServiceRequest = catchAsyncError(async (req, res, next) => {
 
   const serviceRequest = await ServiceRequest.findById(requestId).populate('requester');
   if (!serviceRequest) return next(new ErrorHandler("Service request not found", 404));
-  if (serviceRequest.status !== "Waiting") {
+  if (serviceRequest.status !== "Open") {
     return next(new ErrorHandler("Service request is not available for applications", 400));
   }
 

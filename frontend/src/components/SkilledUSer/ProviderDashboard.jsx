@@ -18,7 +18,7 @@ const ProviderDashboard = () => {
   const navigate = useNavigate();
   
   // Core state
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('requests');
   const [loading, setLoading] = useState(true);
 
   // Modal state
@@ -64,13 +64,24 @@ const ProviderDashboard = () => {
 
   const fetchServiceRequests = async () => {
     try {
-      // Request all available service requests by setting a high limit
-      const response = await api.get('/user/available-service-requests?limit=10000');
+      // Fetch all available service requests matching provider's skills and services
+      // useRecommendations=true enables smart filtering based on provider's skills and expertise
+      const response = await api.get('/user/available-service-requests', {
+        params: {
+          limit: 10000,
+          useRecommendations: true
+        }
+      });
       if (response.data.success) {
         setServiceRequests(response.data.requests);
+        console.log(`Loaded ${response.data.requests.length} available service requests`, {
+          algorithm: response.data.algorithm,
+          description: response.data.description
+        });
       }
     } catch (error) {
       console.error('Error fetching service requests:', error);
+      toast.error('Failed to load available service requests');
     }
   };
 
@@ -245,6 +256,9 @@ const ProviderDashboard = () => {
   const renderRequestsTab = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Available Service Requests</h3>
+      <p className="text-sm text-gray-600">
+        Showing {serviceRequests.length} request{serviceRequests.length !== 1 ? 's' : ''} that match your skills and expertise
+      </p>
       {serviceRequests.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           <FaClipboardList className="mx-auto text-4xl mb-4 text-gray-300" />
@@ -253,13 +267,38 @@ const ProviderDashboard = () => {
       ) : (
         serviceRequests.map((request) => {
           const alreadyApplied = hasAlreadyApplied(request._id);
+          const matchStrength = request.matchStrength;
+          const recommendationScore = request.recommendationScore;
+          
+          // Determine badge color based on match strength
+          const getMatchBadgeColor = () => {
+            switch(matchStrength) {
+              case 'high':
+                return 'bg-green-100 text-green-800';
+              case 'medium':
+                return 'bg-yellow-100 text-yellow-800';
+              default:
+                return 'bg-blue-100 text-blue-800';
+            }
+          };
+          
           return (
-            <div key={request._id} className="bg-white border rounded-lg p-4">
+            <div key={request._id} className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h4 className="font-semibold">{request.name}</h4>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-semibold">{request.name}</h4>
+                    {matchStrength && (
+                      <span className={`text-xs px-2 py-1 rounded font-medium ${getMatchBadgeColor()}`}>
+                        {matchStrength.charAt(0).toUpperCase() + matchStrength.slice(1)} Match
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-600">{request.typeOfWork}</p>
-                  <p className="text-sm text-gray-500">{request.address}</p>
+                  <p className="text-sm text-gray-500 flex items-center gap-1">
+                    <FaMapMarkerAlt className="text-gray-400" />
+                    {request.address || 'Location not specified'}
+                  </p>
                 </div>
                 <div className="text-right">
                   <div className="font-bold text-green-600">
@@ -270,27 +309,42 @@ const ProviderDashboard = () => {
                       : 'Budget not specified'
                     }
                   </div>
-                  <div className="text-sm text-gray-500">{request.time}</div>
+                  <div className="text-sm text-gray-500 flex items-center justify-end gap-1">
+                    <FaCalendarAlt className="text-gray-400" />
+                    {request.time || 'Time not specified'}
+                  </div>
+                  {recommendationScore && (
+                    <div className="text-xs text-gray-600 mt-1">
+                      Relevance: {(recommendationScore * 100).toFixed(0)}%
+                    </div>
+                  )}
                 </div>
               </div>
-              <p className="text-sm mb-3">{request.notes}</p>
-              {alreadyApplied ? (
-                <div className="flex items-center text-green-600">
-                  <FaCheckCircle className="mr-2" />
-                  <span className="font-medium">Already Applied</span>
-                </div>
-              ) : (
-                <button
-                  onClick={() => {
-                    setSelectedRequest(request);
-                    setCommissionFee('');
-                    setShowApplyModal(true);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
-                >
-                  Apply to Request
-                </button>
+              {request.notes && (
+                <p className="text-sm text-gray-700 mb-3 line-clamp-2">{request.notes}</p>
               )}
+              <div className="flex gap-2 items-center justify-between">
+                <div className="text-xs text-gray-500">
+                  {request.requester?.firstName && `Requested by ${request.requester.firstName}`}
+                </div>
+                {alreadyApplied ? (
+                  <div className="flex items-center text-green-600 font-medium">
+                    <FaCheckCircle className="mr-2" />
+                    <span>Already Applied</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setSelectedRequest(request);
+                      setCommissionFee('');
+                      setShowApplyModal(true);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium text-sm transition-colors"
+                  >
+                    Apply to Request
+                  </button>
+                )}
+              </div>
             </div>
           );
         })

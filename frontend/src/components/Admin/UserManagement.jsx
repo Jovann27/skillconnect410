@@ -14,6 +14,92 @@ const SERVICE_OPTIONS = [
   { name: "Air Conditioning & Ventilation", description: "Aircon installation, cleaning, and HVAC servicing.", icon: "❄️" }
 ];
 
+const SKILLS_OPTIONS = {
+  "Plumbing": [
+    "Plumbing",
+    "Pipe Installation",
+    "Leak Repair",
+    "Bathroom Plumbing",
+    "Water Heater Repair",
+    "Drain Cleaning"
+  ],
+  "Electrical": [
+    "Electrical Work",
+    "Wiring",
+    "Lighting Installation",
+    "Electrical Appliance Repair",
+    "Security Systems",
+    "Smart Home Installation",
+    "Solar Panel Installation"
+  ],
+  "Cleaning": [
+    "Cleaning Services",
+    "House Cleaning",
+    "Deep Cleaning",
+    "Carpet Cleaning",
+    "Upholstery Cleaning",
+    "Window Cleaning",
+    "Pressure Washing",
+    "Gutter Cleaning"
+  ],
+  "Carpentry": [
+    "Carpentry",
+    "Furniture Repair",
+    "Furniture Assembly",
+    "Custom Woodwork",
+    "Door Installation",
+    "Deck Construction",
+    "Fence Installation"
+  ],
+  "Painting": [
+    "Painting",
+    "Interior Painting",
+    "Exterior Painting",
+    "Color Consultation",
+    "Wall Painting"
+  ],
+  "Appliance Repair": [
+    "Appliance Repair",
+    "Aircon Repair",
+    "Refrigerator Repair",
+    "Washing Machine Repair",
+    "Oven Repair",
+    "Dishwasher Repair"
+  ],
+  "Home Renovation": [
+    "Home Renovation",
+    "Tile Installation",
+    "Flooring",
+    "Roofing",
+    "Drywall Installation",
+    "Insulation",
+    "Siding Installation",
+    "Masonry",
+    "Concrete Work",
+    "Welding"
+  ],
+  "Pest Control": [
+    "Pest Control",
+    "Termite Control",
+    "Rodent Control",
+    "Insect Control"
+  ],
+  "Gardening & Landscaping": [
+    "Gardening",
+    "Landscaping",
+    "Lawn Care",
+    "Plant Maintenance",
+    "Landscape Design",
+    "Pool Maintenance"
+  ],
+  "Air Conditioning & Ventilation": [
+    "Air Conditioning",
+    "HVAC Maintenance",
+    "Aircon Installation",
+    "Ventilation Servicing"
+  ]
+};
+
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +117,8 @@ const UserManagement = () => {
   const [isEditingServices, setIsEditingServices] = useState(false);
   const [newService, setNewService] = useState({ name: '', rate: '', description: '' });
   const [editingServices, setEditingServices] = useState([]);
+  const [isEditingSkills, setIsEditingSkills] = useState(false);
+  const [editingSkills, setEditingSkills] = useState([]);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -153,6 +241,56 @@ const UserManagement = () => {
     if (success) {
       setIsEditingServices(false);
       setEditingServices([]);
+    }
+  };
+
+  const updateUserSkills = async (userId, skills) => {
+    try {
+      const result = await api.put(`/admin/user/skills/${userId}`, { skills });
+      if (result.data.success) {
+        alert("Skills updated successfully");
+        fetchData();
+        return true;
+      }
+    } catch (err) {
+      console.error("Error updating skills:", err);
+      alert(`Error updating skills: ${err.response?.data?.message || err.message}`);
+    }
+    return false;
+  };
+
+  const startEditingSkills = (user) => {
+    setIsEditingSkills(true);
+    setEditingSkills(user.skills || []);
+  };
+
+  const cancelEditingSkills = () => {
+    setIsEditingSkills(false);
+    setEditingSkills([]);
+  };
+
+  const addSkill = (skill) => {
+    if (!skill || editingSkills.includes(skill)) {
+      return;
+    }
+    setEditingSkills([...editingSkills, skill]);
+  };
+
+  const removeSkill = (skillToRemove) => {
+    const updatedSkills = editingSkills.filter(skill => skill !== skillToRemove);
+    setEditingSkills(updatedSkills);
+  };
+
+  const saveSkills = async () => {
+    if (!selectedUser) return;
+
+    setActionLoading('save-skills');
+    const success = await updateUserSkills(selectedUser._id, editingSkills);
+    setActionLoading(null);
+
+    if (success) {
+      setIsEditingSkills(false);
+      setEditingSkills([]);
     }
   };
 
@@ -1301,16 +1439,171 @@ const UserManagement = () => {
                 </div>
               </div>
 
-              {selectedUser.skills && selectedUser.skills.length > 0 && (
-                <div className="um-detail-section">
-                  <h3>🔧 Skills & Expertise ({selectedUser.skills.length})</h3>
-                  <div className="um-skills-grid">
-                    {selectedUser.skills.map((skill, index) => (
-                      <span key={index} className="um-skill-tag">{skill}</span>
-                    ))}
+              {/* Skills Section */}
+              <div className="um-detail-section">
+                <h3>🔧 Skills & Expertise {selectedUser.skills && selectedUser.skills.length > 0 && `(${selectedUser.skills.length})`}</h3>
+
+                {!isEditingSkills ? (
+                  <>
+                    {selectedUser.skills && selectedUser.skills.length > 0 ? (
+                      <div className="um-skills-grid">
+                        {selectedUser.skills.map((skill, index) => (
+                          <span key={index} className="um-skill-tag">{skill}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                        No skills configured yet
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ background: 'white', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
+                    <h4 style={{ margin: '0 0 1rem 0', color: '#1e293b', fontSize: '1rem', fontWeight: '600' }}>
+                      Edit Skills
+                    </h4>
+
+                    {/* Add Skill Dropdown */}
+                    <div style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
+                      <h5 style={{ margin: '0 0 1rem 0', color: '#374151', fontSize: '0.875rem', fontWeight: '600' }}>
+                        Add Skills by Service Category
+                      </h5>
+                      {Object.entries(SKILLS_OPTIONS).map(([serviceType, skills]) => {
+                        const availableSkills = skills.filter(skill => !editingSkills.includes(skill));
+                        if (availableSkills.length === 0) return null;
+
+                        return (
+                          <div key={serviceType} style={{ marginBottom: '1rem' }}>
+                            <label style={{
+                              display: 'block',
+                              fontSize: '0.75rem',
+                              color: '#6b7280',
+                              marginBottom: '0.5rem',
+                              fontWeight: '600'
+                            }}>
+                              {serviceType}
+                            </label>
+                            <select
+                              value=""
+                              onChange={(e) => {
+                                if (e.target.value) {
+                                  addSkill(e.target.value);
+                                  e.target.value = ""; // Reset dropdown
+                                }
+                              }}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '0.375rem',
+                                fontSize: '0.875rem',
+                                marginBottom: '0.5rem'
+                              }}
+                            >
+                              <option value="">{`Select ${serviceType} skill`}</option>
+                              {availableSkills.map((skill) => (
+                                <option key={skill} value={skill}>{skill}</option>
+                              ))}
+                            </select>
+                          </div>
+                        );
+                      })}
+                      {Object.values(SKILLS_OPTIONS).every(skills => skills.every(skill => editingSkills.includes(skill))) && (
+                        <p style={{ margin: '0.5rem 0 0 0', color: '#6b7280', fontSize: '0.75rem' }}>
+                          All available skills have been added
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Current Skills */}
+                    {editingSkills.length > 0 && (
+                      <div style={{ marginBottom: '1.5rem' }}>
+                        <h5 style={{ margin: '0 0 1rem 0', color: '#374151', fontSize: '0.875rem', fontWeight: '600' }}>
+                          Current Skills ({editingSkills.length})
+                        </h5>
+                        <div className="um-skills-grid">
+                          {editingSkills.map((skill, index) => (
+                            <span key={index} className="um-skill-tag" style={{ position: 'relative', paddingRight: '2rem' }}>
+                              {skill}
+                              <button
+                                onClick={() => removeSkill(skill)}
+                                style={{
+                                  position: 'absolute',
+                                  top: '50%',
+                                  right: '0.25rem',
+                                  transform: 'translateY(-50%)',
+                                  background: '#ef4444',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '50%',
+                                  width: '16px',
+                                  height: '16px',
+                                  fontSize: '0.75rem',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                                title="Remove skill"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Edit Action Buttons */}
+                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                      <button
+                        onClick={cancelEditingSkills}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: '#6b7280',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '0.375rem',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={saveSkills}
+                        disabled={actionLoading === 'save-skills'}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          background: '#2563eb',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '0.375rem',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          cursor: actionLoading === 'save-skills' ? 'not-allowed' : 'pointer',
+                          opacity: actionLoading === 'save-skills' ? 0.5 : 1
+                        }}
+                      >
+                        {actionLoading === 'save-skills' ? 'Saving...' : 'Save Skills'}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {!isEditingSkills && (
+                  <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                    <button
+                      onClick={() => startEditingSkills(selectedUser)}
+                      className="um-action-btn edit"
+                      style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                    >
+                      ✏️ Edit Skills
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {selectedUser.role === 'Service Provider' && (
                 <div className="um-detail-section">

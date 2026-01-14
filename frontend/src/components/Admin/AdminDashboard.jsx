@@ -61,7 +61,7 @@ const AdminDashboard = () => {
     { to: "/admin/analytics", label: "Dashboard", icon: FaHome, active: isDashboardHome },
     { to: "/admin/recommendations", label: "Recommendations", icon: FaLightbulb, active: isRecommendations },
     { to: "/admin/jobfairs", label: "Job Fairs", icon: FaCalendarAlt, active: isJobFairs },
-    { to: "/admin/service-requests", label: "Requests", icon: FaClipboardList, active: isServiceRequests },
+    { to: "/admin/service-requests", label: "Request Logs", icon: FaClipboardList, active: isServiceRequests },
     { to: "/admin/users", label: "Users", icon: FaUsers, active: isUsers },
     { to: "/admin/residents", label: "Barangay Residents List", icon: FaUserFriends, active: isResidents },
     // { to: "/admin/admin-settings", label: "Settings", icon: FaTools, active: isAdminSettings },

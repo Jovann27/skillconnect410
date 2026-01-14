@@ -34,65 +34,291 @@ userBehaviorSchema.index({ action: 1, targetType: 1 });
 const UserBehavior = mongoose.models.UserBehavior || mongoose.model("UserBehavior", userBehaviorSchema);
 
 /**
+ * Normalize string input to handle various data formats
+ * Handles: strings, arrays, undefined, null
+ * @param {*} input - Input value of any type
+ * @returns {string} Normalized lowercase string
+ */
+const normalizeString = (input) => {
+  if (!input) return '';
+  if (typeof input === 'string') return input.toLowerCase().trim();
+  if (Array.isArray(input)) return input.join(' ').toLowerCase().trim();
+  if (typeof input === 'object') return JSON.stringify(input).toLowerCase();
+  return String(input).toLowerCase().trim();
+};
+
+/**
+ * Extract skill names from both legacy and new skill structure
+ * Handles backwards compatibility with both formats
+ * @param {Object} worker - Worker user object
+ * @returns {Array} Array of skill names
+ */
+const extractSkillNames = (worker) => {
+  let skillNames = [];
+  
+  // First, try to extract from new structured skills
+  if (worker.skillsWithService && Array.isArray(worker.skillsWithService)) {
+    worker.skillsWithService.forEach(userSkill => {
+      if (userSkill.skill) {
+        // Check if it's a populated object or just an ID
+        const skillName = userSkill.skill.name || userSkill.skill;
+        if (skillName) skillNames.push(skillName);
+      }
+    });
+  }
+  
+  // Fall back to legacy skills array if no skills found
+  if (skillNames.length === 0 && worker.skills && Array.isArray(worker.skills)) {
+    skillNames = worker.skills;
+  }
+  
+  return skillNames;
+};
+
+/**
  * Calculate content-based similarity score between a worker and service request
+ * Implements improved matching with bidirectional skill matching, occupation alignment,
+ * and proper handling of various data formats
+ * 
  * @param {Object} worker - Worker user object
  * @param {Object} serviceRequest - Service request object
  * @returns {number} Content-based similarity score (0-1)
  */
 const calculateContentBasedScore = (worker, serviceRequest) => {
   let score = 0;
-  let factors = 0;
+  let weights = 0;
 
-  // Factor 1: Skill Match (40% weight)
-  if (serviceRequest.serviceCategory && worker.skills) {
-    const serviceCategoryLower = serviceRequest.serviceCategory.toLowerCase();
-    const matchingSkills = worker.skills.filter(skill => 
-      skill.toLowerCase().includes(serviceCategoryLower) ||
-      serviceCategoryLower.includes(skill.toLowerCase())
-    );
-    const skillMatchRatio = matchingSkills.length / Math.max(worker.skills.length, 1);
-    score += skillMatchRatio * 0.4;
-    factors += 0.4;
+  // Normalize and prepare data with proper format handling
+  const requestTypeOfWork = normalizeString(serviceRequest.typeOfWork || serviceRequest.serviceCategory || '');
+  const requestNotes = normalizeString(serviceRequest.notes || serviceRequest.description || '');
+  // Use new helper function to extract skills from both formats
+  const workerSkills = extractSkillNames(worker);
+  const workerOccupation = normalizeString(worker.occupation || '');
+  const workerServiceTypes = Array.isArray(worker.serviceTypes) ? worker.serviceTypes : 
+                             typeof worker.serviceTypes === 'string' ? [worker.serviceTypes] : [];
+
+  // ========================================================================
+  // Factor 1: SKILL/SERVICE TYPE MATCH (45% weight) - PRIMARY MATCHING FACTOR
+  // ========================================================================
+  const skillMatchScore = calculateSkillMatchScore(
+    requestTypeOfWork,
+    requestNotes,
+    workerSkills,
+    workerOccupation,
+    workerServiceTypes
+  );
+  
+  if (skillMatchScore > 0) {
+    score += skillMatchScore * 0.45;
+    weights += 0.45;
   }
 
-  // Factor 2: Rating Score (25% weight)
-  if (worker.averageRating) {
-    // Normalize rating from 0-5 scale to 0-1
-    const normalizedRating = worker.averageRating / 5.0;
-    score += normalizedRating * 0.25;
-    factors += 0.25;
+  // ========================================================================
+  // Factor 2: PROVIDER OCCUPATION & SERVICE TYPE ALIGNMENT (20% weight)
+  // ========================================================================
+  const occupationScore = calculateOccupationMatch(
+    requestTypeOfWork,
+    workerOccupation,
+    workerSkills,
+    workerServiceTypes
+  );
+  
+  if (occupationScore > 0) {
+    score += occupationScore * 0.2;
+    weights += 0.2;
   }
 
-  // Factor 3: Review Count (15% weight) - More reviews = more reliable
-  if (worker.totalReviews) {
-    // Normalize: 10+ reviews = full score, logarithmic scale
-    const reviewScore = Math.min(Math.log10(worker.totalReviews + 1) / Math.log10(11), 1);
-    score += reviewScore * 0.15;
-    factors += 0.15;
+  // ========================================================================
+  // Factor 3: PROVIDER REPUTATION/HISTORICAL PERFORMANCE (20% weight)
+  // ========================================================================
+  let reputationScore = 0;
+
+  // Rating component (40% of reputation)
+  if (typeof worker.averageRating === 'number' && worker.averageRating >= 0) {
+    const normalizedRating = Math.min(worker.averageRating / 5.0, 1);
+    reputationScore += normalizedRating * 0.4;
   }
 
-  // Factor 4: Experience Level (10% weight)
-  if (worker.yearsExperience) {
-    // Normalize: 5+ years = full score
-    const experienceScore = Math.min(worker.yearsExperience / 5.0, 1);
+  // Review count component (35% of reputation) - validates consistency
+  if (typeof worker.totalReviews === 'number' && worker.totalReviews > 0) {
+    // Logarithmic scale: 1 review = 0.1, 10 reviews = 0.7, 100 reviews = 1.0
+    const reviewScore = Math.min(Math.log10(worker.totalReviews + 1) / 3, 1);
+    reputationScore += reviewScore * 0.35;
+  }
+
+  // Job completion rate component (25% of reputation)
+  if (typeof worker.totalJobsCompleted === 'number' && worker.totalJobsCompleted > 0) {
+    // Normalized: 20+ completed = 1.0, fewer = proportional
+    const completionScore = Math.min(worker.totalJobsCompleted / 20, 1);
+    reputationScore += completionScore * 0.25;
+  }
+
+  if (reputationScore > 0) {
+    score += Math.min(reputationScore, 1) * 0.2;
+    weights += 0.2;
+  }
+
+  // ========================================================================
+  // Factor 4: EXPERIENCE LEVEL (10% weight)
+  // ========================================================================
+  if (typeof worker.yearsExperience === 'number' && worker.yearsExperience >= 0) {
+    // Normalized: 5+ years = 1.0, fewer = proportional
+    const experienceScore = Math.min(worker.yearsExperience / 5, 1);
     score += experienceScore * 0.1;
-    factors += 0.1;
+    weights += 0.1;
   }
 
-  // Factor 5: Job Completion Rate (10% weight)
-  if (worker.totalJobsCompleted) {
-    // Normalize: 20+ completed jobs = full score
-    const completionScore = Math.min(worker.totalJobsCompleted / 20.0, 1);
-    score += completionScore * 0.1;
-    factors += 0.1;
+  // ========================================================================
+  // Factor 5: PROVIDER AVAILABILITY (5% weight)
+  // ========================================================================
+  if (worker.isOnline || worker.isActive) {
+    score += 1.0 * 0.05;
+    weights += 0.05;
   }
 
-  // Normalize by actual factors present
-  return factors > 0 ? score / factors : 0;
+  // Normalize final score
+  if (weights === 0) {
+    return 0.25; // Minimum score for workers with no profile data
+  }
+
+  const finalScore = Math.max(0, Math.min(1, score));
+  logger.debug(`Content score for worker ${worker._id} on request: ${finalScore.toFixed(3)}`);
+  
+  return finalScore;
 };
 
 /**
- * Calculate collaborative filtering score (synchronous version for performance)
+ * Calculate skill match score with bidirectional matching
+ * Checks if worker skills match request type and vice versa
+ * 
+ * @param {string} requestTypeOfWork - Normalized request type
+ * @param {string} requestNotes - Normalized request notes/description
+ * @param {Array} workerSkills - Array of worker skills
+ * @param {string} workerOccupation - Worker's occupation
+ * @param {Array} workerServiceTypes - Worker's service types
+ * @returns {number} Skill match score (0-1)
+ */
+const calculateSkillMatchScore = (
+  requestTypeOfWork,
+  requestNotes,
+  workerSkills,
+  workerOccupation,
+  workerServiceTypes
+) => {
+  if (!requestTypeOfWork && !requestNotes) return 0;
+
+  const normalizedWorkerSkills = workerSkills.map(s => normalizeString(s));
+  const normalizedServiceTypes = workerServiceTypes.map(s => normalizeString(s));
+  const searchText = `${requestTypeOfWork} ${requestNotes}`;
+
+  let matchCount = 0;
+  let totalItems = 0;
+
+  // Check direct skill matches (case-insensitive)
+  if (normalizedWorkerSkills.length > 0) {
+    totalItems += normalizedWorkerSkills.length;
+    
+    matchCount += normalizedWorkerSkills.filter(skill => {
+      // Exact word match
+      if (searchText.includes(skill)) return true;
+      
+      // Partial match (first significant word)
+      const skillWords = skill.split(' ');
+      if (skillWords.length > 0) {
+        return searchText.includes(skillWords[0]);
+      }
+      
+      return false;
+    }).length;
+  }
+
+  // Check service type matches
+  if (normalizedServiceTypes.length > 0) {
+    totalItems += normalizedServiceTypes.length;
+    
+    matchCount += normalizedServiceTypes.filter(service => {
+      if (searchText.includes(service)) return true;
+      const serviceWords = service.split(' ');
+      return serviceWords.length > 0 && searchText.includes(serviceWords[0]);
+    }).length;
+  }
+
+  // Occupation fallback matching
+  if (!matchCount && workerOccupation) {
+    const occupationWords = workerOccupation.split(' ');
+    if (occupationWords.some(word => searchText.includes(word))) {
+      return 0.7; // Good match based on occupation
+    }
+  }
+
+  // Calculate final skill match ratio
+  if (totalItems === 0) return 0;
+  
+  const matchRatio = matchCount / totalItems;
+  
+  // Apply bonus for multiple matching skills
+  const bonusMultiplier = matchCount > 1 ? 1.1 : 1.0;
+  
+  return Math.min(1.0, matchRatio * bonusMultiplier);
+};
+
+/**
+ * Calculate occupation and service type alignment
+ * Ensures provider's primary occupation aligns with request type
+ * 
+ * @param {string} requestTypeOfWork - Normalized request type
+ * @param {string} workerOccupation - Worker's occupation
+ * @param {Array} workerSkills - Worker's skills
+ * @param {Array} workerServiceTypes - Worker's service types
+ * @returns {number} Occupation match score (0-1)
+ */
+const calculateOccupationMatch = (
+  requestTypeOfWork,
+  workerOccupation,
+  workerSkills,
+  workerServiceTypes
+) => {
+  if (!requestTypeOfWork) return 0;
+
+  let score = 0;
+
+  // Primary occupation match
+  if (workerOccupation) {
+    const occWords = workerOccupation.split(' ');
+    const reqWords = requestTypeOfWork.split(' ');
+    
+    // Check if any word overlaps
+    const overlap = occWords.some(occ => 
+      reqWords.some(req => occ === req)
+    );
+    
+    if (overlap) {
+      score += 0.8;
+    } else if (occWords.some(occ => requestTypeOfWork.includes(occ))) {
+      score += 0.6;
+    } else if (requestTypeOfWork.includes(occWords[0])) {
+      score += 0.5;
+    }
+  }
+
+  // Service type reinforcement
+  const normalizedServiceTypes = workerServiceTypes.map(s => normalizeString(s));
+  if (normalizedServiceTypes.some(service => service === requestTypeOfWork)) {
+    score += 0.2;
+  }
+
+  // Skill coverage validation
+  if (workerSkills.length > 2) {
+    score += 0.1; // Bonus for diverse skill set
+  }
+
+  return Math.min(1.0, score);
+};
+
+/**
+ * Calculate collaborative filtering score with enhanced historical performance analysis
+ * Evaluates provider's past performance on similar work types
+ * 
  * @param {Object} worker - Worker user object
  * @param {Object} serviceRequest - Service request object
  * @param {Array} similarRequests - Array of similar service requests
@@ -103,34 +329,71 @@ const calculateCollaborativeScoreSync = (worker, serviceRequest, similarRequests
   let score = 0;
   let factors = 0;
 
-  // Factor 1: Historical Success Rate (50% weight)
+  const requestTypeOfWork = normalizeString(serviceRequest.typeOfWork || serviceRequest.serviceCategory || '');
+
+  // ========================================================================
+  // Factor 1: HISTORICAL SUCCESS RATE ON SIMILAR WORK (50% weight)
+  // ========================================================================
   const workerBookings = historicalBookings.filter(
-    booking => String(booking.provider) === String(worker._id) &&
-               booking.status === 'Completed'
+    booking => String(booking.provider) === String(worker._id)
   );
 
   if (workerBookings.length > 0) {
+    // Analyze performance on similar service types
     const similarCompletedBookings = workerBookings.filter(booking => {
       if (!booking.serviceRequest) return false;
-      const bookingService = booking.serviceRequest.typeOfWork;
-      const requestService = serviceRequest.typeOfWork || serviceRequest.serviceCategory || '';
-      return bookingService &&
-             bookingService.toLowerCase().includes(requestService.toLowerCase().split(' ')[0]);
+      
+      const bookingService = normalizeString(booking.serviceRequest.typeOfWork || booking.serviceRequest.serviceCategory || '');
+      
+      // Check for similar service match
+      if (!bookingService || !requestTypeOfWork) return false;
+      
+      // Exact match or word overlap
+      return bookingService === requestTypeOfWork ||
+             bookingService.includes(requestTypeOfWork.split(' ')[0]) ||
+             requestTypeOfWork.includes(bookingService.split(' ')[0]);
     });
 
-    const successRate = similarCompletedBookings.length / workerBookings.length;
-    score += successRate * 0.5;
-    factors += 0.5;
+    const completedCount = workerBookings.filter(b => b.status === 'Completed').length;
+    
+    if (completedCount > 0) {
+      const successRate = similarCompletedBookings.length / workerBookings.length;
+      score += successRate * 0.5;
+      factors += 0.5;
+    } else if (workerBookings.length > 0) {
+      // No completed work on similar type, penalize slightly
+      score += 0.3 * 0.5;
+      factors += 0.5;
+    }
   }
 
-  // Factor 2: Experience with similar work (30% weight)
+  // ========================================================================
+  // Factor 2: EXPERIENCE WITH SIMILAR WORK TYPE (30% weight)
+  // ========================================================================
   if (worker.totalJobsCompleted && worker.totalJobsCompleted > 0) {
-    const experienceScore = Math.min(worker.totalJobsCompleted / 20.0, 1);
+    // Check if provider has completed similar type of work
+    const hasSimilarExperience = workerBookings.some(booking => {
+      if (!booking.serviceRequest) return false;
+      const bookingService = normalizeString(booking.serviceRequest.typeOfWork || booking.serviceRequest.serviceCategory || '');
+      return bookingService && bookingService.includes(requestTypeOfWork.split(' ')[0]);
+    });
+
+    let experienceScore = 0;
+    if (hasSimilarExperience) {
+      // Provider has done this type of work before
+      experienceScore = Math.min(worker.totalJobsCompleted / 20, 1);
+    } else {
+      // No prior experience with this type, but has general experience
+      experienceScore = Math.min(worker.totalJobsCompleted / 40, 0.6);
+    }
+    
     score += experienceScore * 0.3;
     factors += 0.3;
   }
 
-  // Factor 3: Rating consistency (20% weight)
+  // ========================================================================
+  // Factor 3: RATING CONSISTENCY & RELIABILITY (20% weight)
+  // ========================================================================
   if (worker.averageRating && worker.totalReviews && worker.totalReviews > 0) {
     const ratingScore = Math.min(worker.averageRating / 5.0, 1);
     score += ratingScore * 0.2;
@@ -264,81 +527,172 @@ const generateRecommendationReason = (item) => {
 
 /**
  * Get recommended service requests for a worker
- * Uses reverse recommendation: finds service requests that match worker's profile
- * @param {Object} worker - Worker user object
+ * Uses reverse recommendation: finds ALL service requests that match worker's profile based on offered services
+ * @param {Object} worker - Worker user object (must be populated with skills and serviceTypes)
  * @param {Object} options - Options for recommendation
- * @returns {Array} Array of recommended service requests
  */
 export const getRecommendedServiceRequests = async (worker, options = {}) => {
   const {
     limit = 10,
-    minScore = 0.3,
+    minScore = 0.0, // Set to 0 to include all matching requests
     page = 1
   } = options;
 
   try {
-    // Get available service requests with skill-based filtering
-    const workerSkills = worker.skills || [];
-    const skillRegex = workerSkills.length > 0
-      ? new RegExp(workerSkills.join('|'), 'i')
-      : new RegExp(worker.occupation || '', 'i');
+    // Ensure worker has necessary fields with proper type handling
+    const workerSkills = extractSkillNames(worker);
+    const workerOccupation = normalizeString(worker.occupation || '');
+    const workerServiceTypes = Array.isArray(worker.serviceTypes) ? worker.serviceTypes :
+                              typeof worker.serviceTypes === 'string' ? [worker.serviceTypes] : [];
 
-    const serviceRequests = await ServiceRequest.find({
-      status: "Open",
-      expiresAt: { $gt: new Date() },
-      $or: [
-        { typeOfWork: { $regex: skillRegex } },
-        { notes: { $regex: skillRegex } }
-      ]
-    })
-      .populate('requester', 'firstName lastName profilePic')
-      .limit(50); // Limit for performance
+    // Get service names from serviceTypes if they exist
+    let serviceNames = [];
+    if (workerServiceTypes.length > 0) {
+      try {
+        const Service = (await import('../models/service.js')).default;
+        const services = await Service.find({
+          _id: { $in: workerServiceTypes }
+        }).select('name').lean();
+        serviceNames = services.map(service => normalizeString(service.name));
+      } catch (err) {
+        logger.warn('Could not load service types, continuing with skills only');
+      }
+    }
 
-    if (serviceRequests.length === 0) {
+    // Build comprehensive search criteria based on provider's offered services
+    const searchPatterns = [];
+    const skillSet = new Set();
+
+    // Add skill patterns (case-insensitive) with 45% weight
+    if (workerSkills.length > 0) {
+      workerSkills.forEach(skill => {
+        const normalized = normalizeString(skill);
+        if (normalized) {
+          searchPatterns.push(new RegExp(skill, 'i'));
+          skillSet.add(normalized);
+        }
+      });
+    }
+
+    // Add service name patterns from serviceTypes
+    if (serviceNames.length > 0) {
+      serviceNames.forEach(serviceName => {
+        if (serviceName && !skillSet.has(serviceName)) {
+          searchPatterns.push(new RegExp(serviceName, 'i'));
+          skillSet.add(serviceName);
+        }
+      });
+    }
+
+    // Add occupation as fallback pattern
+    if (workerOccupation) {
+      searchPatterns.push(new RegExp(workerOccupation, 'i'));
+    }
+
+    // Build the query to find ALL available service requests
+    let queryConditions = {
+      status: "Open", // Match "Open" status used by the system
+      expiresAt: { $gt: new Date() } // Only non-expired requests
+    };
+
+    // If we have search patterns, add them to OR conditions
+    if (searchPatterns.length > 0) {
+      const regexConditions = [];
+      searchPatterns.forEach(pattern => {
+        regexConditions.push(
+          { typeOfWork: pattern },
+          { serviceCategory: pattern },
+          { notes: pattern },
+          { description: pattern }
+        );
+      });
+      queryConditions.$or = regexConditions;
+    } else {
+      // If no patterns, return empty array (no matches possible)
+      logger.warn(`No search patterns for provider ${worker._id}`);
       return [];
     }
 
-    // Get worker's historical data
+    logger.info(`Querying service requests for provider ${worker._id} with ${searchPatterns.length} patterns`);
+
+    // Get ALL available service requests matching the provider's offered services
+    const serviceRequests = await ServiceRequest.find(queryConditions)
+      .populate('requester', 'firstName lastName profilePic averageRating')
+      .lean(); // Use lean() for better performance
+
+    if (serviceRequests.length === 0) {
+      logger.info(`No service requests found for provider ${worker._id}`);
+      return [];
+    }
+
+    logger.info(`Found ${serviceRequests.length} total service requests for provider`);
+
+    // Get worker's historical data for better collaborative scoring
     const historicalBookings = await Booking.find({
       provider: worker._id,
       status: { $in: ['Completed', 'In Progress'] }
     })
-      .populate('serviceRequest', 'typeOfWork')
-      .limit(20);
+      .populate('serviceRequest', 'typeOfWork serviceCategory')
+      .lean();
 
-    // Score each service request
+    // Score each service request using improved hybrid scoring algorithm
     const scoredRequests = serviceRequests.map(request => {
+      // Content-based score: skill/service match + occupation alignment (45% + 20%)
+      // This incorporates improved matching logic for service type and skills
       const contentScore = calculateContentBasedScore(worker, request);
 
-      // Check if worker has completed similar requests
+      // Collaborative score: historical performance on similar work
+      const requestType = normalizeString(request.typeOfWork || request.serviceCategory || '');
       const similarCompleted = historicalBookings.filter(booking => {
-        const bookingService = booking.serviceRequest?.typeOfWork;
-        return bookingService &&
-               bookingService.toLowerCase().includes(request.typeOfWork.toLowerCase().split(' ')[0]);
+        const bookingService = normalizeString(booking.serviceRequest?.typeOfWork || booking.serviceRequest?.serviceCategory || '');
+        return bookingService && requestType &&
+               (bookingService === requestType ||
+                bookingService.includes(requestType.split(' ')[0]) ||
+                requestType.includes(bookingService.split(' ')[0]));
       });
 
-      const collaborativeScore = similarCompleted.length > 0 ? 0.8 : 0.4;
-      const hybridScore = (contentScore * 0.7) + (collaborativeScore * 0.3);
+      // Enhanced collaborative score: reflects provider's historical performance
+      // 0.85+ if done similar work, 0.55 if new type, 0.3 if no history
+      let collaborativeScore = 0.3;
+      if (historicalBookings.length > 0) {
+        if (similarCompleted.length > 0) {
+          // Bonus for multiple similar completions
+          collaborativeScore = Math.min(0.95, 0.8 + (Math.min(similarCompleted.length / 5, 0.15)));
+        } else {
+          collaborativeScore = 0.55; // General experience but no similar work
+        }
+      }
+
+      // Hybrid scoring: 70% content-based (skill/occupation), 30% collaborative (performance)
+      const hybridScore = Math.min(1.0, (contentScore * 0.7) + (collaborativeScore * 0.3));
 
       return {
-        request: request.toObject(),
+        request,
         score: hybridScore,
         contentScore,
-        collaborativeScore
+        collaborativeScore,
+        similarWorkDone: similarCompleted.length,
+        matchStrength: contentScore > 0.75 ? 'high' : contentScore > 0.5 ? 'medium' : 'low'
       };
     });
 
-    // Sort and filter
-    const recommended = scoredRequests
-      .filter(item => item.score >= minScore)
+    // Sort by score (highest first), apply pagination with minimum score filter
+    const filtered = scoredRequests.filter(item => item.score >= minScore);
+    
+    const recommended = filtered
       .sort((a, b) => b.score - a.score)
-      .slice(0, limit)
+      .slice((page - 1) * limit, page * limit)
       .map(item => ({
         ...item.request,
-        recommendationScore: item.score,
-        matchReason: generateMatchReason(item, worker)
+        recommendationScore: parseFloat(item.score.toFixed(3)),
+        matchReason: generateDetailedMatchReason(item, worker),
+        contentScore: parseFloat(item.contentScore.toFixed(3)),
+        collaborativeScore: parseFloat(item.collaborativeScore.toFixed(3)),
+        matchStrength: item.matchStrength,
+        similarWorkCount: item.similarWorkDone
       }));
 
+    logger.info(`Recommended ${recommended.length} of ${filtered.length} matching requests to provider ${worker._id}`);
     return recommended;
   } catch (error) {
     logger.error('Error in getRecommendedServiceRequests:', error);
@@ -347,17 +701,35 @@ export const getRecommendedServiceRequests = async (worker, options = {}) => {
 };
 
 /**
- * Generate match reason for service request recommendation
+ * Generate detailed match reason explaining why request was recommended
  */
-const generateMatchReason = (item, worker) => {
+const generateDetailedMatchReason = (item, worker) => {
   const reasons = [];
 
-  if (item.contentScore > 0.7) {
-    reasons.push("Matches your skills");
+  if (item.contentScore > 0.8) {
+    reasons.push("Excellent skill match");
+  } else if (item.contentScore > 0.6) {
+    reasons.push("Good skill match");
+  } else if (item.contentScore > 0.4) {
+    reasons.push("Matches your profile");
   }
 
-  if (item.collaborativeScore > 0.7) {
-    reasons.push("Similar to your completed work");
+  if (item.collaborativeScore > 0.75) {
+    reasons.push("Proven experience on similar work");
+  } else if (item.similarWorkDone > 0) {
+    reasons.push("Experience with similar services");
+  }
+
+  if (worker.averageRating >= 4.5) {
+    reasons.push("Highly rated provider");
+  } else if (worker.averageRating >= 4.0) {
+    reasons.push("Well-rated provider");
+  }
+
+  if (worker.totalJobsCompleted >= 20) {
+    reasons.push("Experienced professional");
+  } else if (worker.totalJobsCompleted >= 5) {
+    reasons.push("Established track record");
   }
 
   return reasons.length > 0 ? reasons.join(", ") : "Good match for your profile";

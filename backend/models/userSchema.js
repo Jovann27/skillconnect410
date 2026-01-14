@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, required: true, enum: ["Community Member", "Service Provider", "Admin"], default: "Community Member" },
 
   // Service Provider specific fields
+  // Legacy skills field maintained for backwards compatibility
   skills: {
     type: [String],
     validate: {
@@ -30,6 +31,28 @@ const userSchema = new mongoose.Schema({
     },
     default: []
   },
+  
+  // New structured skills field with service type connections
+  skillsWithService: [{
+    skill: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Skill",
+      required: true
+    },
+    yearsOfExperience: {
+      type: Number,
+      default: 0
+    },
+    proficiency: {
+      type: String,
+      enum: ["Beginner", "Intermediate", "Advanced", "Expert"],
+      default: "Intermediate"
+    },
+    addedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   serviceTypes: {
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Service" }],
     validate: {
@@ -47,7 +70,7 @@ const userSchema = new mongoose.Schema({
   occupation: { type: String, default: "" },
   yearsExperience: { type: Number, default: 0 },
   totalJobsCompleted: { type: Number, default: 0 },
-  certificates: [{ type: mongoose.Schema.Types.ObjectId, ref: "Certificate" }],
+  certificates: [String],
   workProof: [{ type: mongoose.Schema.Types.ObjectId, ref: "WorkProof" }],
   profilePic: { type: String, default: "" },
   validId: { type: String, required: true },
@@ -104,6 +127,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.index({ skills: 1 });
+userSchema.index({ "skillsWithService.skill": 1 });
 
 // Text index for full-text search on service providers
 userSchema.index({

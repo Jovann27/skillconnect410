@@ -1,357 +1,285 @@
-import JobFair from "../models/jobFairSchema.js";
-import User from "../models/userSchema.js";
-import ServiceRequest from "../models/serviceRequest.js";
-import Booking from "../models/booking.js";
-import ErrorHandler from "../middlewares/error.js";
+1// adminController.js - Admin endpoints for data consistency operations
+
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
-import { sendNotification } from "../utils/socketNotify.js";
+import ErrorHandler from "../middlewares/error.js";
+import {
+  repairUserSkillSync,
+  rebuildAllUserRatings,
+  reconnectOrphanedSkills,
+  validateUserSkillConsistency
+} from "../utils/dataConsistency.js";
+import User from "../models/userSchema.js";
+import Skill from "../models/skillSchema.js";
+import Review from "../models/review.js";
+import Booking from "../models/booking.js";
+import ServiceRequest from "../models/serviceRequest.js";
 
-// Create Job Fair
-export const createJobFair = async (req, res) => {
-  try {
-    const { title, description, date, startTime, endTime, location } = req.body;
+// Pattern 7: Data Recovery Helpers
 
-    const jobfair = await JobFair.create({
-      title,
-      description,
-      date,
-      startTime,
-      endTime,
-      location,
-    });
-
-    res.status(201).json({ success: true, jobfair });
-  } catch (err) {
-    console.error("createJobFair error", err);
-    res.status(500).json({ success: false, message: err.message });
+// Admin endpoint for repairing user skill consistency
+export const adminRepairUserSkills = catchAsyncError(async (req, res, next) => {
+  // Only admin
+  if (req.user.role !== "Admin") {
+    return next(new ErrorHandler("Admin only", 403));
   }
-};
 
-// Get all service requests
-export const adminGetAllServiceRequests = async (req, res) => {
-  try {
-    const { skill, status, sort } = req.query;
+  const { userId } = req.params;
 
-    let filter = {};
-    // skill filter commented out
-
-    if (status) {
-      // normalize to capitalized enum
-      const normalized = status[0].toUpperCase() + status.slice(1).toLowerCase();
-      filter.status = normalized;
-    }
-
-    // Pagination
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    // Sorting
-    let sortOptions = { createdAt: -1 };
-    if (sort === 'oldest') {
-      sortOptions = { createdAt: 1 };
-    }
-
-    const requests = await ServiceRequest.find(filter)
-      .populate('requester', 'firstName lastName profilePic')
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(limit);
-
-    const totalRequests = await ServiceRequest.countDocuments(filter);
-    const totalPages = Math.ceil(totalRequests / limit);
-
-    res.json({
-      success: true,
-      count: totalRequests,
-      totalPages,
-      requests
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
-// Verify user
-export const verifyUser = catchAsyncError(async (req, res, next) => {
-  const { id } = req.params;
-
-  // Debug logging
-  console.log("verifyUser called with params:", { id });
-  console.log("req.admin:", req.admin);
-  console.log("req.headers.authorization:", req.headers.authorization);
-  console.log("req.cookies:", req.cookies);
-
-  // Validate request
-  if (!id) {
+  if (!userId) {
     return next(new ErrorHandler("User ID is required", 400));
   }
 
-  if (!req.admin || !req.admin._id) {
-    console.error("Admin authentication failed - req.admin is missing or invalid:", req.admin);
-    return next(new ErrorHandler("Admin authentication required", 401));
-  }
-
-  const user = await User.findById(id);
-
-  if (!user) return next(new ErrorHandler("User not found", 404));
-  if (user.verified) return next(new ErrorHandler("User is already verified", 400));
-
-  user.verified = true;
-  user.verifiedBy = req.admin._id; // Admin who verified the user
-  await user.save();
-
-  console.log(`User ${id} verified successfully by admin ${req.admin._id}`);
-
-  // Send notification to the user (won't fail if socket not available)
-  await sendNotification(
-    user._id,
-    "Account Verified",
-    "Your account has been verified by an administrator. You can now log in to the system.",
-    { type: "account-verified" }
-  );
-
-  res.status(200).json({
-    success: true,
-    message: `User (${user.firstName} ${user.lastName}) has been verified successfully`,
-    user
-  });
-});
-
-// Get all users
-export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password").sort({ createdAt: -1 });
-    res.json({ success: true, count: users.length, users });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+    const result = await repairUserSkillSync(userId);
+    res.status(200).json({
+      success: true,
+      message: `User skill sync repaired for user ${userId}`,
+      result
+    });
+  } catch (error) {
+    next(new ErrorHandler(`Repair failed: ${error.message}`, 500, { userId, error: error.message }));
   }
-};
-
-// Get service providers
-export const getServiceProviders = async (req, res) => {
-  try {
-    const workers = await User.find({ "role": "Service Provider" })
-      .select("firstName lastName skills availability profilePic createdAt");
-    res.json({ success: true, count: workers.length, workers });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
-// Approve Service Provider (set availability to Available)
-export const approveServiceProvider = catchAsyncError(async (req, res, next) => {
-  const { id } = req.params;
-  const user = await User.findById(id);
-
-  if (!user) return next(new ErrorHandler("User not found", 404));
-  if (user.role !== "Service Provider") return next(new ErrorHandler("User is not a Service Provider", 400));
-
-  user.availability = "Available"; // Set to available
-  await user.save();
-
-  res.status(200).json({
-    success: true,
-    message: `Service Provider (${user.firstName} ${user.lastName}) has been approved.`,
-    user
-  });
 });
 
-// Reject Service Provider (set availability to Not Available)
-export const rejectServiceProvider = catchAsyncError(async (req, res, next) => {
-  const { id } = req.params;
-  const { reason } = req.body;
-  const user = await User.findById(id);
-
-  if (!user) return next(new ErrorHandler("User not found", 404));
-  if (user.role !== "Service Provider") return next(new ErrorHandler("User is not a Service Provider", 400));
-
-  user.availability = "Not Available"; // Set to not available
-  await user.save();
-
-  let message = `Service Provider (${user.firstName} ${user.lastName}) has been rejected`;
-  if (reason) {
-    message += ` Reason: ${reason}`;
-  }
-
-  res.status(200).json({
-    success: true,
-    message,
-    user
-  });
-});
-
-// Get Service Providers
-export const getServiceProviderApplicants = catchAsyncError(async (req, res, next) => {
-  const providers = await User.find({ "role": "Service Provider" })
-    .select("-password")
-    .sort({ createdAt: -1 });
-
-  res.status(200).json({
-    success: true,
-    count: providers.length,
-    providers
-  });
-});
-
-//Ban User
-export const banUser = async (req, res) => {
-  const { id } = req.params;
-
-  if (!id) {
-    return res.status(400).json({ success: false, message: "User ID is required" });
+// Admin endpoint for rebuilding all user ratings
+export const adminRebuildAllRatings = catchAsyncError(async (req, res, next) => {
+  // Only admin
+  if (req.user.role !== "Admin") {
+    return next(new ErrorHandler("Admin only", 403));
   }
 
   try {
-    const user = await User.findById(id);
+    const fixed = await rebuildAllUserRatings();
+    res.status(200).json({
+      success: true,
+      message: `Rebuilt ratings for ${fixed} users`,
+      usersFixed: fixed
+    });
+  } catch (error) {
+    next(new ErrorHandler(`Rating rebuild failed: ${error.message}`, 500, { error: error.message }));
+  }
+});
 
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    if (user.role === "Admin") return res.status(403).json({ success: false, message: "Cannot ban another admin" });
-    if (user.banned) return res.status(400).json({ success: false, message: "User is already banned" });
+// Admin endpoint for reconnecting orphaned skills
+export const adminReconnectSkills = catchAsyncError(async (req, res, next) => {
+  // Only admin
+  if (req.user.role !== "Admin") {
+    return next(new ErrorHandler("Admin only", 403));
+  }
 
-    user.availability = "Not Available";
-    user.banned = true;
-    await user.save();
+  const { serviceTypeId } = req.params;
 
-    console.log(`User ${id} banned successfully`);
+  if (!serviceTypeId) {
+    return next(new ErrorHandler("Service Type ID is required", 400));
+  }
 
-    // Send notification to banned user (won't fail if socket not available)
-    await sendNotification(
-      user._id,
-      "Account Banned",
-      "Your account has been banned by an administrator. Please contact support for more information.",
-      { type: "account-banned" }
+  try {
+    const processed = await reconnectOrphanedSkills(serviceTypeId);
+    res.status(200).json({
+      success: true,
+      message: `Reconnected ${processed} skills in service type ${serviceTypeId}`,
+      skillsProcessed: processed
+    });
+  } catch (error) {
+    next(new ErrorHandler(`Skill reconnection failed: ${error.message}`, 500, {
+      serviceTypeId,
+      error: error.message
+    }));
+  }
+});
+
+// Admin endpoint for running comprehensive consistency check
+export const adminRunConsistencyCheck = catchAsyncError(async (req, res, next) => {
+  // Only admin
+  if (req.user.role !== "Admin") {
+    return next(new ErrorHandler("Admin only", 403));
+  }
+
+  const issues = {
+    skillSyncErrors: [],
+    invalidRatings: [],
+    orphanedSkills: [],
+    invalidBookings: [],
+    expiredRequests: []
+  };
+
+  try {
+    // Check 1: Skill sync issues
+    const users = await User.find({ role: "Service Provider" }).populate("skillsWithService.skill");
+    for (let user of users) {
+      if (!validateUserSkillConsistency(user)) {
+        issues.skillSyncErrors.push({
+          userId: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName
+        });
+      }
+    }
+
+    // Check 2: Invalid ratings
+    const ratingErrors = await User.find({
+      $or: [
+        { averageRating: { $lt: 0 } },
+        { averageRating: { $gt: 5 } },
+        { totalReviews: { $lt: 0 } }
+      ]
+    }).select("_id firstName lastName averageRating totalReviews");
+
+    issues.invalidRatings = ratingErrors.map(user => ({
+      userId: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      averageRating: user.averageRating,
+      totalReviews: user.totalReviews
+    }));
+
+    // Check 3: Orphaned skills
+    const orphanedSkills = await Skill.find({
+      serviceType: { $exists: false }
+    }).select("_id name");
+
+    issues.orphanedSkills = orphanedSkills.map(skill => ({
+      skillId: skill._id,
+      name: skill.name
+    }));
+
+    // Check 4: Invalid bookings
+    const invalidBookings = await Booking.find({
+      $and: [
+        { serviceRequest: null },
+        { serviceOffer: null }
+      ]
+    }).select("_id requester provider status");
+
+    issues.invalidBookings = invalidBookings.map(booking => ({
+      bookingId: booking._id,
+      requester: booking.requester,
+      provider: booking.provider,
+      status: booking.status
+    }));
+
+    // Check 5: Expired but active requests
+    const now = new Date();
+    const expiredRequests = await ServiceRequest.find({
+      expiresAt: { $lt: now },
+      status: { $in: ["Open", "Offered"] }
+    }).select("_id name status expiresAt");
+
+    issues.expiredRequests = expiredRequests.map(request => ({
+      requestId: request._id,
+      name: request.name,
+      status: request.status,
+      expiresAt: request.expiresAt
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Consistency check completed",
+      issues,
+      summary: {
+        skillSyncErrors: issues.skillSyncErrors.length,
+        invalidRatings: issues.invalidRatings.length,
+        orphanedSkills: issues.orphanedSkills.length,
+        invalidBookings: issues.invalidBookings.length,
+        expiredRequests: issues.expiredRequests.length
+      }
+    });
+
+  } catch (error) {
+    next(new ErrorHandler(`Consistency check failed: ${error.message}`, 500, { error: error.message }));
+  }
+});
+
+// Admin endpoint for fixing expired requests
+export const adminFixExpiredRequests = catchAsyncError(async (req, res, next) => {
+  // Only admin
+  if (req.user.role !== "Admin") {
+    return next(new ErrorHandler("Admin only", 403));
+  }
+
+  try {
+    const now = new Date();
+    const result = await ServiceRequest.updateMany(
+      {
+        expiresAt: { $lt: now },
+        status: { $in: ["Open", "Offered"] }
+      },
+      {
+        status: "Cancelled",
+        cancellationReason: "Expired automatically by system"
+      }
     );
 
     res.status(200).json({
       success: true,
-      message: `User (${user.firstName} ${user.lastName}) has been banned successfully.`,
-      user
+      message: `Fixed ${result.modifiedCount} expired requests`,
+      modifiedCount: result.modifiedCount
     });
   } catch (error) {
-    console.error("Error banning user:", error.message, error.stack);
-    return res.status(500).json({ success: false, message: `Failed to ban user: ${error.message}` });
+    next(new ErrorHandler(`Fix expired requests failed: ${error.message}`, 500, { error: error.message }));
   }
-};
-
-// Update user service profile
-export const updateUserServiceProfile = catchAsyncError(async (req, res, next) => {
-  const { id } = req.params;
-  const { services } = req.body;
-
-  const user = await User.findById(id);
-  if (!user) return next(new ErrorHandler("User not found", 404));
-
-  // Validate services array
-  if (!Array.isArray(services)) {
-    return next(new ErrorHandler("Services must be an array", 400));
-  }
-
-  // Validate each service object
-  for (const service of services) {
-    if (!service.name || typeof service.name !== 'string' || service.name.trim() === '') {
-      return next(new ErrorHandler("Each service must have a valid name", 400));
-    }
-    if (service.rate !== undefined && (typeof service.rate !== 'number' || service.rate < 0)) {
-      return next(new ErrorHandler("Service rate must be a positive number", 400));
-    }
-  }
-
-  // Update services array
-  user.services = services.map(service => ({
-    name: service.name.trim(),
-    rate: service.rate || 0,
-    description: service.description ? service.description.trim() : ''
-  }));
-
-  await user.save();
-
-  res.status(200).json({
-    success: true,
-    message: "User service profile updated successfully",
-    user: {
-      _id: user._id,
-      services: user.services
-    }
-  });
 });
 
-// Get dashboard metrics
-export const getDashboardMetrics = async (req, res) => {
+// Admin endpoint for bulk repair operations
+export const adminBulkRepair = catchAsyncError(async (req, res, next) => {
+  // Only admin
+  if (req.user.role !== "Admin") {
+    return next(new ErrorHandler("Admin only", 403));
+  }
+
+  const { operations } = req.body; // Array of operation types
+
+  if (!operations || !Array.isArray(operations)) {
+    return next(new ErrorHandler("Operations array is required", 400));
+  }
+
+  const results = {};
+
   try {
-    const totalUsers = await User.countDocuments();
-    const totalProviders = await User.countDocuments({ "role": "Service Provider" });
-    const activeBookings = await Booking.countDocuments();
-    const totalBookings = await Booking.countDocuments();
+    for (let operation of operations) {
+      switch (operation) {
+        case "rebuild-ratings":
+          results.rebuildRatings = await rebuildAllUserRatings();
+          break;
 
-    res.json({
-      success: true,
-      metrics: {
-        totalUsers,
-        totalProviders,
-        activeBookings,
-        totalBookings
+        case "fix-expired-requests":
+          const expiredResult = await ServiceRequest.updateMany(
+            {
+              expiresAt: { $lt: new Date() },
+              status: { $in: ["Open", "Offered"] }
+            },
+            {
+              status: "Cancelled",
+              cancellationReason: "Expired automatically by system"
+            }
+          );
+          results.fixExpiredRequests = expiredResult.modifiedCount;
+          break;
+
+        default:
+          return next(new ErrorHandler(`Unknown operation: ${operation}`, 400));
       }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Bulk repair operations completed",
+      results
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+
+  } catch (error) {
+    next(new ErrorHandler(`Bulk repair failed: ${error.message}`, 500, {
+      operations,
+      error: error.message
+    }));
   }
+});
+
+export default {
+  adminRepairUserSkills,
+  adminRebuildAllRatings,
+  adminReconnectSkills,
+  adminRunConsistencyCheck,
+  adminFixExpiredRequests,
+  adminBulkRepair
 };
-
-// Certificate and Work Proof features have been removed
-export const getPendingCertificates = catchAsyncError(async (req, res, next) => {
-  res.status(200).json({
-    success: true,
-    message: "Certificate verification feature has been removed",
-    count: 0,
-    certificates: []
-  });
-});
-
-export const verifyCertificate = catchAsyncError(async (req, res, next) => {
-  return next(new ErrorHandler("Certificate verification feature has been removed", 410));
-});
-
-export const rejectCertificate = catchAsyncError(async (req, res, next) => {
-  return next(new ErrorHandler("Certificate verification feature has been removed", 410));
-});
-
-export const getPendingWorkProof = catchAsyncError(async (req, res, next) => {
-  res.status(200).json({
-    success: true,
-    message: "Work proof verification feature has been removed",
-    count: 0,
-    workProofs: []
-  });
-});
-
-export const verifyWorkProof = catchAsyncError(async (req, res, next) => {
-  return next(new ErrorHandler("Work proof verification feature has been removed", 410));
-});
-
-export const rejectWorkProof = catchAsyncError(async (req, res, next) => {
-  return next(new ErrorHandler("Work proof verification feature has been removed", 410));
-});
-
-export const getProviderVerificationStatus = catchAsyncError(async (req, res, next) => {
-  const { providerId } = req.params;
-
-  const provider = await User.findById(providerId);
-  if (!provider) return next(new ErrorHandler("Provider not found", 404));
-
-  res.status(200).json({
-    success: true,
-    provider: {
-      _id: provider._id,
-      firstName: provider.firstName,
-      lastName: provider.lastName,
-      verified: provider.verified,
-      verificationDate: provider.verificationDate
-    },
-    message: "Certificate and work proof verification features have been removed"
-  });
-});

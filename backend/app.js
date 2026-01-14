@@ -26,6 +26,7 @@ import reviewRouter from "./routes/reviewRouter.js";
 import residentRouter from "./routes/residentRouter.js";
 import notificationRouter from "./routes/notificationRouter.js";
 import searchRouter from "./routes/searchRouter.js";
+import skillRouter from "./routes/skillRouter.js";
 
 import mvpRoutes from "./routes/mvpRoutes.js";
 
@@ -218,6 +219,7 @@ app.use("/api/v1/admin/auth", adminAuthRouter);
 app.use("/api/v1/admin", csrfProtection, adminFlowRouter);
 app.use("/api/v1/admin", csrfProtection, adminRouter);
 app.use("/api/v1/admin/residents", csrfProtection, residentRouter);
+app.use("/api/v1/skills", csrfProtection, skillRouter); // Skill management routes - CSRF protected
 app.use("/api/v1/contact", contactRoutes);
 app.use("/api/v1/settings", csrfProtection, settingsRouter);
 app.use("/api/v1/reports", csrfProtection, reportRoutes);

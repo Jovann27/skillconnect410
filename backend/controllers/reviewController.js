@@ -1,6 +1,7 @@
 import Review from "../models/review.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../middlewares/error.js";
+import { recalculateUserAverageRating } from "../utils/dataConsistency.js";
 
 // Get all reviews for a specific user (reviewee)
 export const getUserReviews = catchAsyncError(async (req, res, next) => {
@@ -53,7 +54,7 @@ export const getUserReviews = catchAsyncError(async (req, res, next) => {
   });
 });
 
-// Create a new review
+// Create review & recalculate rating - Pattern 3: Aggregate Recalculation
 export const createReview = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 
@@ -93,7 +94,7 @@ export const createReview = catchAsyncError(async (req, res, next) => {
   }
 
   // Check if booking is completed
-  if (booking.status !== "Complete" && booking.status !== "Completed") {
+  if (booking.status !== "Completed") {
     return next(new ErrorHandler("Can only review completed bookings", 400));
   }
 
@@ -124,6 +125,14 @@ export const createReview = catchAsyncError(async (req, res, next) => {
     rating: ratingNum,
     comments: comments ? comments.trim() : ""
   });
+
+  // NOW: Recalculate reviewee's aggregate
+  try {
+    await recalculateUserAverageRating(revieweeId);
+  } catch (error) {
+    console.error("Error recalculating rating after review creation:", error);
+    // Don't fail the review creation if rating recalculation fails
+  }
 
   res.status(201).json({
     success: true,

@@ -230,7 +230,7 @@ const ManageProfile = () => {
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm font-medium text-gray-700">Services</span>
-                  <strong className="text-sm text-gray-900">{user.services?.length ? `${user.services.length} Listed` : 'Not set'}</strong>
+                  <strong className="text-sm text-gray-900">{user?.services?.length ? `${user?.services?.length} Listed` : 'Not set'}</strong>
                 </div>
               </div>
 

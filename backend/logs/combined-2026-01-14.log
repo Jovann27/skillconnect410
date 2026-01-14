@@ -1,0 +1,435 @@
+{"level":"info","message":"Client Connected: tSJbw5-3EL0ruwKOAAAG, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T03:36:43.951Z"}
+{"level":"info","message":"Client Connected: sVldmtxJg6AtL3LzAAAJ, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T03:36:54.412Z"}
+{"level":"info","message":"Client Connected: MZxV7R77a6pAWGgMAAAL, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T03:38:21.132Z"}
+{"level":"info","message":"Client Connected: LBNNWOpKysWA0dseAAAN, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T03:38:48.885Z"}
+{"level":"info","message":"Client Connected: -x-hil6M7ycXMIWRAAAQ, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T03:39:52.454Z"}
+{"level":"info","message":"Client Connected: k1a2ooKMgClpk-XfAAAT, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T03:41:45.860Z"}
+{"level":"info","message":"Client Connected: XpCAc1vX2s5Mte2sAAAW, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T03:45:16.745Z"}
+{"level":"info","message":"Client Connected: WcUx5Qt2MIDg3zLmAAAZ, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T03:46:05.576Z"}
+{"level":"info","message":"Client Connected: CZFCu6CCk9PNFa9DAAAb, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T04:00:27.425Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:05:38.592Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:05:38.595Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:05:38.758Z"}
+{"level":"info","message":"Client Connected: AZIn8GPAzf_Mf0mnAAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T04:05:41.417Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:06:45.641Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:06:45.649Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:06:45.785Z"}
+{"level":"info","message":"Client Connected: U7naiLv1yMDuUIS2AAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T04:06:46.028Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:07:15.016Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:07:15.022Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:07:15.157Z"}
+{"level":"info","message":"Client Connected: -DtJytxej54jFzlNAAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T04:07:16.332Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:07:26.917Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:07:26.920Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:07:27.049Z"}
+{"level":"info","message":"Client Connected: z4jYLRj_ZROU766dAAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T04:07:30.510Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:07:39.202Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:07:39.206Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:07:39.353Z"}
+{"level":"info","message":"Client Connected: xbob90BdwpIKesGeAAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T04:07:39.638Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:08:19.763Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:08:19.767Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:08:19.888Z"}
+{"level":"info","message":"Client Connected: pYllrYrTXF1y9WaCAAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T04:08:23.353Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:08:54.711Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:08:54.714Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:08:54.816Z"}
+{"level":"info","message":"Client Connected: xtQkzN2RKHoeZFJRAAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T04:08:57.273Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:09:22.126Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:09:22.135Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:09:22.264Z"}
+{"level":"info","message":"Client Connected: 1dcHnd-oAja-0vS7AAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T04:09:22.914Z"}
+{"level":"info","message":"Client Connected: q1M0C1LRr-504cREAAAD, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:09:41.887Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:09:42.146Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:09:42.272Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:09:42.424Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:09:42.538Z"}
+{"level":"info","message":"Client Connected: 83GVMshgjTee0XTGAAAF, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:15:04.858Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:15:05.187Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:15:05.638Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:15:06.040Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:15:06.263Z"}
+{"level":"info","message":"Client Connected: VALzDLQEJVtBVn0yAAAI, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:15:15.362Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:15:15.727Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:15:16.130Z"}
+{"level":"info","message":"Client Connected: uhD0YOgb7BG-OHH5AAAL, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:15:34.160Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:15:34.359Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:15:34.746Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:16:55.616Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:16:56.001Z"}
+{"level":"info","message":"Client Connected: ymChQwXv8c46qW3DAAAO, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:17:12.795Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:17:12.978Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:17:13.201Z"}
+{"level":"info","message":"Client Connected: dejuY-Vrn0hn65_nAAAR, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:17:15.251Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:17:15.423Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59 with patterns: pipe installation, toilet installation, leak repair","timestamp":"2026-01-14T04:17:15.586Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:20:49.084Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:20:49.087Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:20:49.188Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:20:59.864Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:20:59.868Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:20:59.965Z"}
+{"level":"info","message":"Client Connected: lnSHWAWKSCnRn90qAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:21:02.338Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:28:03.722Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:28:03.728Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:28:03.863Z"}
+{"level":"info","message":"Client Connected: GNAzDPMWXd5UCjIYAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:28:06.375Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:28:10.664Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:28:10.675Z"}
+{"level":"info","message":"Client Connected: tzD0_PB137q09UHmAAAE, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:28:52.716Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:28:53.033Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:28:53.101Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:28:53.498Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:28:53.565Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:30:52.454Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:30:52.804Z"}
+{"level":"info","message":"Client Connected: I6w5twNt-QRg_JjfAAAH, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:30:53.708Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:30:54.148Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:30:54.279Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:31:21.038Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:31:21.163Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:31:21.443Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:31:21.489Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:31:21.713Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:31:21.853Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:31:21.985Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:31:22.004Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:33:14.559Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:33:14.561Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:37:42.673Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:37:42.719Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:37:42.904Z"}
+{"level":"info","message":"Client Connected: Eu4F7TkXUx2z5No5AAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:37:44.343Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:40:14.519Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:40:14.533Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:40:14.667Z"}
+{"level":"info","message":"Client Connected: 6_YoGM-8vw-z-bPwAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:40:14.918Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:44:36.322Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:44:36.325Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:44:36.517Z"}
+{"level":"info","message":"Client Connected: axm_CWXs2dDG2uVzAAAC, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:45:47.107Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:45:48.222Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:45:48.450Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:45:48.765Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:45:48.806Z"}
+{"level":"info","message":"Client Connected: t-3CfI2GH-CdkIsaAAAF, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:46:02.079Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:46:02.402Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:46:02.526Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:46:02.922Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:46:02.998Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:48:14.007Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:48:14.010Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:48:14.128Z"}
+{"level":"info","message":"Client Connected: JONev0-anpxygQfIAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:48:16.421Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:52:02.616Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:52:04.145Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:52:05.767Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:52:06.419Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:52:08.406Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:52:09.173Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:52:10.903Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:52:11.364Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:53:55.248Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:53:55.253Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:53:55.378Z"}
+{"level":"info","message":"Client Connected: zpw_ncn4KxZfT6qzAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:53:55.563Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:54:18.424Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:54:18.452Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:54:51.440Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:54:51.443Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:55:24.245Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:55:24.250Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:55:24.405Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:55:24.765Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:55:24.771Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:55:25.405Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:55:25.446Z"}
+{"level":"info","message":"Client Connected: Hg11aueeH6rXunUrAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:55:27.610Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:55:59.913Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:55:59.930Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:57:27.237Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:57:27.265Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T04:57:27.446Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T04:57:27.870Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T04:57:27.876Z"}
+{"level":"info","message":"Client Connected: RDlAJ1b604r6IsW6AAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:57:32.336Z"}
+{"level":"info","message":"Client Connected: TvNwah1HvWGvEavoAAAE, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T04:59:11.543Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:59:11.799Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:59:11.829Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T04:59:11.937Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T04:59:11.959Z"}
+{"level":"info","message":"Client Connected: GbGfg0OXscUebRSzAAAG, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:01:53.238Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:01:53.403Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:01:53.442Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:01:53.561Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:01:53.591Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:01:53.680Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:01:53.712Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:01:53.841Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:01:53.859Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:06:48.343Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:06:48.348Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:06:48.496Z"}
+{"level":"info","message":"Client Connected: RoVlAoMaM-v_3EytAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:06:48.683Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:06:48.908Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:06:48.911Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:07:07.679Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:07:07.693Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:07:07.841Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:07:07.890Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:07:07.911Z"}
+{"level":"info","message":"Client Connected: VjgtApuHDqkApxfAAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:07:10.343Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:07:25.946Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:07:25.951Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:07:26.061Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:07:26.279Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:07:26.287Z"}
+{"level":"info","message":"Client Connected: BsD0YoC9hIcsmygxAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:07:31.389Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:07:50.709Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:07:50.712Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:07:50.859Z"}
+{"level":"info","message":"Client Connected: gywtbtgE5_AxDlyvAAAC, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:07:51.148Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:07:51.267Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:07:51.358Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:07:51.276Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:07:51.462Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:07:51.651Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:07:51.711Z"}
+{"level":"info","message":"Client Connected: GQxoQf9qLj8iOrNbAAAF, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:10:04.731Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:10:04.895Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:10:04.961Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:10:05.202Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:10:05.231Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:11:23.381Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:11:23.426Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:11:23.563Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:11:23.613Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:11:23.575Z"}
+{"level":"info","message":"Client Connected: uVCweM3QtUMaWvqyAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:11:27.730Z"}
+{"level":"info","message":"Client Connected: lzwh0vr3f-VGWkF8AAAE, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:12:03.090Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:12:03.321Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:12:03.388Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:12:03.507Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:12:03.539Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:14:24.746Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:14:24.751Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:14:24.874Z"}
+{"level":"info","message":"Client Connected: cEhohaj0VEs3LOS2AAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:14:25.547Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:14:25.548Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:14:25.551Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:14:35.124Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:14:35.168Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:14:35.164Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:14:35.246Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:14:35.339Z"}
+{"level":"info","message":"Client Connected: 6e9rrI0IX8pmgP7wAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:14:35.611Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:15:09.653Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:15:09.693Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:15:09.672Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:15:09.704Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:15:09.837Z"}
+{"level":"info","message":"Client Connected: SgjJyjRNHq4381WcAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:15:10.423Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:15:40.735Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:15:40.741Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:15:41.000Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:15:41.032Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:15:41.042Z"}
+{"level":"info","message":"Client Connected: SqU69_ErDXdI60LpAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:15:43.338Z"}
+{"level":"info","message":"Querying service requests for provider 693bca65b9445a1d6a4a5a59 with 4 patterns","timestamp":"2026-01-14T05:15:46.205Z"}
+{"level":"info","message":"Found 2 total service requests for provider","timestamp":"2026-01-14T05:15:46.298Z"}
+{"level":"info","message":"Recommended 2 of 2 matching requests to provider 693bca65b9445a1d6a4a5a59","timestamp":"2026-01-14T05:15:46.305Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:16:06.311Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:16:06.329Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:16:06.410Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:16:06.448Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:16:06.417Z"}
+{"level":"info","message":"Client Connected: qMWL1Fv_44QHyv-OAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:16:06.636Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:16:16.816Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:16:16.825Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:16:17.127Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:16:17.176Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:16:17.226Z"}
+{"level":"info","message":"Client Connected: VbVpkXwJkN8vP8YPAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:16:17.346Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:16:31.454Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:16:31.480Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:16:31.458Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:16:31.498Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:16:31.576Z"}
+{"level":"info","message":"Client Connected: 6cJDa6B2pWEv5DghAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:16:31.897Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:16:47.840Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:16:47.854Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:16:47.968Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:16:48.187Z"}
+{"level":"info","message":"Client Connected: EdY5lFCBuOKqmDl2AAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:16:48.247Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:16:48.201Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:17:03.542Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:17:03.559Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:17:03.723Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:17:03.847Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:17:03.855Z"}
+{"level":"info","message":"Client Connected: OcAUXy9JsepFFFweAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:17:06.326Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:17:30.580Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:17:30.587Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:17:30.584Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:17:30.610Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:17:30.699Z"}
+{"level":"info","message":"Client Connected: Uu3itqMqBNfMB6L-AAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:17:31.069Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:17:41.827Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:17:41.840Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:17:41.984Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:17:42.060Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:17:42.070Z"}
+{"level":"info","message":"Client Connected: NhuPtyWFlGn6o2zcAAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:17:42.177Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:18:03.466Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:18:03.469Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:18:36.567Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:18:36.571Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:18:36.618Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:18:36.632Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:18:36.718Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:18:54.792Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:18:55.235Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:18:55.020Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:18:55.524Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:18:55.453Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:20:15.903Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:20:15.906Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:20:16.003Z"}
+{"level":"info","message":"Client Connected: Av9C2iH-3iQN74O5AAAB, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:20:23.188Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 694593626941f140a8d19c59 (jo casiano), Role: Service Provider","timestamp":"2026-01-14T05:20:23.528Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T05:20:23.531Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T05:20:23.533Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"pipe installation\",\"toilet installation\",\"leak repair\"], occupation=","timestamp":"2026-01-14T05:20:23.592Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:20:23.597Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:20:23.655Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T05:20:23.658Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 694593626941f140a8d19c59 (jo casiano), Role: Service Provider","timestamp":"2026-01-14T05:20:23.773Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T05:20:23.777Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T05:20:23.779Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"pipe installation\",\"toilet installation\",\"leak repair\"], occupation=","timestamp":"2026-01-14T05:20:23.827Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:20:23.831Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:20:23.848Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T05:20:23.850Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 694593626941f140a8d19c59 (jo casiano), Role: Service Provider","timestamp":"2026-01-14T05:20:23.957Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T05:20:23.959Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T05:20:23.961Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"pipe installation\",\"toilet installation\",\"leak repair\"], occupation=","timestamp":"2026-01-14T05:20:23.999Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:20:24.002Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:20:24.046Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T05:20:24.049Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 694593626941f140a8d19c59 (jo casiano), Role: Service Provider","timestamp":"2026-01-14T05:20:24.137Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T05:20:24.139Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T05:20:24.140Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"pipe installation\",\"toilet installation\",\"leak repair\"], occupation=","timestamp":"2026-01-14T05:20:24.159Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:20:24.161Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:20:24.198Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T05:20:24.200Z"}
+{"level":"info","message":"Client Connected: 1pRN1BF5mX-vQ-GHAAAE, User: 694593626941f140a8d19c59","timestamp":"2026-01-14T05:21:36.209Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 694593626941f140a8d19c59 (jo casiano), Role: Service Provider","timestamp":"2026-01-14T05:21:36.526Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T05:21:36.530Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T05:21:36.537Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"pipe installation\",\"toilet installation\",\"leak repair\"], occupation=","timestamp":"2026-01-14T05:21:36.572Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:21:36.575Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:21:36.590Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T05:21:36.595Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 694593626941f140a8d19c59 (jo casiano), Role: Service Provider","timestamp":"2026-01-14T05:21:36.785Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T05:21:36.787Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T05:21:36.789Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"pipe installation\",\"toilet installation\",\"leak repair\"], occupation=","timestamp":"2026-01-14T05:21:36.837Z"}
+{"level":"info","message":"Querying service requests for provider 694593626941f140a8d19c59 with 3 patterns","timestamp":"2026-01-14T05:21:36.839Z"}
+{"level":"info","message":"No service requests found for provider 694593626941f140a8d19c59","timestamp":"2026-01-14T05:21:36.851Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T05:21:36.855Z"}
+{"level":"info","message":"Client Connected: ick_oaBRSw10gq8cAAAG, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T05:24:55.278Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:25:37.789Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:25:37.794Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:25:37.967Z"}
+{"level":"info","message":"Client Connected: FZhxkpedbXXdxIVZAAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T05:25:38.672Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:25:53.085Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:25:53.090Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:25:53.256Z"}
+{"level":"info","message":"Client Connected: O1D8djl1DwJpa2cKAAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T05:25:53.530Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:26:07.272Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:26:07.328Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:26:07.544Z"}
+{"level":"info","message":"Client Connected: 5DzAT7xgeYzkxsg6AAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T05:26:08.403Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:28:01.193Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:28:01.198Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:28:01.368Z"}
+{"level":"info","message":"Client Connected: MiXLET6_-GXCOUv8AAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T05:28:01.619Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:28:11.347Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:28:11.353Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T05:29:20.556Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T05:29:20.560Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T05:29:20.699Z"}
+{"level":"info","message":"Client Connected: qufrdIflJy2lTjTJAAAB, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T05:31:03.114Z"}
+{"level":"info","message":"Client Connected: t7GmGYxPxCVIB2YWAAAE, User: 69490fbf77874954bb9d2d24","timestamp":"2026-01-14T05:31:24.893Z"}
+{"level":"info","message":"Cleared existing data","timestamp":"2026-01-14T05:32:43.577Z"}
+{"level":"info","message":"Admin created successfully.","timestamp":"2026-01-14T05:32:44.124Z"}
+{"level":"info","message":"50 settings created","timestamp":"2026-01-14T05:32:44.358Z"}
+{"level":"info","message":"50 help requests created","timestamp":"2026-01-14T05:32:44.459Z"}
+{"level":"info","message":"50 job fairs created","timestamp":"2026-01-14T05:32:44.507Z"}
+{"level":"info","message":"50 residents created","timestamp":"2026-01-14T05:32:44.592Z"}
+{"level":"info","message":"Cleared existing data","timestamp":"2026-01-14T05:41:59.913Z"}
+{"level":"info","message":"Admin created successfully.","timestamp":"2026-01-14T05:42:00.356Z"}
+{"level":"info","message":"50 settings created","timestamp":"2026-01-14T05:42:00.561Z"}
+{"level":"info","message":"50 help requests created","timestamp":"2026-01-14T05:42:00.586Z"}
+{"level":"info","message":"50 job fairs created","timestamp":"2026-01-14T05:42:00.614Z"}
+{"level":"info","message":"50 residents created","timestamp":"2026-01-14T05:42:00.639Z"}
+{"level":"info","message":"60 comprehensive services created","timestamp":"2026-01-14T05:42:00.703Z"}
+{"level":"info","message":"Cleared existing data","timestamp":"2026-01-14T05:46:12.269Z"}
+{"level":"info","message":"Admin already exists, skipping admin creation.","timestamp":"2026-01-14T05:46:12.286Z"}
+{"level":"info","message":"50 settings created","timestamp":"2026-01-14T05:46:12.460Z"}
+{"level":"info","message":"50 help requests created","timestamp":"2026-01-14T05:46:12.488Z"}
+{"level":"info","message":"50 job fairs created","timestamp":"2026-01-14T05:46:12.515Z"}
+{"level":"info","message":"50 residents created","timestamp":"2026-01-14T05:46:12.538Z"}
+{"level":"info","message":"60 comprehensive services created","timestamp":"2026-01-14T05:46:12.569Z"}
+{"level":"info","message":"Cleared existing data","timestamp":"2026-01-14T06:15:13.155Z"}
+{"level":"info","message":"Admin created successfully.","timestamp":"2026-01-14T06:15:13.378Z"}
+{"level":"info","message":"50 settings created","timestamp":"2026-01-14T06:15:13.510Z"}
+{"level":"info","message":"50 help requests created","timestamp":"2026-01-14T06:15:13.532Z"}
+{"level":"info","message":"50 job fairs created","timestamp":"2026-01-14T06:15:13.561Z"}
+{"level":"info","message":"50 residents created","timestamp":"2026-01-14T06:15:13.583Z"}
+{"level":"info","message":"60 comprehensive services created","timestamp":"2026-01-14T06:15:13.618Z"}
+{"level":"info","message":"50 users created","timestamp":"2026-01-14T06:15:20.215Z"}
+{"level":"info","message":"Cleared existing data","timestamp":"2026-01-14T06:19:48.720Z"}
+{"level":"info","message":"Admin already exists, skipping admin creation.","timestamp":"2026-01-14T06:19:48.737Z"}
+{"level":"info","message":"50 settings created","timestamp":"2026-01-14T06:19:48.874Z"}
+{"level":"info","message":"50 help requests created","timestamp":"2026-01-14T06:19:48.895Z"}
+{"level":"info","message":"50 job fairs created","timestamp":"2026-01-14T06:19:48.920Z"}
+{"level":"info","message":"50 residents created","timestamp":"2026-01-14T06:19:48.953Z"}
+{"level":"info","message":"60 comprehensive services created","timestamp":"2026-01-14T06:19:48.990Z"}
+{"level":"info","message":"50 users created","timestamp":"2026-01-14T06:19:56.435Z"}
+{"level":"info","message":"50 service requests created","timestamp":"2026-01-14T06:19:56.496Z"}
+{"level":"info","message":"50 bookings created","timestamp":"2026-01-14T06:19:56.562Z"}
+{"level":"info","message":"Cleared existing data","timestamp":"2026-01-14T06:21:31.748Z"}
+{"level":"info","message":"Admin created successfully.","timestamp":"2026-01-14T06:21:32.136Z"}
+{"level":"info","message":"50 settings created","timestamp":"2026-01-14T06:21:32.969Z"}
+{"level":"info","message":"50 help requests created","timestamp":"2026-01-14T06:21:33.042Z"}
+{"level":"info","message":"50 job fairs created","timestamp":"2026-01-14T06:21:33.113Z"}
+{"level":"info","message":"50 residents created","timestamp":"2026-01-14T06:21:33.171Z"}
+{"level":"info","message":"60 comprehensive services created","timestamp":"2026-01-14T06:21:33.266Z"}
+{"level":"info","message":"50 users created","timestamp":"2026-01-14T06:21:41.362Z"}
+{"level":"info","message":"50 service requests created","timestamp":"2026-01-14T06:21:41.471Z"}
+{"level":"info","message":"50 bookings created","timestamp":"2026-01-14T06:21:41.532Z"}
+{"level":"info","message":"50 reviews created","timestamp":"2026-01-14T06:21:41.641Z"}
+{"level":"info","message":"50 reports created","timestamp":"2026-01-14T06:21:41.664Z"}
+{"level":"info","message":"50 notifications created","timestamp":"2026-01-14T06:21:41.700Z"}
+{"level":"info","message":"50 verification appointments created","timestamp":"2026-01-14T06:21:42.092Z"}
+{"level":"info","message":"50 chats created","timestamp":"2026-01-14T06:21:42.125Z"}
+{"level":"info","message":"Seeding completed successfully!","timestamp":"2026-01-14T06:21:42.602Z"}
+{"level":"info","message":"Cleared existing data","timestamp":"2026-01-14T06:23:24.622Z"}
+{"level":"info","message":"Admin already exists, skipping admin creation.","timestamp":"2026-01-14T06:23:24.637Z"}
+{"level":"info","message":"50 settings created","timestamp":"2026-01-14T06:23:24.775Z"}
+{"level":"info","message":"50 help requests created","timestamp":"2026-01-14T06:23:24.792Z"}
+{"level":"info","message":"50 job fairs created","timestamp":"2026-01-14T06:23:24.810Z"}
+{"level":"info","message":"50 residents created","timestamp":"2026-01-14T06:23:24.826Z"}
+{"level":"info","message":"60 comprehensive services created","timestamp":"2026-01-14T06:23:24.860Z"}
+{"level":"info","message":"50 users created","timestamp":"2026-01-14T06:23:30.309Z"}
+{"level":"info","message":"50 service requests created","timestamp":"2026-01-14T06:23:30.334Z"}
+{"level":"info","message":"50 bookings created","timestamp":"2026-01-14T06:23:30.358Z"}
+{"level":"info","message":"50 reviews created","timestamp":"2026-01-14T06:23:30.381Z"}
+{"level":"info","message":"50 reports created","timestamp":"2026-01-14T06:23:30.397Z"}
+{"level":"info","message":"50 notifications created","timestamp":"2026-01-14T06:23:30.423Z"}
+{"level":"info","message":"50 verification appointments created","timestamp":"2026-01-14T06:23:30.631Z"}
+{"level":"info","message":"50 chats created","timestamp":"2026-01-14T06:23:30.660Z"}
+{"level":"info","message":"Seeding completed successfully!","timestamp":"2026-01-14T06:23:31.001Z"}

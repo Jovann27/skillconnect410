@@ -358,12 +358,9 @@ const ChatIcon = () => {
 
   const fetchMessages = useCallback(async (appointmentId) => {
     try {
-      // Fetch chat history and filter for this appointment
-      const response = await api.get('/user/chat-history');
-      const appointmentChat = response.data.chatHistory?.find(
-        chat => chat.appointmentId.toString() === appointmentId.toString()
-      );
-      const chatMessages = appointmentChat?.messages || [];
+      // Fetch chat history for this specific appointment
+      const response = await api.get(`/user/chat-history?appointmentId=${appointmentId}`);
+      const chatMessages = response.data.chatHistory || [];
       setMessages(chatMessages);
       // Mark messages as seen
       if (chatMessages.length > 0) {
@@ -380,11 +377,12 @@ const ChatIcon = () => {
   }, [scrollToBottom]);
 
   const openChat = useCallback(async (chat, specificAppointmentId = null) => {
-    const appointmentId = specificAppointmentId || chat.appointmentId;
+    const appointmentId = specificAppointmentId || chat.appointments?.[0] || chat.appointmentId;
+
     let selectedChatData = { ...chat, appointmentId };
 
-    // Fetch latest booking details to ensure accurate status
     if (appointmentId) {
+      // Fetch latest booking details to ensure accurate status
       try {
         const booking = await fetchBookingDetails(appointmentId);
         if (booking) {
@@ -400,7 +398,12 @@ const ChatIcon = () => {
     setSelectedChat(selectedChatData);
     setView('chat');
     setError(null);
-    fetchMessages(appointmentId);
+
+    if (appointmentId) {
+      fetchMessages(appointmentId);
+    } else {
+      setMessages([]); // No messages for new provider chats
+    }
   }, [user, fetchMessages]);
 
   // Effect to handle opening chat from external trigger
@@ -546,18 +549,19 @@ const ChatIcon = () => {
 
       // If no appointment exists, create a service request first
       if (!appointmentId) {
-        // Create a service request with the message as inquiry
-        const serviceRequestData = {
-          targetProvider: selectedChat.otherUser._id,
-          name: `Inquiry: ${newMessage.trim().substring(0, 50)}${newMessage.trim().length > 50 ? '...' : ''}`,
-          address: user.address || 'Not specified',
-          phone: user.phone || 'Not provided',
-          typeOfWork: 'General Inquiry',
-          preferredDate: null,
-          time: '09:00', // Default time
-          budget: 0, // Inquiry, no budget set yet
-          notes: `Inquiry from ${user.firstName} ${user.lastName}: ${newMessage.trim()}`
-        };
+      // Create a service request with the message as inquiry
+      const sanitizedMessage = newMessage.trim().replace(/[^a-zA-Z0-9\s\-_.]/g, '').substring(0, 50);
+      const serviceRequestData = {
+        targetProvider: selectedChat.otherUser._id,
+        name: `Inquiry - ${sanitizedMessage}${newMessage.trim().length > 50 ? '...' : ''}`,
+        address: user.address || 'Not specified',
+        phone: user.phone || 'Not provided',
+        typeOfWork: 'General Inquiry',
+        preferredDate: null,
+        time: '09:00', // Default time
+        budget: 0, // Inquiry, no budget set yet
+        notes: `Inquiry from ${user.firstName} ${user.lastName}: ${newMessage.trim()}`
+      };
 
         const requestResponse = await api.post('/user/post-service-request', serviceRequestData);
         if (requestResponse.data.success) {
@@ -918,7 +922,7 @@ const ChatIcon = () => {
                   </div>
                   {tokenType === 'user' && chatList.map((chat) => (
                     <div
-                      key={chat.appointmentId}
+                      key={chat.otherUser._id}
                       className={chatIconClasses.chatItem}
                       onClick={() => openChat(chat)}
                     >
@@ -940,8 +944,8 @@ const ChatIcon = () => {
                           <p className={chatIconClasses.noMessages}>No messages yet</p>
                         )}
                       </div>
-                      {unreadCounts[chat.appointmentId] > 0 && (
-                        <span className={chatIconClasses.unreadBadge}>{unreadCounts[chat.appointmentId]}</span>
+                      {unreadCounts[chat.appointments?.[0]] > 0 && (
+                        <span className={chatIconClasses.unreadBadge}>{unreadCounts[chat.appointments?.[0]]}</span>
                       )}
                     </div>
                   ))}
@@ -952,9 +956,9 @@ const ChatIcon = () => {
                   {error && <p className={chatIconClasses.error}>{error}</p>}
 
                   <div className={chatIconClasses.messagesContainerInner}>
-                  {messages.map((msg) => (
+                  {messages.map((msg, index) => (
                     <div
-                      key={msg.id || msg._id}
+                      key={msg._id || msg.id || `msg-${index}`}
                       className={`${chatIconClasses.messageWrapper} ${msg.sender._id === user._id ? chatIconClasses.messageWrapperOwn : ''}`}
                     >
                       <div className={chatIconClasses.messageTimestamp}>

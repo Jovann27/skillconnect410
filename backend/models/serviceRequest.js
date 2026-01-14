@@ -7,7 +7,7 @@ const serviceRequestSchema = new mongoose.Schema({
   phone: { type: String },
   typeOfWork: { type: String, required: true },
   preferredDate: { type: Date },
-  time: { type: String, required: true, match: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/ },
+  time: { type: String, required: true, match: /^([01]?[0-9]|1[0-2]):[0-5][0-9] (AM|PM)$/i },
   minBudget: { type: Number, default: 0 },
   maxBudget: { type: Number, default: 0 },
   notes: { type: String, default: "" },
