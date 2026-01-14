@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import CreateServiceRequest from "./CreateServiceRequest";
 import { FaStar, FaMapMarkerAlt, FaPhone, FaEnvelope, FaCheckCircle, FaTimes, FaUser, FaBriefcase, FaTrophy, FaUsers, FaClock, FaHandshake } from "react-icons/fa";
 
-const ProviderProfileModal = ({ providerId, onClose, onOpenChat }) => {
+const ProviderProfileModal = ({ providerId, onClose, onOpenChat, hideRequestService = false }) => {
   const navigate = useNavigate();
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,18 +22,13 @@ const ProviderProfileModal = ({ providerId, onClose, onOpenChat }) => {
     try {
       setLoading(true);
 
-      // Get provider basic info (we already have this from the dashboard)
-      const providerResponse = await api.get('/user/service-providers');
+      // Get provider details using the dedicated endpoint
+      const providerResponse = await api.get(`/user/provider-profile/${providerId}`);
       if (providerResponse.data.success) {
-        const foundProvider = providerResponse.data.workers.find(p => p._id === providerId);
-        if (foundProvider) {
-          setProvider(foundProvider);
-        }
+        setProvider(providerResponse.data.provider);
+      } else {
+        throw new Error("Provider not found");
       }
-
-      // Get provider reviews
-      // Note: In a real implementation, you'd have a dedicated endpoint for provider reviews
-      // For now, we'll show mock review data or use what's available
 
     } catch (error) {
       console.error("Error fetching provider details:", error);
@@ -288,16 +283,18 @@ const ProviderProfileModal = ({ providerId, onClose, onOpenChat }) => {
               <FaEnvelope className="mr-2" />
               Message Provider
             </button>
-            <button
-              onClick={() => {
-                // Open create service request modal
-                setShowCreateRequest(true);
-              }}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center"
-            >
-              <FaHandshake className="mr-2" />
-              Request Service
-            </button>
+            {!hideRequestService && (
+              <button
+                onClick={() => {
+                  // Open create service request modal
+                  setShowCreateRequest(true);
+                }}
+                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center"
+              >
+                <FaHandshake className="mr-2" />
+                Request Service
+              </button>
+            )}
           </div>
         </div>
       </div>

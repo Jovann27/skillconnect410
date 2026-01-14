@@ -77,8 +77,8 @@ const ClientDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
 
-  // Service requests state for clients
-  const [myRequests, setMyRequests] = useState([]);
+  // All user requests (comprehensive view)
+  const [allRequests, setAllRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(false);
 
   // Job portal specific features
@@ -98,7 +98,7 @@ const ClientDashboard = () => {
     if (activeTab === 'applications') {
       fetchApplications();
     } else if (activeTab === 'requests') {
-      fetchMyRequests();
+      fetchAllUserRequests();
       // Fetch applications after a short delay to ensure requests are loaded
       setTimeout(() => fetchApplications(), 100);
     }
@@ -106,10 +106,10 @@ const ClientDashboard = () => {
 
   // Also refresh applications when switching to requests tab
   useEffect(() => {
-    if (activeTab === 'requests' && myRequests.length > 0) {
+    if (activeTab === 'requests' && allRequests.length > 0) {
       fetchApplications();
     }
-  }, [myRequests.length]);
+  }, [allRequests.length]);
 
   useEffect(() => {
     applyFilters();
@@ -178,16 +178,18 @@ const ClientDashboard = () => {
     }
   };
 
-  const fetchMyRequests = async () => {
+
+
+  const fetchAllUserRequests = async () => {
     try {
       setRequestsLoading(true);
-      const response = await api.get('/user/user-service-requests');
+      const response = await api.get('/user/all-user-requests');
       if (response.data.success) {
-        setMyRequests(response.data.requests);
+        setAllRequests(response.data.requests);
       }
     } catch (error) {
-      console.error('Error fetching service requests:', error);
-      toast.error('Failed to load service requests');
+      console.error('Error fetching user requests:', error);
+      toast.error('Failed to load requests');
     } finally {
       setRequestsLoading(false);
     }
@@ -531,7 +533,7 @@ const ClientDashboard = () => {
                 }`}
               >
                 <FaClipboardList className="inline mr-2" />
-                My Requests ({myRequests.length})
+                My Requests ({allRequests.length})
               </button>
               <button
                 onClick={() => setActiveTab('applications')}
@@ -1180,11 +1182,11 @@ const ClientDashboard = () => {
                 <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
                 <h3 className="text-xl font-semibold text-gray-700">Loading your requests...</h3>
               </div>
-            ) : myRequests.length === 0 ? (
+            ) : allRequests.length === 0 ? (
               <div className="text-center py-20 px-6 bg-white rounded-lg shadow-md">
                 <div className="text-6xl mb-4">📋</div>
-                <h4 className="text-xl font-semibold text-gray-900 mb-2">No Service Requests Yet</h4>
-                <p className="text-gray-600 mb-4">You haven't posted any service requests yet.</p>
+                <h4 className="text-xl font-semibold text-gray-900 mb-2">No Service Requests or Offers Yet</h4>
+                <p className="text-gray-600 mb-4">You haven't posted any service requests or sent any offers yet.</p>
                 <button
                   onClick={() => setActiveTab('browse')}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
@@ -1194,119 +1196,299 @@ const ClientDashboard = () => {
               </div>
             ) : (
               <div className="space-y-6">
-                {myRequests.map((request) => {
-                  // Find applications for this request
-                  const requestApplications = applications.filter(app => {
-                    // Handle different possible data structures
-                    if (!app.serviceRequest) return false;
+                {allRequests.map((request) => {
+                  // Different display logic based on request type
+                  if (request.type === 'service-request') {
+                    // Service Request display
+                    const serviceRequest = request.data;
+                    // Find applications for this request
+                    const requestApplications = applications.filter(app => {
+                      if (!app.serviceRequest) return false;
+                      const serviceRequestId = typeof app.serviceRequest === 'object'
+                        ? app.serviceRequest._id
+                        : app.serviceRequest;
+                      return serviceRequestId === request._id ||
+                             serviceRequestId?.toString() === request._id?.toString();
+                    });
 
-                    // serviceRequest might be an object or just an ID string
-                    const serviceRequestId = typeof app.serviceRequest === 'object'
-                      ? app.serviceRequest._id
-                      : app.serviceRequest;
-
-                    return serviceRequestId === request._id ||
-                           serviceRequestId?.toString() === request._id?.toString();
-                  });
-
-                  return (
-                    <div key={request._id} className="bg-white rounded-lg shadow-md p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2">{request.name}</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
-                            <div><span className="font-medium text-gray-700">Type:</span> {request.typeOfWork}</div>
-                            <div><span className="font-medium text-gray-700">Location:</span> {request.address}</div>
-                            <div><span className="font-medium text-gray-700">Budget:</span> ₱{request.minBudget} - ₱{request.maxBudget}</div>
-                            <div><span className="font-medium text-gray-700">Status:</span>
-                              <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
-                                request.status === 'Waiting' ? 'bg-yellow-100 text-yellow-800' :
-                                request.status === 'Offered' ? 'bg-blue-100 text-blue-800' :
-                                request.status === 'Working' ? 'bg-green-100 text-green-800' :
-                                request.status === 'Complete' ? 'bg-gray-100 text-gray-800' :
-                                'bg-red-100 text-red-800'
-                              }`}>
-                                {request.status}
-                              </span>
+                    return (
+                      <div key={request._id} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <FaClipboardList className="text-blue-600" />
+                              <h4 className="text-lg font-semibold text-gray-900">{request.title}</h4>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                              <div><span className="font-medium text-gray-700">Type:</span> {request.data?.typeOfWork}</div>
+                              <div><span className="font-medium text-gray-700">Location:</span> {request.location}</div>
+                              <div><span className="font-medium text-gray-700">Budget:</span> ₱{request.minBudget} - ₱{request.maxBudget}</div>
+                              <div><span className="font-medium text-gray-700">Status:</span>
+                                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                                  request.status === 'Waiting' ? 'bg-yellow-100 text-yellow-800' :
+                                  request.status === 'Offered' ? 'bg-blue-100 text-blue-800' :
+                                  request.status === 'Working' ? 'bg-green-100 text-green-800' :
+                                  request.status === 'Complete' ? 'bg-gray-100 text-gray-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {request.status}
+                                </span>
+                              </div>
+                            </div>
+                            {request.data?.notes && (
+                              <div className="mb-4">
+                                <span className="font-medium text-gray-700">Notes:</span>
+                                <p className="text-sm text-gray-600 mt-1">{request.data.notes}</p>
+                              </div>
+                            )}
+                            <div className="text-sm text-gray-500">
+                              Posted on {new Date(request.createdAt).toLocaleDateString()}
                             </div>
                           </div>
-                          {request.notes && (
-                            <div className="mb-4">
-                              <span className="font-medium text-gray-700">Notes:</span>
-                              <p className="text-sm text-gray-600 mt-1">{request.notes}</p>
+                        </div>
+
+                        {/* Show providers who applied */}
+                        {requestApplications.length > 0 && (
+                          <div className="border-t border-gray-200 pt-4">
+                            <h5 className="text-md font-semibold text-gray-900 mb-3 flex items-center">
+                              <FaUsers className="mr-2 text-blue-600" />
+                              Providers Who Applied ({requestApplications.length})
+                            </h5>
+                            <div className="space-y-3">
+                              {requestApplications.map((application) => (
+                                <div key={application._id} className="bg-gray-50 rounded-lg p-3 border-l-4 border-blue-400">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                      <img
+                                        src={application.provider?.profilePic || "/default-profile.png"}
+                                        alt={`${application.provider?.firstName} ${application.provider?.lastName}`}
+                                        className="w-10 h-10 rounded-full object-cover border border-gray-300"
+                                      />
+                                      <div>
+                                        <div className="flex items-center space-x-2">
+                                          <span className="font-medium text-gray-900">
+                                            {application.provider?.firstName} {application.provider?.lastName}
+                                          </span>
+                                          {application.provider?.verified && (
+                                            <FaCheckCircle className="text-green-500 text-sm" />
+                                          )}
+                                        </div>
+                                        <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                          <div className="flex">
+                                            {renderStars(application.provider?.averageRating || 0)}
+                                          </div>
+                                          <span>({application.provider?.totalReviews || 0})</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-sm font-semibold text-green-600">
+                                        ₱{application.commissionFee?.toLocaleString() || 'N/A'}
+                                      </div>
+                                      <div className="text-xs text-gray-500">Commission Fee</div>
+                                    </div>
+                                  </div>
+                                  <div className="mt-2 flex items-center justify-between">
+                                    <div className="flex flex-wrap gap-1">
+                                      {application.provider?.skills?.slice(0, 3).map((skill, index) => (
+                                        <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                          {skill}
+                                        </span>
+                                      ))}
+                                      {application.provider?.skills?.length > 3 && (
+                                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                          +{application.provider.skills.length - 3} more
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      Applied {new Date(application.createdAt).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  } else if (request.type === 'offer') {
+                    // Offer display
+                    return (
+                      <div key={request._id} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-start space-x-4">
+                            <img
+                              src={request.provider?.profilePic || "/default-profile.png"}
+                              alt={`${request.provider?.firstName} ${request.provider?.lastName}`}
+                              className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <FaBriefcase className="text-purple-600" />
+                                <h4 className="text-lg font-semibold text-gray-900">
+                                  {request.provider?.firstName} {request.provider?.lastName}
+                                </h4>
+                                {request.provider?.verified && (
+                                  <FaCheckCircle className="text-green-500" />
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-4 mb-2">
+                                <div className="flex items-center">
+                                  {renderStars(request.provider?.averageRating || 0)}
+                                  <span className="ml-2 text-sm text-gray-600">
+                                    ({request.provider?.totalReviews || 0} reviews)
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {request.provider?.skills?.slice(0, 4).map((skill, index) => (
+                                  <span key={index} className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-purple-600 mb-1">
+                              ₱{request.minBudget?.toLocaleString()} - ₱{request.maxBudget?.toLocaleString()}
+                            </div>
+                            <div className="text-sm text-gray-500">Budget Range</div>
+                            <div className={`text-xs mt-1 px-2 py-1 rounded-full font-medium ${
+                              request.status === 'Open' ? 'bg-yellow-100 text-yellow-800' :
+                              request.status === 'Accepted' ? 'bg-green-100 text-green-800' :
+                              request.status === 'Declined' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {request.status}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Offer Details */}
+                        <div className="bg-purple-50 rounded-lg p-4 mb-4">
+                          <h5 className="font-semibold text-gray-900 mb-2">{request.title}</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-3">
+                            <div>
+                              <span className="font-medium text-gray-700">Location:</span> {request.location}
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Preferred Date:</span> {request.preferredDate ? new Date(request.preferredDate).toLocaleDateString() : 'Flexible'}
+                            </div>
+                          </div>
+                          {request.data?.description && (
+                            <div>
+                              <span className="font-medium text-gray-700">Description:</span>
+                              <p className="text-sm text-gray-600 mt-1">{request.data.description}</p>
                             </div>
                           )}
-                          <div className="text-sm text-gray-500">
-                            Posted on {new Date(request.createdAt).toLocaleDateString()}
+                          <div className="text-xs text-gray-500 mt-2">
+                            Sent on {new Date(request.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-start">
+                          <div className="flex items-center space-x-3">
+                            <button
+                              onClick={() => handleViewProfile(request.provider?._id)}
+                              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm"
+                            >
+                              <FaEye className="mr-2" />
+                              View Profile
+                            </button>
+                            <button
+                              onClick={() => handleSendMessage(request.provider?._id)}
+                              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm"
+                            >
+                              <FaEnvelope className="mr-2" />
+                              Message
+                            </button>
+                            {request.status === 'Open' && (
+                              <div className="ml-auto text-sm text-yellow-700 font-medium flex items-center">
+                                <FaClock className="mr-1" />
+                                Waiting for response
+                              </div>
+                            )}
+                            {request.status === 'Accepted' && (
+                              <div className="ml-auto text-sm text-green-700 font-medium flex items-center">
+                                <FaCheckCircle className="mr-1" />
+                                Offer accepted
+                              </div>
+                            )}
+                            {request.status === 'Declined' && (
+                              <div className="ml-auto text-sm text-red-700 font-medium flex items-center">
+                                <FaThumbsDown className="mr-1" />
+                                Offer declined
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
-
-                      {/* Show providers who applied */}
-                      {requestApplications.length > 0 && (
-                        <div className="border-t border-gray-200 pt-4">
-                          <h5 className="text-md font-semibold text-gray-900 mb-3 flex items-center">
-                            <FaUsers className="mr-2 text-blue-600" />
-                            Providers Who Applied ({requestApplications.length})
-                          </h5>
-                          <div className="space-y-3">
-                            {requestApplications.map((application) => (
-                              <div key={application._id} className="bg-gray-50 rounded-lg p-3 border-l-4 border-blue-400">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-3">
-                                    <img
-                                      src={application.provider?.profilePic || "/default-profile.png"}
-                                      alt={`${application.provider?.firstName} ${application.provider?.lastName}`}
-                                      className="w-10 h-10 rounded-full object-cover border border-gray-300"
-                                    />
-                                    <div>
-                                      <div className="flex items-center space-x-2">
-                                        <span className="font-medium text-gray-900">
-                                          {application.provider?.firstName} {application.provider?.lastName}
-                                        </span>
-                                        {application.provider?.verified && (
-                                          <FaCheckCircle className="text-green-500 text-sm" />
-                                        )}
-                                      </div>
-                                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                                        <div className="flex">
-                                          {renderStars(application.provider?.averageRating || 0)}
-                                        </div>
-                                        <span>({application.provider?.totalReviews || 0})</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="text-sm font-semibold text-green-600">
-                                      ₱{application.commissionFee?.toLocaleString() || 'N/A'}
-                                    </div>
-                                    <div className="text-xs text-gray-500">Commission Fee</div>
-                                  </div>
-                                </div>
-                                <div className="mt-2 flex items-center justify-between">
-                                  <div className="flex flex-wrap gap-1">
-                                    {application.provider?.skills?.slice(0, 3).map((skill, index) => (
-                                      <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                                        {skill}
-                                      </span>
-                                    ))}
-                                    {application.provider?.skills?.length > 3 && (
-                                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                        +{application.provider.skills.length - 3} more
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="text-xs text-gray-500">
-                                    Applied {new Date(application.createdAt).toLocaleDateString()}
-                                  </div>
-                                </div>
+                    );
+                  } else if (request.type === 'booking') {
+                    // Booking display
+                    return (
+                      <div key={request._id} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-start space-x-4">
+                            <img
+                              src={request.otherParty?.profilePic || "/default-profile.png"}
+                              alt={`${request.otherParty?.firstName} ${request.otherParty?.lastName}`}
+                              className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <FaHandshake className="text-green-600" />
+                                <h4 className="text-lg font-semibold text-gray-900">
+                                  {request.title}
+                                </h4>
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  request.status === 'In Progress' ? 'bg-green-100 text-green-800' :
+                                  request.status === 'Completed' ? 'bg-gray-100 text-gray-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {request.status}
+                                </span>
                               </div>
-                            ))}
+                              <div className="text-sm text-gray-600">
+                                {request.otherParty?.firstName} {request.otherParty?.lastName}
+                              </div>
+                              {request.description && (
+                                <p className="text-sm text-gray-600 mt-2">{request.description}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            Created {new Date(request.createdAt).toLocaleDateString()}
                           </div>
                         </div>
-                      )}
-                    </div>
-                  );
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-start">
+                          <div className="flex items-center space-x-3">
+                            <button
+                              onClick={() => handleViewProfile(request.otherParty?._id)}
+                              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm"
+                            >
+                              <FaEye className="mr-2" />
+                              View Profile
+                            </button>
+                            <button
+                              onClick={() => handleSendMessage(request.otherParty?._id)}
+                              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm"
+                            >
+                              <FaEnvelope className="mr-2" />
+                              Message
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return null;
                 })}
               </div>
             )}
@@ -1403,6 +1585,7 @@ const ClientDashboard = () => {
               // In future, we could create a temporary chat or modify chat system
               handleSendMessage(providerId);
             }}
+            hideRequestService={activeTab === 'requests'}
           />
         )}
 

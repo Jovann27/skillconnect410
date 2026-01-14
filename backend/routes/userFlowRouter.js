@@ -65,7 +65,10 @@ import {
   applyToServiceRequest,
   updateProfilePicture,
   sendDirectServiceOffer,
-  getServiceProviders
+  getServiceProviders,
+  getClientServiceOffers,
+  getAllUserRequests,
+  getProviderProfile
 } from '../controllers/userFlowController.js';
 import { getServices } from '../controllers/adminFlowController.js';
 import { updateProfile, updateUserPassword } from '../controllers/userController.js';
@@ -522,6 +525,15 @@ router.get('/client-applications', isUserAuthenticated, isUserVerified, catchAsy
 
   res.status(200).json({ success: true, applications });
 }));
+
+// Client service offers (for clients to view their sent offers)
+router.get('/client-service-offers', isUserAuthenticated, isUserVerified, getClientServiceOffers);
+
+// All user requests (comprehensive view of all requests belonging to the current user)
+router.get('/all-user-requests', isUserAuthenticated, isUserVerified, getAllUserRequests);
+
+// Get provider profile by ID
+router.get('/provider-profile/:providerId', isUserAuthenticated, isUserVerified, getProviderProfile);
 
 // Matching requests (for workers - alias for available-service-requests)
 router.get('/matching-requests', isUserAuthenticated, isUserVerified, getAvailableServiceRequests);

@@ -2069,6 +2069,241 @@ export const getRecommendedProviders = catchAsyncError(async (req, res, next) =>
   }
 });
 
+export const getClientServiceOffers = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+  if (req.user.role !== "Community Member") {
+    return next(new ErrorHandler("Only community members can view their service offers", 403));
+  }
+
+  const { page = 1, limit = 20, status } = req.query;
+  const skip = (page - 1) * limit;
+
+  let query = { requester: req.user._id };
+  if (status) {
+    query.status = status;
+  }
+
+  const offers = await ServiceOffer.find(query)
+    .populate('provider', 'firstName lastName email phone profilePic skills averageRating totalReviews verified')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  const totalCount = await ServiceOffer.countDocuments(query);
+
+  res.json({
+    success: true,
+    count: totalCount,
+    offers
+  });
+});
+
+export const getProviderProfile = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { providerId } = req.params;
+
+  if (!providerId) {
+    return next(new ErrorHandler("Provider ID is required", 400));
+  }
+
+  // Validate that the providerId is a valid MongoDB ObjectId format
+  if (!providerId.match(/^[0-9a-fA-F]{24}$/)) {
+    return next(new ErrorHandler("Invalid provider ID format", 400));
+  }
+
+  const provider = await User.findById(providerId)
+    .select('firstName lastName email phone skills services serviceDescription serviceRate profilePic isOnline averageRating totalReviews verified occupation address role');
+
+  if (!provider) {
+    // Log the issue for debugging
+    console.error(`Provider not found with ID: ${providerId}`);
+    return next(new ErrorHandler("Provider profile not available", 404));
+  }
+
+  // Get provider reviews (only if they have reviews as a service provider)
+  const reviews = await Review.find({ reviewee: providerId })
+    .populate('reviewer', 'firstName lastName')
+    .sort({ createdAt: -1 })
+    .limit(5);
+
+  res.status(200).json({
+    success: true,
+    provider: {
+      ...provider.toObject(),
+      reviews,
+      // Add a flag to indicate if this user is currently a service provider
+      isActiveProvider: provider.role === "Service Provider"
+    }
+  });
+});
+
+export const getAllUserRequests = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { page = 1, limit = 20, status, type } = req.query;
+  const skip = (page - 1) * limit;
+
+  const allRequests = [];
+
+  // 1. Get service requests posted by user
+  if (!type || type === 'service-requests') {
+    let serviceRequestQuery = { requester: req.user._id };
+    if (status) {
+      serviceRequestQuery.status = status;
+    }
+
+    const serviceRequests = await ServiceRequest.find(serviceRequestQuery)
+      .populate('serviceProvider', 'firstName lastName profilePic')
+      .populate('targetProvider', 'firstName lastName profilePic')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    serviceRequests.forEach(request => {
+      allRequests.push({
+        _id: request._id,
+        type: 'service-request',
+        title: request.name,
+        description: request.notes,
+        location: request.address,
+        minBudget: request.minBudget,
+        maxBudget: request.maxBudget,
+        preferredDate: request.preferredDate,
+        status: request.status,
+        createdAt: request.createdAt,
+        serviceProvider: request.serviceProvider,
+        targetProvider: request.targetProvider,
+        data: request
+      });
+    });
+  }
+
+  // 2. Get service offers sent by user (only include offers where provider still exists)
+  if (!type || type === 'offers') {
+    let offerQuery = { requester: req.user._id };
+    if (status) {
+      offerQuery.status = status;
+    }
+
+    const offers = await ServiceOffer.find(offerQuery)
+      .populate({
+        path: 'provider',
+        select: 'firstName lastName email phone profilePic skills averageRating totalReviews verified',
+        match: { _id: { $exists: true } } // Ensure provider exists
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // Only include offers where provider was successfully populated (i.e., provider still exists)
+    offers.forEach(offer => {
+      if (offer.provider) { // Only add if provider exists
+        allRequests.push({
+          _id: offer._id,
+          type: 'offer',
+          title: offer.title,
+          description: offer.description,
+          location: offer.location,
+          minBudget: offer.minBudget,
+          maxBudget: offer.maxBudget,
+          preferredDate: offer.preferredDate,
+          status: offer.status,
+          createdAt: offer.createdAt,
+          provider: offer.provider,
+          data: offer
+        });
+      }
+    });
+  }
+
+  // 3. Get applications submitted by user (if any)
+  if (!type || type === 'applications') {
+    let applicationQuery = { provider: req.user._id };
+    if (status) {
+      applicationQuery.status = status;
+    }
+
+    const applications = await Booking.find(applicationQuery)
+      .populate('requester', 'firstName lastName email phone profilePic')
+      .populate('serviceRequest', 'name address typeOfWork minBudget maxBudget notes preferredDate time')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    applications.forEach(application => {
+      allRequests.push({
+        _id: application._id,
+        type: 'application',
+        title: `Application for: ${application.serviceRequest?.name || 'Service Request'}`,
+        description: `Applied with commission fee: ₱${application.commissionFee?.toLocaleString() || 'N/A'}`,
+        location: application.serviceRequest?.address,
+        minBudget: application.serviceRequest?.minBudget,
+        maxBudget: application.serviceRequest?.maxBudget,
+        preferredDate: application.serviceRequest?.preferredDate,
+        status: application.status,
+        createdAt: application.createdAt,
+        requester: application.requester,
+        serviceRequest: application.serviceRequest,
+        data: application
+      });
+    });
+  }
+
+  // 4. Get bookings/ongoing work
+  if (!type || type === 'bookings') {
+    let bookingQuery = {
+      $or: [
+        { requester: req.user._id },
+        { provider: req.user._id }
+      ]
+    };
+    if (status) {
+      bookingQuery.status = status;
+    }
+
+    const bookings = await Booking.find(bookingQuery)
+      .populate('requester', 'firstName lastName email phone profilePic')
+      .populate('provider', 'firstName lastName email phone profilePic')
+      .populate('serviceRequest', 'name address typeOfWork')
+      .populate('serviceOffer', 'title description location')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    bookings.forEach(booking => {
+      const isRequester = String(booking.requester._id) === String(req.user._id);
+      const otherParty = isRequester ? booking.provider : booking.requester;
+
+      allRequests.push({
+        _id: booking._id,
+        type: 'booking',
+        title: booking.serviceRequest?.name || booking.serviceOffer?.title || 'Service Booking',
+        description: booking.serviceRequest?.notes || booking.serviceOffer?.description || 'Ongoing service work',
+        location: booking.serviceRequest?.address || booking.serviceOffer?.location,
+        status: booking.status,
+        createdAt: booking.createdAt,
+        otherParty: otherParty,
+        serviceRequest: booking.serviceRequest,
+        serviceOffer: booking.serviceOffer,
+        data: booking
+      });
+    });
+  }
+
+  // Sort all requests by created date (most recent first)
+  allRequests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Apply pagination after combining
+  const paginatedRequests = allRequests.slice(skip, skip + parseInt(limit));
+
+  res.json({
+    success: true,
+    count: allRequests.length,
+    requests: paginatedRequests
+  });
+});
+
 export const updateProfilePicture = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
 

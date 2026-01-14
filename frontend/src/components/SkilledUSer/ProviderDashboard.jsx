@@ -39,8 +39,11 @@ const ProviderDashboard = () => {
   // Form state - no longer needed for credentials upload
 
   useEffect(() => {
-    if (user) {
+    if (user && user.role === 'Service Provider') {
       fetchData();
+    } else if (user && user.role !== 'Service Provider') {
+      toast.error('This dashboard is only available for service providers');
+      navigate('/');
     }
   }, [user]);
 
@@ -73,14 +76,17 @@ const ProviderDashboard = () => {
         }
       });
       if (response.data.success) {
-        setServiceRequests(response.data.requests);
-        console.log(`Loaded ${response.data.requests.length} available service requests`, {
+        setServiceRequests(response.data.requests || []);
+        console.log(`Loaded ${response.data.requests?.length || 0} available service requests`, {
           algorithm: response.data.algorithm,
           description: response.data.description
         });
+      } else {
+        setServiceRequests([]);
       }
     } catch (error) {
       console.error('Error fetching service requests:', error);
+      setServiceRequests([]);
       toast.error('Failed to load available service requests');
     }
   };
@@ -89,10 +95,14 @@ const ProviderDashboard = () => {
     try {
       const response = await api.get('/user/provider-offers');
       if (response.data.success) {
-        setServiceOffers(response.data.offers);
+        setServiceOffers(response.data.offers || []);
+      } else {
+        setServiceOffers([]);
       }
     } catch (error) {
       console.error('Error fetching service offers:', error);
+      setServiceOffers([]);
+      toast.error('Failed to load service offers');
     }
   };
 
@@ -100,10 +110,14 @@ const ProviderDashboard = () => {
     try {
       const response = await api.get('/user/provider-applications');
       if (response.data.success) {
-        setApplications(response.data.applications);
+        setApplications(response.data.applications || []);
+      } else {
+        setApplications([]);
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
+      setApplications([]);
+      toast.error('Failed to load applications');
     }
   };
 
@@ -111,10 +125,13 @@ const ProviderDashboard = () => {
     try {
       const response = await api.get('/user/my-certificates');
       if (response.data.success) {
-        setCertificates(response.data.certificates);
+        setCertificates(response.data.certificates || []);
+      } else {
+        setCertificates([]);
       }
     } catch (error) {
       console.error('Error fetching certificates:', error);
+      setCertificates([]);
     }
   };
 
@@ -122,10 +139,13 @@ const ProviderDashboard = () => {
     try {
       const response = await api.get('/user/my-work-proof');
       if (response.data.success) {
-        setWorkProof(response.data.workProof);
+        setWorkProof(response.data.workProof || []);
+      } else {
+        setWorkProof([]);
       }
     } catch (error) {
       console.error('Error fetching work proof:', error);
+      setWorkProof([]);
     }
   };
 
