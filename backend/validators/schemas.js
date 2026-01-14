@@ -412,6 +412,14 @@ export const helpTopicSchema = {
   }
 };
 
+export const proofOfWorkSchema = {
+  completionNotes: {
+    type: 'string',
+    maxLength: 500
+  }
+  // proofOfWork files will be handled by multer/express-fileupload
+};
+
 export const settingsSchema = {
   maintenanceMode: {
     type: 'boolean'

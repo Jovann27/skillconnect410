@@ -103,7 +103,7 @@ export const createReview = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Not authorized to review this booking", 403));
   }
 
-  // Check if user already reviewed this booking
+  // Check if user already reviewed this specific booking (unique index ensures this, but we check explicitly)
   const existingReview = await Review.findOne({
     booking: bookingId,
     reviewer: req.user._id
@@ -140,6 +140,23 @@ export const createReview = catchAsyncError(async (req, res, next) => {
     review
   });
 });
+
+// Get reviews by the current user (as reviewer)
+export const getReviewsByUser = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const reviews = await Review.find({ reviewer: req.user._id })
+    .populate('reviewee', 'firstName lastName profilePic')
+    .populate('booking')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    reviews
+  });
+});
+
+
 
 // Get review statistics for a user
 export const getUserReviewStats = catchAsyncError(async (req, res, next) => {

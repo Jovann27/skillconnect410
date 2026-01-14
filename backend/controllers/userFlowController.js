@@ -60,8 +60,8 @@ export const postServiceRequest = catchAsyncError(async (req, res, next) => {
   const minBudgetAmount = budgetRange?.min || budget || 0;
   const maxBudgetAmount = budgetRange?.max || budget || 0;
 
-  // For inquiries (General Inquiry), address and phone are not required
-  const isInquiry = requestTypeOfWork === 'General Inquiry';
+  // For inquiries (General Inquiry or Consultation), address and phone are not required
+  const isInquiry = requestTypeOfWork === 'General Inquiry' || requestTypeOfWork === 'Consultation';
   if (!requestTitle || !requestTypeOfWork || !requestTime || (!isInquiry && (!requestLocation || !phone))) {
     return next(new ErrorHandler("Missing required fields: title/name, typeOfWork/serviceCategory, time/preferredTime, and location/address are required", 400));
   }
@@ -181,6 +181,100 @@ export const updateBookingStatus = catchAsyncError(async (req, res, next) => {
   res.json({ success: true, booking });
 });
 
+export const uploadProofOfWork = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { id } = req.params;
+  const { completionNotes } = req.body;
+
+  // Validate completionNotes length
+  if (completionNotes && (typeof completionNotes !== 'string' || completionNotes.length > 500)) {
+    return next(new ErrorHandler("Completion notes must be a string with maximum 500 characters", 400));
+  }
+
+  const booking = await Booking.findById(id).populate('serviceRequest');
+  if (!booking) return next(new ErrorHandler("Booking not found", 404));
+
+  // Only the provider can upload proof of work
+  if (String(booking.provider) !== String(req.user._id)) {
+    return next(new ErrorHandler("Not authorized to upload proof for this booking", 403));
+  }
+
+  // Only allow upload if booking is "In Progress"
+  if (booking.status !== "In Progress") {
+    return next(new ErrorHandler("Can only upload proof of work for bookings that are in progress", 400));
+  }
+
+  // Handle file uploads
+  const proofOfWorkFiles = [];
+  if (req.files && req.files.proofOfWork) {
+    const files = Array.isArray(req.files.proofOfWork) ? req.files.proofOfWork : [req.files.proofOfWork];
+
+    for (const file of files) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+      if (!allowedTypes.includes(file.mimetype)) {
+        return next(new ErrorHandler(`Invalid file type for ${file.name}. Only images and PDFs are allowed.`, 400));
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        return next(new ErrorHandler(`File ${file.name} is too large. Maximum size is 5MB.`, 400));
+      }
+
+      // Generate unique filename
+      const fileName = `proof_${Date.now()}_${Math.floor(Math.random() * 1000000)}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+
+      // Move file to uploads directory
+      await file.mv(`./uploads/${fileName}`);
+      proofOfWorkFiles.push(`/uploads/${fileName}`);
+    }
+  }
+
+  // Update booking with proof of work and completion notes
+  booking.proofOfWork = proofOfWorkFiles;
+  if (completionNotes) {
+    booking.completionNotes = completionNotes;
+  }
+
+  // Mark booking as completed
+  booking.status = "Completed";
+  booking.updatedAt = new Date();
+  await booking.save();
+
+  // Update service request status if exists
+  if (booking.serviceRequest) {
+    booking.serviceRequest.status = "Completed";
+    await booking.serviceRequest.save();
+  }
+
+  // Update provider ratings
+  const provider = await User.findById(booking.provider);
+  if (provider) {
+    const reviews = await Review.find({ reviewee: booking.provider });
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+    provider.averageRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+    provider.totalReviews = reviews.length;
+    await provider.save();
+  }
+
+  // Notify the client that work is completed
+  await sendNotification(
+    booking.requester,
+    "Service Completed",
+    `Your service request has been completed by ${req.user.firstName} ${req.user.lastName}. You can now leave a review.`,
+    { bookingId: booking._id, type: "service-completed" }
+  );
+
+  io.emit("booking-updated", { bookingId: booking._id, action: "completed" });
+
+  res.status(200).json({
+    success: true,
+    message: "Proof of work uploaded successfully. Service marked as completed.",
+    booking
+  });
+});
+
 export const leaveReview = catchAsyncError(async (req, res, next) => {
   if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
   const { bookingId, rating, comments } = req.body;
@@ -205,6 +299,7 @@ export const leaveReview = catchAsyncError(async (req, res, next) => {
     reviewee: String(booking.requester) === String(req.user._id) ? booking.provider : booking.requester,
     rating,
     comments,
+    reviewType: String(booking.requester) === String(req.user._id) ? "Client to Provider" : "Provider to Client",
   });
 
   await sendNotification(review.reviewee, "New Review", `You received a ${rating}-star review.`);
@@ -705,10 +800,7 @@ export const sendMessage = [
   await chatMessage.populate('sender', 'firstName lastName profilePic');
 
   // Send real-time notification via socket
-  io.to(`booking-${booking._id}`).emit("new-message", {
-    message: chatMessage,
-    bookingId: booking._id
-  });
+  io.to(`chat-${booking._id}`).emit("new-message", chatMessage);
 
   // Send notification to receiver
   await sendNotification(
@@ -2328,7 +2420,7 @@ export const updateProfilePicture = catchAsyncError(async (req, res, next) => {
   const fileName = `profilePic_${Date.now()}_${Math.floor(Math.random() * 1000000)}.${profilePic.mimetype.split('/')[1]}`;
 
   // Move file to uploads directory
-  await profilePic.mv(`backend/uploads/${fileName}`);
+  await profilePic.mv(`./uploads/${fileName}`);
 
   // Update user profile picture
   const user = await User.findById(req.user._id);

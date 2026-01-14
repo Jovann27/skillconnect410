@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import api from "../../api";
+import api, { getImageUrl } from "../../api";
 import { useMainContext } from "../../mainContext";
 import toast from "react-hot-toast";
 import CreateServiceRequest from "./CreateServiceRequest";
@@ -72,8 +72,14 @@ const ClientDashboard = () => {
   const [showCreateRequest, setShowCreateRequest] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showSendOfferModal, setShowSendOfferModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showRequestDetailsModal, setShowRequestDetailsModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
   const [selectedProviderId, setSelectedProviderId] = useState(null);
   const [offerProvider, setOfferProvider] = useState(null);
+  const [reviewBooking, setReviewBooking] = useState(null);
+  const [reviewProvider, setReviewProvider] = useState(null);
+  const [reviewedBookings, setReviewedBookings] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
 
@@ -91,6 +97,7 @@ const ClientDashboard = () => {
     fetchProviders();
     fetchRecommendedProviders();
     loadUserPreferences();
+    fetchUserReviews();
   }, []);
 
   useEffect(() => {
@@ -192,6 +199,21 @@ const ClientDashboard = () => {
       toast.error('Failed to load requests');
     } finally {
       setRequestsLoading(false);
+    }
+  };
+
+  const fetchUserReviews = async () => {
+    try {
+      const response = await api.get('/review/my-reviews');
+      if (response.data.success) {
+        // Extract booking IDs from reviews to mark them as reviewed
+        const bookingIds = response.data.reviews.map(review => review.booking.toString());
+        setReviewedBookings(bookingIds);
+        console.log('Fetched user reviews:', response.data.reviews.length, 'reviews for bookings:', bookingIds);
+      }
+    } catch (error) {
+      console.error('Error fetching user reviews:', error);
+      // Don't show error toast as this is not critical for the user experience
     }
   };
 
@@ -395,6 +417,70 @@ const ClientDashboard = () => {
     } catch (error) {
       console.error('Error declining application:', error);
       toast.error('Failed to decline application');
+    }
+  };
+
+  const handleLeaveReview = (bookingId, provider) => {
+    setReviewBooking(bookingId);
+    setReviewProvider(provider);
+    setShowReviewModal(true);
+  };
+
+  const handleReviewSuccess = (bookingId) => {
+    // Mark this booking as reviewed so we can disable the review button
+    setReviewedBookings(prev => [...prev, bookingId]);
+  };
+
+  const handleSubmitReview = async (bookingId, rating, comments) => {
+    try {
+      console.log('Submitting review with data:', {
+        bookingId,
+        rating,
+        comments: comments.trim()
+      });
+
+      const response = await api.post('/review', {
+        bookingId: bookingId._id || bookingId, // Handle both booking object and ID
+        rating,
+        comments: comments.trim()
+      });
+
+      console.log('Review submission response:', response.data);
+
+      if (response.data.success) {
+        // Show success notification
+        toast.success('Review submitted successfully!');
+
+        // Mark this booking as reviewed
+        const bookingIdToMark = bookingId._id || bookingId;
+        handleReviewSuccess(bookingIdToMark);
+
+        // Refresh the requests data to update the UI
+        fetchAllUserRequests();
+        // Also refresh applications to update the UI
+        fetchApplications();
+        return response.data;
+      } else {
+        throw new Error(response.data.message || 'Failed to submit review');
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        fullError: error
+      });
+
+      // Log the server's error response specifically
+      if (error.response?.data) {
+        console.error('Server error response:', error.response.data);
+      }
+
+      // Display the specific error message from the server if available
+      const errorMessage = error.response?.data?.message || 'Failed to submit review';
+      toast.error(errorMessage);
+      throw error;
     }
   };
 
@@ -742,10 +828,6 @@ const ClientDashboard = () => {
                       <h3 className="text-xl font-bold text-gray-900">
                         Recommended for You
                       </h3>
-                      <p className="text-sm text-gray-600 flex items-center mt-1">
-                        <FaInfoCircle className="mr-1" />
-                        Powered by Hybrid Recommendation Algorithm (Content-based + Collaborative Filtering)
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -755,7 +837,7 @@ const ClientDashboard = () => {
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center">
                           <img
-                            src={provider.profilePic || "/default-profile.png"}
+                            src={getImageUrl(provider.profilePic)}
                             alt={`${provider.firstName} ${provider.lastName}`}
                             className="w-12 h-12 rounded-full object-cover mr-3"
                           />
@@ -784,7 +866,7 @@ const ClientDashboard = () => {
                           onClick={() => handleSendOffer(provider._id)}
                           className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
                         >
-                          Contact
+                          Send Direct Request
                         </button>
                       </div>
                     </div>
@@ -885,7 +967,7 @@ const ClientDashboard = () => {
                       <div className="flex items-start space-x-4 mb-4">
                         <div className="relative">
                           <img
-                            src={provider.profilePic || "/default-profile.png"}
+                            src={getImageUrl(provider.profilePic)}
                             alt={`${provider.firstName} ${provider.lastName}`}
                             className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
                           />
@@ -1020,7 +1102,7 @@ const ClientDashboard = () => {
                     <div className="flex items-start space-x-6 pl-12">
                       <div className="relative">
                         <img
-                          src={provider.profilePic || "/default-profile.png"}
+                          src={getImageUrl(provider.profilePic)}
                           alt={`${provider.firstName} ${provider.lastName}`}
                           className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                         />
@@ -1219,6 +1301,17 @@ const ClientDashboard = () => {
                               <FaClipboardList className="text-blue-600" />
                               <h4 className="text-lg font-semibold text-gray-900">{request.title}</h4>
                             </div>
+                            <div className="mb-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedRequest(request);
+                                  setShowRequestDetailsModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                              >
+                                View Details
+                              </button>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
                               <div><span className="font-medium text-gray-700">Type:</span> {request.data?.typeOfWork}</div>
                               <div><span className="font-medium text-gray-700">Location:</span> {request.location}</div>
@@ -1260,7 +1353,7 @@ const ClientDashboard = () => {
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
                                       <img
-                                        src={application.provider?.profilePic || "/default-profile.png"}
+                                        src={getImageUrl(application.provider?.profilePic)}
                                         alt={`${application.provider?.firstName} ${application.provider?.lastName}`}
                                         className="w-10 h-10 rounded-full object-cover border border-gray-300"
                                       />
@@ -1319,7 +1412,7 @@ const ClientDashboard = () => {
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-start space-x-4">
                             <img
-                              src={request.provider?.profilePic || "/default-profile.png"}
+                              src={getImageUrl(request.provider?.profilePic)}
                               alt={`${request.provider?.firstName} ${request.provider?.lastName}`}
                               className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
                             />
@@ -1332,6 +1425,17 @@ const ClientDashboard = () => {
                                 {request.provider?.verified && (
                                   <FaCheckCircle className="text-green-500" />
                                 )}
+                              </div>
+                              <div className="mb-2">
+                                <button
+                                  onClick={() => {
+                                    setSelectedRequest(request);
+                                    setShowRequestDetailsModal(true);
+                                  }}
+                                  className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                                >
+                                  View Details
+                                </button>
                               </div>
                               <div className="flex items-center space-x-4 mb-2">
                                 <div className="flex items-center">
@@ -1434,7 +1538,7 @@ const ClientDashboard = () => {
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-start space-x-4">
                             <img
-                              src={request.otherParty?.profilePic || "/default-profile.png"}
+                              src={getImageUrl(request.otherParty?.profilePic)}
                               alt={`${request.otherParty?.firstName} ${request.otherParty?.lastName}`}
                               className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
                             />
@@ -1455,6 +1559,17 @@ const ClientDashboard = () => {
                               <div className="text-sm text-gray-600">
                                 {request.otherParty?.firstName} {request.otherParty?.lastName}
                               </div>
+                              <div className="mb-2">
+                                <button
+                                  onClick={() => {
+                                    setSelectedRequest(request);
+                                    setShowRequestDetailsModal(true);
+                                  }}
+                                  className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                                >
+                                  View Details
+                                </button>
+                              </div>
                               {request.description && (
                                 <p className="text-sm text-gray-600 mt-2">{request.description}</p>
                               )}
@@ -1465,8 +1580,51 @@ const ClientDashboard = () => {
                           </div>
                         </div>
 
+                        {/* Proof of Work Display for Completed Bookings */}
+                        {request.status === 'Completed' && request.data?.proofOfWork && request.data.proofOfWork.length > 0 && (
+                          <div className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+                            <h5 className="font-semibold text-blue-900 mb-3 flex items-center">
+                              <FaFileAlt className="mr-2" />
+                              Proof of Work Submitted
+                            </h5>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                              {request.data.proofOfWork.map((proofUrl, index) => (
+                                <div key={index} className="bg-white rounded-lg p-3 border border-blue-300">
+                                  {proofUrl.toLowerCase().endsWith('.pdf') ? (
+                                    <div className="flex items-center justify-center h-20 bg-red-50 rounded">
+                                      <FaFileAlt className="text-red-500 text-2xl" />
+                                    </div>
+                                  ) : (
+                                    <img
+                                      src={proofUrl}
+                                      alt={`Proof of work ${index + 1}`}
+                                      className="w-full h-20 object-cover rounded"
+                                    />
+                                  )}
+                                  <div className="mt-2 text-center">
+                                    <a
+                                      href={proofUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                    >
+                                      View {proofUrl.toLowerCase().endsWith('.pdf') ? 'Document' : 'Image'}
+                                    </a>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            {request.data?.completionNotes && (
+                              <div className="mt-3 p-3 bg-white rounded border-l-4 border-blue-400">
+                                <span className="font-medium text-gray-700">Completion Notes:</span>
+                                <p className="text-sm text-gray-600 mt-1">{request.data.completionNotes}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         {/* Action Buttons */}
-                        <div className="flex items-center justify-start">
+                        <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <button
                               onClick={() => handleViewProfile(request.otherParty?._id)}
@@ -1483,6 +1641,24 @@ const ClientDashboard = () => {
                               Message
                             </button>
                           </div>
+
+                          {/* Review Button for Completed Bookings */}
+                          {request.status === 'Completed' && (
+                            reviewedBookings.includes(request._id) ? (
+                              <div className="bg-green-600 text-white px-6 py-2 rounded-lg flex items-center text-sm font-medium">
+                                <FaCheckCircle className="mr-2" />
+                                Request Completed
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleLeaveReview(request._id, request.otherParty)}
+                                className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm font-medium"
+                              >
+                                <FaStar className="mr-2" />
+                                Leave Review
+                              </button>
+                            )
+                          )}
                         </div>
                       </div>
                     );
@@ -1600,6 +1776,31 @@ const ClientDashboard = () => {
             onSuccess={handleOfferSuccess}
           />
         )}
+
+        {/* Review Modal */}
+        {showReviewModal && reviewBooking && reviewProvider && (
+          <ReviewModal
+            booking={reviewBooking}
+            provider={reviewProvider}
+            onClose={() => {
+              setShowReviewModal(false);
+              setReviewBooking(null);
+              setReviewProvider(null);
+            }}
+            onSubmit={handleSubmitReview}
+          />
+        )}
+
+        {/* Request Details Modal */}
+        {showRequestDetailsModal && selectedRequest && (
+          <RequestDetailsModal
+            request={selectedRequest}
+            onClose={() => {
+              setShowRequestDetailsModal(false);
+              setSelectedRequest(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );
@@ -1633,7 +1834,7 @@ const ApplicationCard = ({ application, onAccept, onDecline, onViewProfile, onMe
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start space-x-4">
           <img
-            src={provider.profilePic || "/default-profile.png"}
+            src={getImageUrl(provider.profilePic)}
             alt={`${provider.firstName} ${provider.lastName}`}
             className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
           />
@@ -1769,7 +1970,7 @@ const AcceptedApplicationCard = ({ application, onViewProfile, onMessage }) => {
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start space-x-4">
           <img
-            src={provider.profilePic || "/default-profile.png"}
+            src={getImageUrl(provider.profilePic)}
             alt={`${provider.firstName} ${provider.lastName}`}
             className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
           />
@@ -1860,6 +2061,494 @@ const AcceptedApplicationCard = ({ application, onViewProfile, onMessage }) => {
           <div className="ml-auto text-sm text-green-700 font-medium flex items-center">
             <FaCheckCircle className="mr-1" />
             Work in progress
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Review Modal Component
+const ReviewModal = ({ booking, provider, onClose, onSubmit }) => {
+  const [rating, setRating] = useState(5);
+  const [comments, setComments] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
+
+  const handleSubmit = async () => {
+    if (!comments.trim()) {
+      toast.error('Please provide review comments');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await onSubmit(booking, rating, comments.trim());
+      toast.success('Review submitted successfully!');
+      onClose();
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      // Error handling is done in the parent component (handleSubmitReview)
+      // Don't show duplicate error messages
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-gray-900">Leave a Review</h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Provider Info */}
+          <div className="flex items-center space-x-4 mb-6 p-4 bg-gray-50 rounded-lg">
+            <img
+              src={getImageUrl(provider?.profilePic)}
+              alt={`${provider?.firstName} ${provider?.lastName}`}
+              className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+            />
+            <div>
+              <h4 className="font-semibold text-gray-900">
+                {provider?.firstName} {provider?.lastName}
+              </h4>
+              <div className="flex items-center mt-1">
+                {renderStars(provider?.averageRating || 0)}
+                <span className="ml-2 text-sm text-gray-600">
+                  ({provider?.totalReviews || 0} reviews)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Rating */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Rating
+            </label>
+            <div className="flex items-center space-x-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  className="text-3xl focus:outline-none transition-colors"
+                >
+                  <FaStar
+                    className={`${
+                      star <= (hoverRating || rating)
+                        ? 'text-yellow-400 fill-current'
+                        : 'text-gray-300'
+                    } hover:text-yellow-400 transition-colors`}
+                  />
+                </button>
+              ))}
+              <span className="ml-3 text-sm text-gray-600">
+                {rating} star{rating !== 1 ? 's' : ''}
+              </span>
+            </div>
+          </div>
+
+          {/* Comments */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Comments
+            </label>
+            <textarea
+              value={comments}
+              onChange={(e) => setComments(e.target.value)}
+              placeholder="Share your experience with this service provider..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              rows={4}
+              maxLength={500}
+            />
+            <div className="text-xs text-gray-500 mt-1">
+              {comments.length}/500 characters
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end space-x-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={submitting || !comments.trim()}
+              className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium flex items-center"
+            >
+              {submitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <FaStar className="mr-2" />
+                  Submit Review
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+// Request Details Modal Component
+const RequestDetailsModal = ({ request, onClose }) => {
+  if (!request) return null;
+
+  const renderRequestDetails = () => {
+    switch (request.type) {
+      case 'service-request':
+        return (
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center space-x-3 mb-4">
+              <FaClipboardList className="text-blue-600 text-xl" />
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">{request.title}</h3>
+                <p className="text-sm text-gray-600">Service Request Details</p>
+              </div>
+            </div>
+
+            {/* Status */}
+            <div className="bg-blue-50 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-gray-700">Status:</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  request.status === 'Waiting' ? 'bg-yellow-100 text-yellow-800' :
+                  request.status === 'Offered' ? 'bg-blue-100 text-blue-800' :
+                  request.status === 'Working' ? 'bg-green-100 text-green-800' :
+                  request.status === 'Complete' ? 'bg-gray-100 text-gray-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {request.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">{request.data?.typeOfWork || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">{request.location || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Budget Range</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">
+                    ₱{request.minBudget?.toLocaleString()} - ₱{request.maxBudget?.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">
+                    {request.data?.preferredDate ? new Date(request.data.preferredDate).toLocaleDateString() : 'Flexible'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Time</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">{request.data?.time || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date Posted</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">
+                    {new Date(request.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Notes */}
+            {request.data?.notes && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-900">{request.data.notes}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'offer':
+        return (
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center space-x-3 mb-4">
+              <FaBriefcase className="text-purple-600 text-xl" />
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">{request.title}</h3>
+                <p className="text-sm text-gray-600">Service Offer Details</p>
+              </div>
+            </div>
+
+            {/* Provider Info */}
+            {request.provider && (
+              <div className="bg-purple-50 rounded-lg p-4">
+                <div className="flex items-center space-x-4">
+                  <img
+                    src={getImageUrl(request.provider.profilePic)}
+                    alt={`${request.provider.firstName} ${request.provider.lastName}`}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                  />
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="font-semibold text-gray-900">
+                        {request.provider.firstName} {request.provider.lastName}
+                      </h4>
+                      {request.provider.verified && <FaCheckCircle className="text-green-500" />}
+                    </div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      {renderStars(request.provider.averageRating || 0)}
+                      <span className="text-sm text-gray-600">
+                        ({request.provider.totalReviews || 0} reviews)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Status */}
+            <div className="bg-purple-50 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-gray-700">Status:</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  request.status === 'Open' ? 'bg-yellow-100 text-yellow-800' :
+                  request.status === 'Accepted' ? 'bg-green-100 text-green-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {request.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Budget Range</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">
+                    ₱{request.minBudget?.toLocaleString()} - ₱{request.maxBudget?.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">{request.location || 'N/A'}</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">
+                    {request.preferredDate ? new Date(request.preferredDate).toLocaleDateString() : 'Flexible'}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date Sent</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">
+                    {new Date(request.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            {request.data?.description && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-900">{request.data.description}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'booking':
+        return (
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center space-x-3 mb-4">
+              <FaHandshake className="text-green-600 text-xl" />
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">{request.title}</h3>
+                <p className="text-sm text-gray-600">Booking Details</p>
+              </div>
+            </div>
+
+            {/* Provider Info */}
+            {request.otherParty && (
+              <div className="bg-green-50 rounded-lg p-4">
+                <div className="flex items-center space-x-4">
+                  <img
+                    src={getImageUrl(request.otherParty.profilePic)}
+                    alt={`${request.otherParty.firstName} ${request.otherParty.lastName}`}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                  />
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="font-semibold text-gray-900">
+                        {request.otherParty.firstName} {request.otherParty.lastName}
+                      </h4>
+                      {request.otherParty.verified && <FaCheckCircle className="text-green-500" />}
+                    </div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      {renderStars(request.otherParty.averageRating || 0)}
+                      <span className="text-sm text-gray-600">
+                        ({request.otherParty.totalReviews || 0} reviews)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Status */}
+            <div className="bg-green-50 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-gray-700">Status:</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  request.status === 'In Progress' ? 'bg-green-100 text-green-800' :
+                  request.status === 'Completed' ? 'bg-gray-100 text-gray-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {request.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date Created</label>
+                <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">
+                  {new Date(request.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Booking ID</label>
+                <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded font-mono text-sm">
+                  {request._id}
+                </p>
+              </div>
+            </div>
+
+            {/* Description */}
+            {request.description && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-900">{request.description}</p>
+                </div>
+              </div>
+            )}
+
+
+
+            {/* Proof of Work for Completed Bookings */}
+            {request.status === 'Completed' && request.data?.proofOfWork && request.data.proofOfWork.length > 0 && (
+              <div className="border-t border-gray-200 pt-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <FaFileAlt className="mr-2 text-blue-600" />
+                  Proof of Work Submitted
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {request.data.proofOfWork.map((proofUrl, index) => (
+                    <div key={index} className="bg-white rounded-lg p-3 border border-gray-300">
+                      {proofUrl.toLowerCase().endsWith('.pdf') ? (
+                        <div className="flex items-center justify-center h-20 bg-red-50 rounded">
+                          <FaFileAlt className="text-red-500 text-2xl" />
+                        </div>
+                      ) : (
+                        <img
+                          src={proofUrl}
+                          alt={`Proof of work ${index + 1}`}
+                          className="w-full h-20 object-cover rounded"
+                        />
+                      )}
+                      <div className="mt-2 text-center">
+                        <a
+                          href={proofUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                          View {proofUrl.toLowerCase().endsWith('.pdf') ? 'Document' : 'Image'}
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {request.data?.completionNotes && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <span className="font-medium text-gray-700">Completion Notes:</span>
+                    <p className="text-sm text-gray-600 mt-1">{request.data.completionNotes}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+
+      default:
+        return (
+          <div className="text-center text-gray-500">
+            <p>Request details not available</p>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Request Details</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors text-xl"
+            >
+              ✕
+            </button>
+          </div>
+
+          {renderRequestDetails()}
+
+          <div className="flex justify-end mt-8 pt-6 border-t border-gray-200">
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>

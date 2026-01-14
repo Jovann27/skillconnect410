@@ -5,13 +5,17 @@ import { reviewSchema } from "../validators/schemas.js";
 import {
   getUserReviews,
   createReview,
-  getUserReviewStats
+  getUserReviewStats,
+  getReviewsByUser
 } from "../controllers/reviewController.js";
 
 const router = express.Router();
 
 // Get reviews for a specific user
 router.get("/user/:userId", getUserReviews);
+
+// Get reviews by the current user (as reviewer)
+router.get("/my-reviews", isUserAuthenticated, getReviewsByUser);
 
 // Get review statistics for a user
 router.get("/stats/:userId", getUserReviewStats);

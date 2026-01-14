@@ -3,6 +3,8 @@ import { clearSocket } from "./utils/socket";
 
 // Constants for configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+// Extract backend URL for image serving (remove /api/v1 suffix)
+const BACKEND_BASE_URL = API_BASE_URL.replace('/api/v1', '');
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BASE_DELAY = 1000; // 1 second base delay
 const RETRY_MULTIPLIER = 2; // Exponential backoff multiplier
@@ -100,4 +102,27 @@ api.interceptors.response.use(
   }
 );
 
+/**
+ * Utility function to construct full image URLs from relative paths
+ * @param {string} imagePath - Relative image path (e.g., "/uploads/filename.jpg")
+ * @returns {string} Full image URL or fallback image path
+ */
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return "/default-profile.png";
+
+  // If it's already a full URL, return as is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+
+  // If it's a relative path starting with /uploads, construct full URL
+  if (imagePath.startsWith('/uploads/')) {
+    return `${BACKEND_BASE_URL}${imagePath}`;
+  }
+
+  // For other relative paths, return as is (they might be served from frontend public folder)
+  return imagePath;
+};
+
+export { BACKEND_BASE_URL };
 export default api;

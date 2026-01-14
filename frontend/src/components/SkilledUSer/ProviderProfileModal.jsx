@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../api";
+import api, { getImageUrl } from "../../api";
 import toast from "react-hot-toast";
 import CreateServiceRequest from "./CreateServiceRequest";
 import { FaStar, FaMapMarkerAlt, FaPhone, FaEnvelope, FaCheckCircle, FaTimes, FaUser, FaBriefcase, FaTrophy, FaUsers, FaClock, FaHandshake } from "react-icons/fa";
@@ -108,7 +108,7 @@ const ProviderProfileModal = ({ providerId, onClose, onOpenChat, hideRequestServ
             <div className="flex items-start space-x-6">
               <div className="relative">
                 <img
-                  src={provider.profilePic || "/default-profile.png"}
+                  src={getImageUrl(provider.profilePic)}
                   alt={`${provider.firstName} ${provider.lastName}`}
                   className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                 />

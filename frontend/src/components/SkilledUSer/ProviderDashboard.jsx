@@ -33,8 +33,15 @@ const ProviderDashboard = () => {
   const [serviceRequests, setServiceRequests] = useState([]);
   const [serviceOffers, setServiceOffers] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [activeBookings, setActiveBookings] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [workProof, setWorkProof] = useState([]);
+
+  // Proof of work modal state
+  const [showProofModal, setShowProofModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [proofFiles, setProofFiles] = useState([]);
+  const [completionNotes, setCompletionNotes] = useState('');
 
   // Form state - no longer needed for credentials upload
 
@@ -54,6 +61,7 @@ const ProviderDashboard = () => {
         fetchServiceRequests(),
         fetchServiceOffers(),
         fetchApplications(),
+        fetchActiveBookings(),
         fetchCertificates(),
         fetchWorkProof()
       ]);
@@ -124,6 +132,27 @@ const ProviderDashboard = () => {
       console.error('Error fetching applications:', error);
       setApplications([]);
       toast.error('Failed to load applications');
+    }
+  };
+
+  const fetchActiveBookings = async () => {
+    try {
+      const response = await api.get('/user/bookings', {
+        params: { status: 'In Progress' }
+      });
+      if (response.data.success) {
+        // Filter to only show bookings where current user is the provider
+        const providerBookings = response.data.bookings.filter(booking =>
+          booking.provider && String(booking.provider._id) === String(user._id)
+        );
+        setActiveBookings(providerBookings || []);
+      } else {
+        setActiveBookings([]);
+      }
+    } catch (error) {
+      console.error('Error fetching active bookings:', error);
+      setActiveBookings([]);
+      toast.error('Failed to load active bookings');
     }
   };
 
@@ -449,52 +478,138 @@ const ProviderDashboard = () => {
     </div>
   );
 
-  const renderApplicationsTab = () => (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">My Work Records</h3>
-      {applications.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <FaFileAlt className="mx-auto text-4xl mb-4 text-gray-300" />
-          <p>You haven't submitted any work records yet.</p>
-        </div>
-      ) : (
-        applications.map((application) => (
-          <div key={application._id} className="bg-white border rounded-lg p-4">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <h4 className="font-semibold">{application.serviceRequest?.title || application.serviceRequest?.name || 'Service Request'}</h4>
-                <p className="text-sm text-gray-600">{application.serviceRequest?.serviceCategory || application.serviceRequest?.typeOfWork}</p>
-                <p className="text-sm text-gray-500">Client: {application.requester?.firstName} {application.requester?.lastName}</p>
-              </div>
-              <div className="text-right">
-                <div className="font-bold text-green-600">
-                  ₱{application.serviceRequest?.minBudget && application.serviceRequest?.maxBudget
-                    ? `${application.serviceRequest.minBudget.toLocaleString()} - ₱${application.serviceRequest.maxBudget.toLocaleString()}`
-                    : application.serviceRequest?.minBudget || application.serviceRequest?.maxBudget
-                    ? `₱${(application.serviceRequest?.minBudget || application.serviceRequest?.maxBudget).toLocaleString()}`
-                    : application.serviceRequest?.budget
-                    ? `₱${application.serviceRequest.budget.toLocaleString()}`
-                    : 'Budget not specified'
-                  }
-                </div>
-                <div className={`text-sm px-2 py-1 rounded ${
-                  application.status === 'In Progress' ? 'bg-green-100 text-green-800' :
-                  application.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                  application.status === 'Declined' ? 'bg-red-100 text-red-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {application.status}
-                </div>
-              </div>
-            </div>
-            <p className="text-sm text-gray-600">
-              Applied on: {new Date(application.createdAt).toLocaleDateString()}
-            </p>
+  const handleUploadProofOfWork = async () => {
+    if (!selectedBooking || proofFiles.length === 0) {
+      toast.error('Please select files to upload');
+      return;
+    }
+
+    const formData = new FormData();
+    proofFiles.forEach(file => {
+      formData.append('proofOfWork', file);
+    });
+    if (completionNotes.trim()) {
+      formData.append('completionNotes', completionNotes.trim());
+    }
+
+    try {
+      const response = await api.post(`/user/booking/${selectedBooking._id}/upload-proof`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.data.success) {
+        toast.success('Proof of work uploaded successfully! Service marked as completed.');
+        setShowProofModal(false);
+        setSelectedBooking(null);
+        setProofFiles([]);
+        setCompletionNotes('');
+        fetchActiveBookings(); // Refresh active bookings
+        fetchApplications(); // Refresh applications in case any were completed
+      }
+    } catch (error) {
+      console.error('Error uploading proof of work:', error);
+      toast.error('Failed to upload proof of work');
+    }
+  };
+
+  const renderApplicationsTab = () => {
+    const allWorkRecords = [
+      ...activeBookings.map(booking => ({
+        ...booking,
+        type: 'active_booking',
+        title: booking.serviceRequest?.name || booking.serviceOffer?.title || 'Active Service',
+        description: booking.serviceRequest?.notes || booking.serviceOffer?.description || 'Ongoing service work',
+        client: booking.requester,
+        budget: booking.serviceRequest?.minBudget || booking.serviceRequest?.maxBudget || booking.serviceOffer?.minBudget || booking.serviceOffer?.maxBudget,
+        status: booking.status,
+        createdAt: booking.createdAt
+      })),
+
+    ];
+
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">My Work Records</h3>
+        <p className="text-sm text-gray-600">
+          Showing {activeBookings.length} active job{activeBookings.length !== 1 ? 's' : ''} and {applications.length} application{applications.length !== 1 ? 's' : ''}
+        </p>
+        {allWorkRecords.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <FaFileAlt className="mx-auto text-4xl mb-4 text-gray-300" />
+            <p>You haven't submitted any work records yet.</p>
           </div>
-        ))
-      )}
-    </div>
-  );
+        ) : (
+          allWorkRecords.map((record) => (
+            <div key={record._id} className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-semibold">{record.title}</h4>
+                    <span className={`text-xs px-2 py-1 rounded font-medium ${
+                      record.type === 'active_booking'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {record.type === 'active_booking' ? 'Active Job' : 'Application'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600">{record.description}</p>
+                  <p className="text-sm text-gray-500">
+                    Client: {record.client?.firstName} {record.client?.lastName}
+                  </p>
+                  {record.type === 'active_booking' && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Started: {new Date(record.createdAt).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+                <div className="text-right ml-4">
+                  <div className="font-bold text-green-600 mb-2">
+                    ₱{record.budget ? record.budget.toLocaleString() : 'Budget not specified'}
+                  </div>
+                  <div className={`text-sm px-2 py-1 rounded inline-block ${
+                    record.status === 'In Progress' ? 'bg-green-100 text-green-800' :
+                    record.status === 'Applied' ? 'bg-blue-100 text-blue-800' :
+                    record.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                    record.status === 'Declined' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {record.status}
+                  </div>
+                </div>
+              </div>
+
+              {record.type === 'active_booking' && record.status === 'In Progress' && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      setSelectedBooking(record);
+                      setShowProofModal(true);
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium text-sm transition-colors flex items-center gap-2"
+                  >
+                    <FaCheck className="text-sm" />
+                    Upload Proof of Work & Complete
+                  </button>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Upload photos/videos of completed work to mark this job as finished
+                  </p>
+                </div>
+              )}
+
+              {record.type === 'application' && (
+                <p className="text-sm text-gray-600 mt-2">
+                  Applied on: {new Date(record.createdAt).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    );
+  };
 
 
   if (loading) {
@@ -762,6 +877,89 @@ const ProviderDashboard = () => {
                 >
                   View My Applications
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Proof of Work Upload Modal */}
+        {showProofModal && selectedBooking && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
+              <h3 className="text-lg font-semibold mb-4">Upload Proof of Work</h3>
+              <div className="mb-4">
+                <h4 className="font-medium text-gray-900">{selectedBooking.title}</h4>
+                <p className="text-sm text-gray-600">Client: {selectedBooking.client?.firstName} {selectedBooking.client?.lastName}</p>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload Photos/Videos of Completed Work *
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,video/*,.pdf"
+                  onChange={(e) => setProofFiles(Array.from(e.target.files))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Supported formats: Images, Videos, PDFs (Max 5MB each)
+                </p>
+                {proofFiles.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-700">Selected files:</p>
+                    <ul className="text-xs text-gray-600">
+                      {proofFiles.map((file, index) => (
+                        <li key={index}>• {file.name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Completion Notes (Optional)
+                </label>
+                <textarea
+                  value={completionNotes}
+                  onChange={(e) => setCompletionNotes(e.target.value)}
+                  placeholder="Describe what was completed..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  maxLength={500}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {completionNotes.length}/500 characters
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowProofModal(false);
+                    setSelectedBooking(null);
+                    setProofFiles([]);
+                    setCompletionNotes('');
+                  }}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUploadProofOfWork}
+                  disabled={proofFiles.length === 0}
+                  className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded font-medium disabled:cursor-not-allowed"
+                >
+                  Upload & Complete Job
+                </button>
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>Note:</strong> Once uploaded, this job will be marked as completed and the client will be able to leave a review.
+                </p>
               </div>
             </div>
           </div>

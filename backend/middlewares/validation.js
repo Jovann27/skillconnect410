@@ -121,15 +121,8 @@ export const securityLogger = (req, res, next) => {
   const userAgent = req.get('User-Agent') || 'Unknown';
   const method = req.method;
   const url = req.originalUrl;
-  const userId = req.user ? req.user._id : 'unauthenticated';
-  const adminId = req.admin ? req.admin._id : null;
 
-  // Log security events
-  if (req.method !== 'GET' && req.method !== 'OPTIONS') {
-    console.log(`[${timestamp}] SECURITY: ${method} ${url} - IP: ${ip} - User: ${userId}${adminId ? ` - Admin: ${adminId}` : ''} - UA: ${userAgent.substring(0, 100)}`);
-  }
-
-  // Log potential security threats
+  // Log potential security threats (before processing)
   if (req.body && typeof req.body === 'object') {
     const bodyString = JSON.stringify(req.body);
     if (bodyString.length > 10000) {
@@ -140,11 +133,22 @@ export const securityLogger = (req, res, next) => {
     const suspiciousPatterns = ['<script', 'javascript:', 'onload=', 'onerror=', 'eval(', 'document.cookie'];
     for (const pattern of suspiciousPatterns) {
       if (bodyString.toLowerCase().includes(pattern)) {
-        console.warn(`[${timestamp}] SUSPICIOUS_PATTERN: ${pattern} in ${method} ${url} - IP: ${ip} - User: ${userId}`);
+        console.warn(`[${timestamp}] SUSPICIOUS_PATTERN: ${pattern} in ${method} ${url} - IP: ${ip}`);
         break;
       }
     }
   }
+
+  // Log security events after response is sent
+  res.on('finish', () => {
+    const finalTimestamp = new Date().toISOString();
+    const userId = req.user ? req.user._id : 'unauthenticated';
+    const adminId = req.admin ? req.admin._id : null;
+
+    if (req.method !== 'GET' && req.method !== 'OPTIONS') {
+      console.log(`[${finalTimestamp}] SECURITY: ${method} ${url} - IP: ${ip} - User: ${userId}${adminId ? ` - Admin: ${adminId}` : ''} - UA: ${userAgent.substring(0, 100)} - Status: ${res.statusCode}`);
+    }
+  });
 
   next();
 };
@@ -169,12 +173,19 @@ export const csrfProtection = (req, res, next) => {
     isAllowed = allowedOrigins.some(allowedOrigin => referer.startsWith(allowedOrigin));
   }
 
-  if (!isAllowed && process.env.NODE_ENV === 'production') {
-    console.warn(`[${new Date().toISOString()}] CSRF_ATTEMPT: ${req.method} ${req.originalUrl} - Origin: ${origin} - Referer: ${referer} - IP: ${req.ip}`);
-    return res.status(403).json({
-      success: false,
-      message: 'CSRF protection: Invalid origin'
-    });
+  // In development mode, be more lenient but still log attempts
+  if (!isAllowed) {
+    if (process.env.NODE_ENV === 'production') {
+      console.warn(`[${new Date().toISOString()}] CSRF_ATTEMPT: ${req.method} ${req.originalUrl} - Origin: ${origin} - Referer: ${referer} - IP: ${req.ip}`);
+      return res.status(403).json({
+        success: false,
+        message: 'CSRF protection: Invalid origin'
+      });
+    } else {
+      // In development, log the issue but allow the request to proceed
+      console.warn(`[${new Date().toISOString()}] CSRF_WARNING: ${req.method} ${req.originalUrl} - Origin: ${origin} - Referer: ${referer} - IP: ${req.ip} - Allowed: ${allowedOrigins.join(', ')}`);
+      console.warn(`[${new Date().toISOString()}] CSRF_WARNING: Request allowed in development mode but would be blocked in production`);
+    }
   }
 
   next();

@@ -706,3 +706,49 @@
 {"level":"info","message":"Client Connected: rmmh1DRih_k_AcSUAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:55:01.279Z"}
 {"level":"info","message":"Client Connected: etTPCF8DCLg01KjsAAAE, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:57:58.381Z"}
 {"level":"info","message":"Client Connected: ciRgZKBpDwqHsqJaAAAG, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:04:36.936Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T15:07:03.531Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T15:07:03.533Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T15:07:03.632Z"}
+{"level":"info","message":"Client Connected: qMTIyvSDhAufjVKDAAAC, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:07:19.929Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T15:33:28.347Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T15:33:28.355Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T15:33:28.452Z"}
+{"level":"info","message":"Client Connected: owqnVYuFT8OBxol8AAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:33:30.311Z"}
+{"level":"info","message":"Client Connected: XIdi-p0CNQ6nGPG3AAAE, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:33:43.299Z"}
+{"level":"info","message":"Client Connected: Wriw079nBS92SgPhAAAH, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:36:18.641Z"}
+{"level":"info","message":"Client Connected: bg-46euH8gUnPkeWAAAK, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:38:11.468Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T15:39:46.117Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T15:39:46.120Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T15:39:46.300Z"}
+{"level":"info","message":"Client Connected: kkOswnMv5J-6gs9yAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:39:47.231Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T15:40:11.978Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T15:40:11.980Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T15:40:12.087Z"}
+{"level":"info","message":"Client Connected: 7lSi6ZbT25oOFUVpAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:40:13.270Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T15:40:37.742Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T15:40:37.749Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T15:40:37.854Z"}
+{"level":"info","message":"Client Connected: 3luUFHfPYdh9YTxLAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:40:37.982Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T15:40:56.661Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T15:40:56.664Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T15:40:56.759Z"}
+{"level":"info","message":"Client Connected: Te5VtYuS1NE6EtmQAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:40:59.294Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T15:41:29.281Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T15:41:29.284Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T15:41:29.385Z"}
+{"level":"info","message":"Client Connected: nnUx7S7fnDtyVMGHAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:41:30.210Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T15:43:09.852Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T15:43:09.862Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T15:44:28.957Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T15:44:28.960Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T15:44:29.043Z"}
+{"level":"info","message":"Client Connected: PYEH9-BAI_JVgXWdAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:44:29.253Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T15:49:25.378Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T15:49:25.384Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T15:49:25.452Z"}
+{"level":"info","message":"Client Connected: 9rXN3Z1j9kfEhQApAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:49:27.757Z"}
+{"level":"info","message":"Client Connected: nLS7h2n4_OOK3zMsAAAE, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:50:29.166Z"}
+{"level":"info","message":"Client Connected: LdUt2yLuevh8JnETAAAH, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:50:41.005Z"}
+{"level":"info","message":"Client Connected: 5FEC8i2FlH4_N3Z2AAAK, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:56:25.847Z"}
+{"level":"info","message":"Client Connected: VwSg9FNW-B_u9-rHAAAN, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:56:26.980Z"}
+{"level":"info","message":"Client Connected: eM2TVDsEYUD4FcpvAAAQ, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:59:31.847Z"}

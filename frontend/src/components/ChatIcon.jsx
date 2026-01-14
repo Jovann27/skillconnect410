@@ -534,6 +534,59 @@ const ChatIcon = () => {
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedChat) return;
 
+    // If no appointment exists, create a service request first (inquiry)
+    if (!selectedChat.appointmentId) {
+      try {
+        // Create a service request with the message as inquiry
+        const sanitizedMessage = newMessage.trim().replace(/[^a-zA-Z0-9\s\-_.]/g, '').substring(0, 50);
+        const serviceRequestData = {
+          targetProvider: selectedChat.otherUser._id,
+          name: `Inquiry - ${sanitizedMessage}${newMessage.trim().length > 50 ? '...' : ''}`,
+          address: user.address || 'Not specified',
+          ...(user.phone && user.phone !== 'Not provided' && { phone: user.phone }),
+          typeOfWork: 'Consultation', // Use a valid service type for inquiries
+          time: '09:00', // Default time
+          budget: 0, // Inquiry, no budget set yet
+          notes: `Inquiry from ${user.firstName} ${user.lastName}: ${newMessage.trim()}`
+        };
+
+        const requestResponse = await api.post('/user/post-service-request', serviceRequestData);
+        if (requestResponse.data.success) {
+          // Update the selectedChat with inquiry status
+          setSelectedChat(prev => ({
+            ...prev,
+            status: 'Waiting for provider response',
+            serviceRequest: {
+              name: serviceRequestData.name,
+              provider: { _id: selectedChat.otherUser._id }
+            }
+          }));
+
+          // Add system message to indicate inquiry was sent
+          const systemMessage = {
+            id: Date.now(),
+            message: 'Inquiry sent! You\'ll be able to chat once the provider accepts your request.',
+            sender: { _id: 'system', firstName: 'System', lastName: '', profilePic: null },
+            timestamp: new Date(),
+            status: 'delivered',
+            isSystem: true
+          };
+          setMessages([systemMessage]);
+
+          // Clear input
+          setNewMessage('');
+        } else {
+          throw new Error('Failed to create service request');
+        }
+      } catch (err) {
+        console.error('Error sending inquiry:', err);
+        const errorMessage = err.response?.data?.message || 'Failed to send inquiry. Please try again.';
+        setError(errorMessage);
+      }
+      return;
+    }
+
+    // If we have an appointment (booking), send the actual chat message
     // Add the sent message to the UI immediately
     const sentMessage = {
       id: Date.now(),
@@ -545,54 +598,16 @@ const ChatIcon = () => {
     setMessages(prev => [...prev, sentMessage]);
 
     try {
-      let appointmentId = selectedChat.appointmentId;
-
-      // If no appointment exists, create a service request first
-      if (!appointmentId) {
-      // Create a service request with the message as inquiry
-      const sanitizedMessage = newMessage.trim().replace(/[^a-zA-Z0-9\s\-_.]/g, '').substring(0, 50);
-      const serviceRequestData = {
-        targetProvider: selectedChat.otherUser._id,
-        name: `Inquiry - ${sanitizedMessage}${newMessage.trim().length > 50 ? '...' : ''}`,
-        address: user.address || 'Not specified',
-        phone: user.phone || 'Not provided',
-        typeOfWork: 'General Inquiry',
-        preferredDate: null,
-        time: '09:00', // Default time
-        budget: 0, // Inquiry, no budget set yet
-        notes: `Inquiry from ${user.firstName} ${user.lastName}: ${newMessage.trim()}`
-      };
-
-        const requestResponse = await api.post('/user/post-service-request', serviceRequestData);
-        if (requestResponse.data.success) {
-          appointmentId = requestResponse.data.request._id;
-          // Update the selectedChat with the new appointmentId
-          setSelectedChat(prev => ({
-            ...prev,
-            appointmentId: appointmentId,
-            status: 'Waiting',
-            serviceRequest: {
-              name: serviceRequestData.name,
-              provider: { _id: selectedChat.otherUser._id }
-            }
-          }));
-        } else {
-          throw new Error('Failed to create service request');
-        }
-      }
-
       await api.post('/user/send-message', {
-        appointmentId: appointmentId,
+        appointmentId: selectedChat.appointmentId,
         message: newMessage.trim()
       });
 
       // Clear input and stop typing indicator
       setNewMessage('');
-      if (appointmentId) {
-        socket.emit('stop-typing', appointmentId);
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-        }
+      socket.emit('stop-typing', selectedChat.appointmentId);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
       }
     } catch (err) {
       console.error('Error sending message:', err);
@@ -961,29 +976,39 @@ const ChatIcon = () => {
                       key={msg._id || msg.id || `msg-${index}`}
                       className={`${chatIconClasses.messageWrapper} ${msg.sender._id === user._id ? chatIconClasses.messageWrapperOwn : ''}`}
                     >
-                      <div className={chatIconClasses.messageTimestamp}>
-                        <small>{formatTime(msg.timestamp)}</small>
-                      </div>
-                      <div className={`${chatIconClasses.message} ${msg.sender._id === user._id ? chatIconClasses.messageOwn : chatIconClasses.messageOther}`}>
-                        {msg.sender._id !== user._id && (
-                          <img
-                            src={getProfileImageUrl(msg.sender.profilePic)}
-                            alt={`${msg.sender.firstName} ${msg.sender.lastName}`}
-                            className={chatIconClasses.messageAvatar}
-                            onError={(e) => {
-                              e.target.src = '/default-profile.png';
-                            }}
-                          />
-                        )}
-                        <div className={`${chatIconClasses.messageContent} ${msg.sender._id === user._id ? chatIconClasses.messageContentOwn : chatIconClasses.messageContentOther}`}>
-                          <span>{msg.message}</span>
+                      {msg.isSystem ? (
+                        <div className="text-center my-2">
+                          <div className="inline-block bg-gray-200 text-gray-600 text-sm px-3 py-1 rounded-full">
+                            {msg.message}
+                          </div>
                         </div>
-                        {msg.sender._id === user._id && (
-                          <span className={`${chatIconClasses.messageStatus} text-${msg.status === 'seen' ? 'green' : 'gray'}-400`}>
-                            {getMessageStatusIcon(msg.status)}
-                          </span>
-                        )}
-                      </div>
+                      ) : (
+                        <>
+                          <div className={chatIconClasses.messageTimestamp}>
+                            <small>{formatTime(msg.timestamp)}</small>
+                          </div>
+                          <div className={`${chatIconClasses.message} ${msg.sender._id === user._id ? chatIconClasses.messageOwn : chatIconClasses.messageOther}`}>
+                            {msg.sender._id !== user._id && (
+                              <img
+                                src={getProfileImageUrl(msg.sender.profilePic)}
+                                alt={`${msg.sender.firstName} ${msg.sender.lastName}`}
+                                className={chatIconClasses.messageAvatar}
+                                onError={(e) => {
+                                  e.target.src = '/default-profile.png';
+                                }}
+                              />
+                            )}
+                            <div className={`${chatIconClasses.messageContent} ${msg.sender._id === user._id ? chatIconClasses.messageContentOwn : chatIconClasses.messageContentOther}`}>
+                              <span>{msg.message}</span>
+                            </div>
+                            {msg.sender._id === user._id && (
+                              <span className={`${chatIconClasses.messageStatus} text-${msg.status === 'seen' ? 'green' : 'gray'}-400`}>
+                                {getMessageStatusIcon(msg.status)}
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </div>
                   ))}
 

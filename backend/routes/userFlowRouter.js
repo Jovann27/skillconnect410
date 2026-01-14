@@ -1,8 +1,9 @@
 import express from "express";
+import { param } from "express-validator";
 import rateLimit from "express-rate-limit";
 import { isUserAuthenticated, isUserVerified } from "../middlewares/auth.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
-import { validateSchema, handleValidationErrors, validateApplication, validateApplicationResponse } from "../middlewares/validation.js";
+import { validateSchema, handleValidationErrors, validateApplication, validateApplicationResponse, validateOfferResponse, csrfProtection, securityLogger } from "../middlewares/validation.js";
 import ErrorHandler from "../middlewares/error.js";
 import User from "../models/userSchema.js";
 import ServiceRequest from '../models/serviceRequest.js';
@@ -20,7 +21,8 @@ import {
   bookingStatusSchema,
   savedSearchSchema,
   deviceTokenSchema,
-  notificationPreferencesSchema
+  notificationPreferencesSchema,
+  proofOfWorkSchema
 } from '../validators/schemas.js';
 
 // Stricter rate limiting for critical operations like accepting offers/requests
@@ -41,6 +43,7 @@ import {
   updateBookingStatus,
   completeBooking,
   leaveReview,
+  uploadProofOfWork,
   postServiceRequest,
   getServiceProfile,
   updateServiceProfile,
@@ -411,14 +414,27 @@ router.get('/bookings', isUserAuthenticated, isUserVerified, getBookings);
 router.get('/booking/:id', isUserAuthenticated, isUserVerified, getBooking);
 router.put('/booking/:id/status', isUserAuthenticated, isUserVerified, validateSchema(bookingStatusSchema), handleValidationErrors, updateBookingStatus);
 router.put('/booking/:id/complete', isUserAuthenticated, isUserVerified, completeBooking);
+router.post('/booking/:id/upload-proof', isUserAuthenticated, isUserVerified, param('id').isMongoId().withMessage('Invalid booking ID'), uploadProofOfWork);
 router.post('/review', isUserAuthenticated, isUserVerified, validateSchema(reviewSchema), handleValidationErrors, leaveReview);
+
+// Rate limiting for service request operations
+const serviceRequestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 service requests per 15 minutes per user
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many service requests, please try again later."
+  }
+});
 
 // Service Request routes
 router.get('/available-service-requests', isUserAuthenticated, isUserVerified, getAvailableServiceRequests);
-router.post('/post-service-request', isUserAuthenticated, isUserVerified, validateSchema(serviceRequestSchema), handleValidationErrors, postServiceRequest);
+router.post('/post-service-request', isUserAuthenticated, isUserVerified, csrfProtection, serviceRequestLimiter, validateSchema(serviceRequestSchema), handleValidationErrors, postServiceRequest);
 router.get('/service-request/:id', isUserAuthenticated, isUserVerified, getServiceRequest);
-router.delete('/service-request/:id/cancel', isUserAuthenticated, isUserVerified, cancelServiceRequest);
-router.post('/service-request/:id/accept', criticalOperationLimiter, isUserAuthenticated, isUserVerified, acceptServiceRequest);
+router.delete('/service-request/:id/cancel', isUserAuthenticated, isUserVerified, csrfProtection, cancelServiceRequest);
+router.post('/service-request/:id/accept', criticalOperationLimiter, isUserAuthenticated, isUserVerified, csrfProtection, acceptServiceRequest);
 
 // Service Profile routes
 router.get('/service-profile', isUserAuthenticated, isUserVerified, getServiceProfile);
@@ -489,7 +505,7 @@ router.get('/notification-preferences', isUserAuthenticated, isUserVerified, cat
 router.get('/provider-offers', isUserAuthenticated, isUserVerified, getProviderOffers);
 router.get('/provider-applications', isUserAuthenticated, isUserVerified, getProviderApplications);
 router.post('/apply-to-request/:requestId', isUserAuthenticated, isUserVerified, validateApplication, handleValidationErrors, applyToServiceRequest);
-router.post('/respond-to-offer/:offerId', isUserAuthenticated, isUserVerified, validateSchema(offerResponseSchema, 'param'), handleValidationErrors, respondToServiceOffer);
+router.post('/respond-to-offer/:offerId', isUserAuthenticated, isUserVerified, validateOfferResponse, handleValidationErrors, respondToServiceOffer);
 router.post('/respond-to-application/:bookingId', isUserAuthenticated, isUserVerified, validateApplicationResponse, handleValidationErrors, respondToApplication);
 router.post('/update-profile-picture', isUserAuthenticated, isUserVerified, updateProfilePicture);
 
