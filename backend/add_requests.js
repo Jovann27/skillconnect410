@@ -46,10 +46,11 @@ for (let i = 0; i < 25; i++) {
   const member = existingMembers[Math.floor(Math.random() * existingMembers.length)];
   const assignedProvider = existingProviders[Math.floor(Math.random() * existingProviders.length)];
 
-  // Generate 24-hour format time
-  const hour = Math.floor(Math.random() * 12) + 8; // 8 AM to 8 PM
-  const minute = Math.floor(Math.random() * 4) * 15; // 0, 15, 30, 45 minutes
-  const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+  const hour24 = Math.floor(Math.random() * 12) + 8; // 8 to 19
+  const minute = Math.floor(Math.random() * 4) * 15;
+  const period = hour24 < 12 ? 'AM' : 'PM';
+  const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+  const timeString = `${hour12.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${period}`;
 
   serviceRequestsData.push({
     requester: member._id,

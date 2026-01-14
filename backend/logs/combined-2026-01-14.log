@@ -3,3 +3,706 @@
 {"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T09:42:29.486Z"}
 {"level":"info","message":"Client Connected: I-g1DSm67kXq5cN_AAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T09:42:29.603Z"}
 {"level":"info","message":"Client Connected: 9vG4WkPtzzWZHjXkAAAD, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T09:43:03.589Z"}
+{"level":"info","message":"Client Connected: nkU0B4kX3OFB0197AAAG, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:02:55.265Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:02:55.572Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:02:55.575Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:02:55.583Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:02:55.656Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:02:55.664Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:02:55.672Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:02:55.794Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:02:55.799Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:02:55.807Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:02:55.860Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:02:55.878Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:02:55.880Z"}
+{"level":"info","message":"Client Connected: HbLKSvp0cTNGnURGAAAI, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T10:02:59.960Z"}
+{"level":"info","message":"Client Connected: zZObDkDmmq_0KxUwAAAK, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:04:00.316Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:04:00.381Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:04:00.382Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:04:00.382Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:04:00.398Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:04:00.399Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:04:00.399Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:04:00.470Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:04:00.471Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:04:00.475Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:04:00.496Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:04:00.499Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:04:00.500Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:04:00.532Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:04:00.533Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:04:00.534Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:04:00.552Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:04:00.553Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:04:00.556Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:04:00.607Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:04:00.612Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:04:00.614Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:04:00.630Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:04:00.631Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:04:00.632Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T10:06:01.868Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T10:06:01.872Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T10:06:01.966Z"}
+{"level":"info","message":"Client Connected: qWx_N8hf4z7nEkPVAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T10:06:03.329Z"}
+{"level":"info","message":"Client Connected: j7H6L15UeVF33kbPAAAD, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:06:05.975Z"}
+{"level":"info","message":"Client Connected: U-gFjxTtywBRzha5AAAF, User: 69676af73c224a4e7ec6ecc9","timestamp":"2026-01-14T10:09:05.977Z"}
+{"level":"info","message":"Client Connected: ztd0gZPUJ-nlVyjDAAAH, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:11:52.857Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:11:52.966Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:11:52.968Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:11:52.969Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:11:53.022Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:11:53.024Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:11:53.031Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:11:53.130Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:11:53.132Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:11:53.133Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:11:53.167Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:11:53.170Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:11:53.173Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:11:53.265Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:11:53.267Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:11:53.268Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:11:53.303Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:11:53.305Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:11:53.307Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:11:53.364Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:11:53.365Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:11:53.366Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:11:53.384Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:11:53.386Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:11:53.388Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T10:24:01.761Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T10:24:01.763Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T10:24:01.836Z"}
+{"level":"info","message":"Client Connected: EdhfJrvptstD9ZYxAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:24:03.335Z"}
+{"level":"info","message":"Client Connected: kqF2UKr9qxE9hpfuAAAE, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:24:43.808Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:24:43.990Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:24:43.993Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:24:43.996Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:24:44.228Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:24:44.233Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:24:44.263Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:24:44.345Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:24:44.346Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:24:44.349Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:24:44.385Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:24:44.420Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:24:44.426Z"}
+{"level":"info","message":"Client Connected: 1RD-zxD91oaAi3mgAAAG, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:34:37.301Z"}
+{"level":"info","message":"Client Connected: YkXpfOq6xxXGqfQ7AAAI, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:37:19.703Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:37:20.019Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:37:20.021Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:37:20.022Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:37:20.051Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:37:20.053Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:37:20.054Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:37:20.144Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:37:20.146Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:37:20.148Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:37:20.183Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:37:20.184Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:37:20.185Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:37:20.294Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:37:20.296Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:37:20.301Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:37:20.336Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:37:20.337Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:37:20.339Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:37:20.386Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:37:20.387Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:37:20.388Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:37:20.412Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:37:20.417Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:37:20.418Z"}
+{"level":"info","message":"Client Connected: Oi4elhBKG_B1y4EhAAAK, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T10:37:52.341Z"}
+{"level":"info","message":"Client Connected: 7N-CZgc49eGOx-PPAAAM, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:38:27.596Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:38:27.675Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:38:27.677Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:38:27.681Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:38:27.711Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:38:27.714Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:38:27.719Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:38:27.820Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:38:27.822Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:38:27.838Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:38:27.864Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:38:27.870Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:38:27.872Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:38:27.962Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:38:27.963Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:38:27.969Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:38:28.004Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:38:28.005Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:38:28.007Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:38:28.057Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:38:28.059Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:38:28.060Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:38:28.089Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:38:28.091Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:38:28.094Z"}
+{"level":"info","message":"Client Connected: EHkbUCFCZfUJsgBsAAAO, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T10:39:26.318Z"}
+{"level":"info","message":"Client Connected: L8LGx7kYAaHPvFoqAAAQ, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:41:33.538Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:41:33.643Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:41:33.645Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:41:33.646Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:41:33.689Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:41:33.691Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:41:33.692Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:41:33.770Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:41:33.773Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:41:33.774Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:41:33.796Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:41:33.797Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:41:33.798Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:41:33.875Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:41:33.876Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:41:33.877Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:41:33.911Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:41:33.912Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:41:33.913Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:41:33.987Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:41:33.989Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:41:33.989Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:41:34.048Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:41:34.052Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:41:34.053Z"}
+{"level":"info","message":"Client Connected: izU2lRr1Cezi7pztAAAS, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T10:43:03.320Z"}
+{"level":"info","message":"Client Connected: i1fF6ICupCOpa4y9AAAU, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:50:13.338Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:50:13.439Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:50:13.445Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:50:13.447Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:50:13.466Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:50:13.468Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:50:13.469Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:50:13.611Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:50:13.612Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:50:13.614Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:50:13.653Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:50:13.655Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:50:13.656Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:50:13.744Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:50:13.747Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:50:13.750Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:50:13.768Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:50:13.770Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:50:13.773Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:50:13.871Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:50:13.872Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:50:13.877Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:50:13.903Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:50:13.908Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:50:13.910Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:50:48.440Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:50:48.442Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:50:48.443Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:50:48.454Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:50:48.457Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:50:48.459Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:51:14.347Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:51:14.355Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:51:14.359Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:51:14.392Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:51:14.394Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:51:14.395Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:51:14.469Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:51:14.473Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:51:14.477Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:51:14.513Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:51:14.527Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:51:14.529Z"}
+{"level":"info","message":"Client Connected: wchpYrSD-B6d68lQAAAX, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:54:43.881Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:54:44.138Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:54:44.218Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:54:44.307Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:54:44.355Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:54:44.356Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:54:44.357Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T10:54:44.464Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T10:54:44.473Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T10:54:44.484Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T10:54:44.522Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T10:54:44.523Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T10:54:44.524Z"}
+{"level":"info","message":"Client Connected: oWuG9XmlszBY1HSJAAAZ, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:05:07.969Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:07:47.971Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:07:48.314Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:07:48.824Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:07:49.145Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=undefined, limit=20, page=1","timestamp":"2026-01-14T11:07:49.543Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:07:49.689Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:07:49.972Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:07:50.122Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:07:50.158Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:07:50.247Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=undefined, limit=20, page=1","timestamp":"2026-01-14T11:07:50.249Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:07:50.251Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:07:50.267Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:07:50.269Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:07:50.269Z"}
+{"level":"info","message":"Client Connected: TXT4nk-KiMw9mQ5gAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:07:50.352Z"}
+{"level":"info","message":"Client Connected: FEcCvhPuaPM2KboTAAAE, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:07:55.937Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:07:56.182Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=undefined, limit=20, page=1","timestamp":"2026-01-14T11:07:56.294Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:07:56.392Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:07:56.448Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:07:56.470Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:07:56.471Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:07:56.571Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=undefined, limit=20, page=1","timestamp":"2026-01-14T11:07:56.573Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:07:56.576Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:07:56.608Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:07:56.616Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:07:56.622Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:08:06.345Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:08:06.348Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:08:06.350Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:08:06.382Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:08:06.385Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:08:06.387Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:08:06.446Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:08:06.586Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:08:06.707Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:08:06.923Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:08:07.052Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:08:07.099Z"}
+{"level":"info","message":"Client Connected: -V3jv_Mv40XYYd89AAAH, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:08:27.900Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:08:28.069Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:08:28.115Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:08:28.158Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:08:28.223Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:08:28.230Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:08:28.231Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:08:28.313Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:08:28.314Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:08:28.315Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:08:28.345Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:08:28.350Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:08:28.351Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:10:35.459Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:10:35.460Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:10:35.460Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:10:35.484Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:10:35.487Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:10:35.560Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:10:35.743Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:10:35.758Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:10:35.763Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:10:35.857Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:10:36.008Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:10:36.123Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:11:10.308Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:11:10.310Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:11:10.311Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:11:10.323Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:11:10.327Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:11:10.327Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:11:28.675Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:11:28.676Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:11:28.677Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:11:28.689Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:11:28.690Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:11:28.691Z"}
+{"level":"info","message":"Client Connected: QOjPDN773MFJE433AAAK, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:12:24.078Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:12:24.287Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:12:24.341Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:12:24.373Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:12:24.456Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:12:24.485Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:12:24.487Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:12:24.570Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:12:24.582Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:12:24.583Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:12:24.619Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:12:24.620Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:12:24.621Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:13:01.325Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:13:01.326Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:13:01.326Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:13:01.343Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:13:01.344Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:13:01.345Z"}
+{"level":"info","message":"Client Connected: QExCEw0fm0LjvHhEAAAN, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:13:08.920Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:13:09.118Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:13:09.175Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:13:09.204Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:13:09.283Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:13:09.329Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:13:09.349Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:13:09.456Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:13:09.461Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:13:09.463Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:13:09.474Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:13:09.475Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:13:09.475Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:13:48.336Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:13:48.338Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:13:48.339Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:13:48.371Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:13:48.410Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:13:48.412Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:13:49.079Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:13:49.081Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:13:49.081Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:13:49.086Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:13:49.098Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:13:49.100Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:14:09.566Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:14:09.595Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:14:09.609Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:14:09.664Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:14:09.672Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:14:09.722Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:14:30.311Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:14:30.312Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:14:30.312Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:14:30.329Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:14:30.330Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:14:30.331Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:14:43.068Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:14:43.069Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:14:43.075Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:14:43.100Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:14:43.103Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:14:43.161Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:14:54.299Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:14:54.300Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:14:54.300Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:14:54.315Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:14:54.316Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:14:54.316Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:16:48.303Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:16:48.306Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:16:48.307Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:16:48.323Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:16:48.357Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:16:48.372Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:31:29.913Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:31:29.915Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:31:29.982Z"}
+{"level":"info","message":"Client Connected: _BRscMItN_vwjLnBAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:31:33.319Z"}
+{"level":"info","message":"Client Connected: OGO9Y73HKTy1KF1-AAAE, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:31:46.187Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:31:47.147Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:31:47.148Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:31:47.150Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:31:47.330Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:31:47.332Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:31:47.333Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:31:47.549Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:31:47.551Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:31:47.552Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T11:31:47.612Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:31:47.613Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T11:31:47.614Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:39:37.619Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:39:37.625Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:39:37.746Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:39:45.368Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:39:45.371Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:39:45.440Z"}
+{"context":{},"level":"error","message":"Request Error User validation failed: serviceTypes: Service providers must select at least one service type","method":"PUT","stack":"ValidationError: User validation failed: serviceTypes: Service providers must select at least one service type\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T11:40:13.586Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:44:06.810Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:44:06.948Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:44:07.224Z"}
+{"context":{},"level":"error","message":"Request Error User validation failed: serviceTypes: Service providers must select at least one service type","method":"PUT","stack":"ValidationError: User validation failed: serviceTypes: Service providers must select at least one service type\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T11:44:50.850Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"context":{},"level":"error","message":"Request Error User validation failed: serviceTypes: Service providers must select at least one service type","method":"PUT","stack":"ValidationError: User validation failed: serviceTypes: Service providers must select at least one service type\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T11:45:19.535Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:45:42.282Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:45:42.288Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:45:42.384Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:46:34.329Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:46:34.337Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:46:34.471Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:46:48.821Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:46:48.828Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:46:48.962Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:48:07.548Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:48:07.553Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:48:07.692Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:48:17.504Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:48:17.508Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:48:17.659Z"}
+{"context":{},"level":"error","message":"Request Error User validation failed: serviceTypes: Service providers must select at least one service type","method":"PUT","stack":"ValidationError: User validation failed: serviceTypes: Service providers must select at least one service type\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T11:48:46.904Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:49:31.571Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:49:31.575Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:49:31.693Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:49:44.437Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:49:44.440Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:50:22.150Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:50:22.153Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T11:50:22.275Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:50:22.588Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:50:22.592Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:50:50.775Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:50:50.785Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T11:52:16.550Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T11:52:16.555Z"}
+{"level":"info","message":"Client Connected: oo7uky1TYAETflznAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:54:56.061Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:54:56.288Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:54:56.289Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:54:56.289Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T11:54:56.310Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T11:54:56.311Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T11:54:56.410Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:54:56.432Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T11:54:56.432Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:54:56.481Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:54:56.482Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:54:56.482Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T11:54:56.498Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T11:54:56.499Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T11:54:56.536Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:54:56.563Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T11:54:56.564Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:54:56.636Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:54:56.637Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:54:56.637Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T11:54:56.653Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T11:54:56.653Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T11:54:56.672Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:54:56.677Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T11:54:56.678Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:54:56.686Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:54:56.687Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:54:56.687Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T11:54:56.691Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T11:54:56.692Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T11:54:56.699Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:54:56.702Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T11:54:56.702Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T11:55:11.698Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T11:55:11.698Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T11:55:11.699Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T11:55:11.702Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T11:55:11.703Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T11:55:11.712Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T11:55:11.715Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T11:55:11.716Z"}
+{"level":"info","message":"Client Connected: 7x6ftpHMtdOC1phPAAAD, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:00:17.146Z"}
+{"level":"info","message":"Client Connected: W4cF1843PdkLf5L_AAAF, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:00:37.355Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T12:03:09.776Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T12:03:09.783Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T12:03:09.884Z"}
+{"level":"info","message":"Client Connected: 4CObHuTWQPksfw66AAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:03:11.340Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T12:03:33.687Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T12:03:33.690Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T12:03:33.792Z"}
+{"level":"info","message":"Client Connected: 7dWbVqUJMgCoed-VAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:03:39.362Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T12:04:08.265Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T12:04:08.269Z"}
+{"level":"info","message":"Client Connected: xyAuDXt0RIulmRzYAAAD, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:12:45.938Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:13:15.037Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:13:15.038Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:13:15.038Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:13:15.079Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:13:15.082Z"}
+{"level":"info","message":"Client Connected: Tdvs8SKCmAwj8lQfAAAG, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:13:15.144Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:13:15.186Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:13:15.225Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:13:15.225Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:13:15.391Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:13:15.391Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:13:15.392Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:13:15.411Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:13:15.412Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:13:15.606Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:13:15.691Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:13:15.691Z"}
+{"context":{},"level":"error","message":"Request Error Booking validation failed: status: `Applied` is not a valid enum value for path `status`.","method":"POST","stack":"ValidationError: Booking validation failed: status: `Applied` is not a valid enum value for path `status`.\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T12:13:23.062Z","url":"/api/v1/user/apply-to-request/69676dd5809010724fdafb71","userId":"69673ec29b63259c6df8a040"}
+{"context":{},"level":"error","message":"Request Error Booking validation failed: status: `Applied` is not a valid enum value for path `status`.","method":"POST","stack":"ValidationError: Booking validation failed: status: `Applied` is not a valid enum value for path `status`.\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T12:13:24.381Z","url":"/api/v1/user/apply-to-request/69676dd5809010724fdafb71","userId":"69673ec29b63259c6df8a040"}
+{"level":"info","message":"Client Connected: IN9xe7Zpr8g1KQ3BAAAI, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:19:02.293Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T12:22:00.697Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T12:22:00.700Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T12:22:00.832Z"}
+{"level":"info","message":"Client Connected: D4KwDYSwMPVkgCzUAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:22:02.333Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:22:07.769Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:22:07.770Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:22:07.771Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:22:07.817Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:22:07.819Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:22:07.854Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:22:07.877Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:22:07.878Z"}
+{"level":"info","message":"Client Connected: XHJyoGRh1vyJUa1QAAAE, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:22:14.190Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:22:14.316Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:22:14.316Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:22:14.317Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:22:14.373Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:22:14.374Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:22:14.420Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:22:14.458Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:22:14.459Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:22:14.606Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:22:14.607Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:22:14.607Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:22:14.614Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:22:14.614Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:22:14.625Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:22:14.629Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:22:14.630Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:22:23.017Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:22:23.018Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:22:23.018Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:22:23.033Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:22:23.034Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:22:23.050Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:22:23.074Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:22:23.074Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:22:28.557Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:22:28.558Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:22:28.559Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:22:28.566Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:22:28.567Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:22:28.580Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:22:28.586Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:22:28.587Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:22:34.116Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:22:34.117Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:22:34.117Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:22:34.125Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:22:34.125Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:22:34.140Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:22:34.147Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:22:34.148Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:22:38.592Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:22:38.594Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:22:38.594Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:22:38.603Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:22:38.603Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:22:38.613Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:22:38.620Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:22:38.621Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:22:43.469Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:22:43.469Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:22:43.470Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:22:43.477Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:22:43.478Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:22:43.487Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:22:43.490Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:22:43.491Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T12:24:21.039Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T12:24:21.040Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T12:24:21.040Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T12:24:21.045Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T12:24:21.046Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T12:24:21.058Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T12:24:21.061Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T12:24:21.061Z"}
+{"level":"info","message":"Client Connected: Wc1ux0rIQb6LdAJFAAAJ, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:23:00.089Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T14:23:03.216Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T14:23:03.217Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T14:23:03.217Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T14:23:03.222Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T14:23:03.222Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T14:23:03.232Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:23:03.235Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T14:23:03.236Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T14:23:03.740Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T14:23:03.740Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T14:23:03.741Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T14:23:03.748Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T14:23:03.749Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T14:23:03.777Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:23:03.782Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T14:23:03.782Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:24:07.804Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:24:07.807Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:24:22.203Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:24:22.208Z"}
+{"level":"info","message":"Client Connected: 0fL4_9glVmUCwwyfAAAL, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:27:58.269Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:30:56.425Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:30:56.430Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:31:36.774Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:31:36.776Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T14:31:36.910Z"}
+{"level":"info","message":"Client Connected: X7mxhChNgIoDUbd9AAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:31:38.174Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:31:59.056Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:31:59.062Z"}
+{"level":"info","message":"Client Connected: yYyuyOOZldu4TGE6AAAE, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:37:18.692Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T14:37:18.845Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T14:37:18.846Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T14:37:18.846Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T14:37:18.891Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T14:37:18.893Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T14:37:18.965Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:37:18.994Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T14:37:18.994Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T14:37:19.051Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T14:37:19.053Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T14:37:19.053Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T14:37:19.084Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T14:37:19.085Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T14:37:19.139Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:37:19.155Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T14:37:19.156Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T14:37:36.699Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T14:37:36.700Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T14:37:36.701Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T14:37:36.706Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T14:37:36.707Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T14:37:36.716Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:37:36.721Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T14:37:36.722Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T14:37:39.516Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T14:37:39.517Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T14:37:39.517Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T14:37:39.532Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T14:37:39.533Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T14:37:39.552Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:37:39.557Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T14:37:39.557Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T14:37:42.615Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T14:37:42.616Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T14:37:42.616Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T14:37:42.621Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T14:37:42.622Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T14:37:42.633Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:37:42.641Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T14:37:42.641Z"}
+{"level":"info","message":"Client Connected: kNalGG_KhIKNfE5JAAAH, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:38:21.516Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T14:38:22.115Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T14:38:22.116Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T14:38:22.117Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T14:38:22.158Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T14:38:22.159Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T14:38:22.394Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:38:22.445Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T14:38:22.445Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T14:38:22.526Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T14:38:22.526Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T14:38:22.527Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-14T14:38:22.549Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-14T14:38:22.549Z"}
+{"level":"info","message":"Found 4 total service requests for provider","timestamp":"2026-01-14T14:38:22.575Z"}
+{"level":"info","message":"Recommended 4 of 4 matching requests to provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T14:38:22.585Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 4 requests","timestamp":"2026-01-14T14:38:22.586Z"}
+{"level":"info","message":"Client Connected: w60sd3VNIUtdEl_4AAAJ, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:38:33.522Z"}
+{"context":{},"level":"error","message":"Request Error ServiceOffer validation failed: status: `Pending` is not a valid enum value for path `status`.","method":"POST","stack":"ValidationError: ServiceOffer validation failed: status: `Pending` is not a valid enum value for path `status`.\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T14:39:09.424Z","url":"/api/v1/user/send-direct-service-offer","userId":"6967516ca27f4091a38fdc6e"}
+{"context":{},"level":"error","message":"Request Error ServiceOffer validation failed: status: `Pending` is not a valid enum value for path `status`.","method":"POST","stack":"ValidationError: ServiceOffer validation failed: status: `Pending` is not a valid enum value for path `status`.\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T14:39:10.392Z","url":"/api/v1/user/send-direct-service-offer","userId":"6967516ca27f4091a38fdc6e"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:40:38.650Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:40:38.653Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T14:40:38.769Z"}
+{"level":"info","message":"Client Connected: AbkA_haL9Wc2HtT3AAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:41:37.721Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:47:22.332Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:47:22.335Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T14:47:22.465Z"}
+{"level":"info","message":"Client Connected: Rfn10WbNpvGPBxg4AAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:47:23.228Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:47:43.418Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:47:43.421Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T14:47:43.535Z"}
+{"level":"info","message":"Client Connected: zGIomZWpl-NzbMXyAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:47:46.757Z"}
+{"level":"info","message":"Client Connected: lrMTmU7q7_qVZUrWAAAD, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:51:26.089Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:54:25.701Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:54:25.704Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T14:54:25.810Z"}
+{"level":"info","message":"Client Connected: fuRnQQ6c1A3-1r8rAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:54:28.071Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:54:45.064Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:54:45.067Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T14:54:45.241Z"}
+{"level":"info","message":"Client Connected: LQPAHKj0cC6Eq3vJAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:54:50.072Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T14:55:00.933Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T14:55:00.936Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T14:55:01.050Z"}
+{"level":"info","message":"Client Connected: rmmh1DRih_k_AcSUAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:55:01.279Z"}
+{"level":"info","message":"Client Connected: etTPCF8DCLg01KjsAAAE, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T14:57:58.381Z"}
+{"level":"info","message":"Client Connected: ciRgZKBpDwqHsqJaAAAG, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T15:04:36.936Z"}

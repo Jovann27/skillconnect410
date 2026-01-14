@@ -21,7 +21,8 @@ const bookingSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Accepted", "In Progress", "Completed", "Cancelled", "Declined"],
+    // Include "Applied" status for provider applications
+    enum: ["Applied", "Accepted", "In Progress", "Completed", "Cancelled", "Declined"],
     default: "Accepted"
   },
   commissionFee: {

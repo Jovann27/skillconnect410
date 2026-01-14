@@ -156,6 +156,91 @@ userSchema.index({
   name: 'user_text_index'
 });
 
+/**
+ * Auto-sync skills from serviceTypes for Service Providers.
+ * Ensures up to 3 active skills per selected serviceType are stored on:
+ * - `skillsWithService` (structured)
+ * - `skills` (legacy string array used by multiple frontend screens)
+ *
+ * This only ADDS missing skills; it does not remove any existing skills.
+ */
+userSchema.pre("save", async function ensureDefaultSkillsForServiceTypes(next) {
+  try {
+    if (this.role !== "Service Provider") return next();
+    if (!Array.isArray(this.serviceTypes) || this.serviceTypes.length === 0) return next();
+
+    // Lazy import to avoid circular deps at load time
+    const Skill = (await import("./skillSchema.js")).default;
+
+    if (!Array.isArray(this.skills)) this.skills = [];
+    if (!Array.isArray(this.skillsWithService)) this.skillsWithService = [];
+
+    const existingSkillIds = this.skillsWithService
+      .map(s => s?.skill)
+      .filter(Boolean)
+      .map(id => id.toString());
+
+    const existingSkillDocs = existingSkillIds.length
+      ? await Skill.find({ _id: { $in: existingSkillIds } }).select("_id name serviceType")
+      : [];
+
+    const existingByServiceType = {};
+    const existingSkillIdSet = new Set(existingSkillDocs.map(d => d._id.toString()));
+
+    for (const doc of existingSkillDocs) {
+      const st = doc.serviceType?.toString();
+      if (!st) continue;
+      if (!existingByServiceType[st]) existingByServiceType[st] = [];
+      existingByServiceType[st].push(doc);
+
+      // keep legacy array in sync
+      if (doc.name && !this.skills.includes(doc.name)) {
+        this.skills.push(doc.name);
+      }
+    }
+
+    for (const serviceTypeId of this.serviceTypes) {
+      const stId = serviceTypeId?.toString();
+      if (!stId) continue;
+
+      const already = existingByServiceType[stId]?.length || 0;
+      const needed = Math.max(0, 3 - already);
+      if (needed === 0) continue;
+
+      const missingSkills = await Skill.find({
+        serviceType: stId,
+        isActive: true,
+        _id: { $nin: Array.from(existingSkillIdSet) }
+      })
+        .sort({ createdAt: 1, name: 1 })
+        .limit(needed)
+        .select("_id name serviceType");
+
+      for (const ms of missingSkills) {
+        const msId = ms._id.toString();
+        if (existingSkillIdSet.has(msId)) continue;
+
+        this.skillsWithService.push({
+          skill: ms._id,
+          yearsOfExperience: 0,
+          proficiency: "Intermediate",
+          addedAt: new Date()
+        });
+
+        existingSkillIdSet.add(msId);
+
+        if (ms.name && !this.skills.includes(ms.name)) {
+          this.skills.push(ms.name);
+        }
+      }
+    }
+
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+});
+
 userSchema.pre("save", async function(next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);

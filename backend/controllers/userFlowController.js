@@ -1699,7 +1699,7 @@ export const getProviderOffers = catchAsyncError(async (req, res, next) => {
   const skip = (page - 1) * limit;
 
   // First, get direct service offers (ServiceOffer records)
-  let directOffersQuery = { provider: req.user._id, status: "Pending" };
+  let directOffersQuery = { provider: req.user._id, status: "Open" };
   if (status) {
     directOffersQuery.status = status;
   }
@@ -1784,7 +1784,7 @@ export const respondToServiceOffer = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Not authorized to respond to this offer", 403));
   }
 
-  if (offer.status !== "Pending") {
+  if (offer.status !== "Open") {
     return next(new ErrorHandler("Offer has already been responded to", 400));
   }
 

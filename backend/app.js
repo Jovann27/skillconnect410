@@ -112,11 +112,15 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.example.com"]
+      // Allow images from API host during development (e.g. /uploads/*)
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      // Allow the frontend to call the API from localhost / LAN during development
+      connectSrc: ["'self'", "http:", "https:", "ws:"]
     }
   },
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  // Fix ERR_BLOCKED_BY_RESPONSE.NotSameOrigin when loading /uploads/* across origins
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 app.use(hpp()); // Prevent HTTP Parameter Pollution
 app.use(mongoSanitize()); // Sanitize MongoDB queries

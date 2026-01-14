@@ -34,7 +34,8 @@ const Navbar = () => {
 
   const fetchUnreadCount = useCallback(async () => {
     // Only fetch if user is authorized and has a valid token
-    if (!isAuthorized || !localStorage.getItem("token")) {
+    // Also only fetch for USER sessions (admin tokens will get 401 on user endpoints)
+    if (!isAuthorized || tokenType !== "user" || !localStorage.getItem("token")) {
       setUnreadCount(0);
       return;
     }
@@ -52,7 +53,7 @@ const Navbar = () => {
       // Only log unexpected errors
       console.error("Error fetching unread count:", err);
     }
-  }, [isAuthorized]);
+  }, [isAuthorized, tokenType]);
 
   useEffect(() => {
     if (show || dashboardDropdown) {
@@ -75,7 +76,7 @@ const Navbar = () => {
     } else {
       setUnreadCount(0);
     }
-  }, [isAuthorized, fetchUnreadCount]);
+  }, [isAuthorized, tokenType, fetchUnreadCount]);
 
   const handleLogout = async () => {
     if (isLoggingOut) return;

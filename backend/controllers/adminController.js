@@ -489,15 +489,23 @@ export const adminUpdateUserSkills = catchAsyncError(async (req, res, next) => {
   // Validate skill limits per service type (max 3 skills per service type)
   const skillCountsByServiceType = {};
 
-  // Clear existing skills
+  // Clear existing skills (but preserve serviceTypes)
+  // NOTE: serviceTypes are required for Service Providers by schema validation.
+  // We should not wipe them here; instead, keep current serviceTypes and only ADD new ones inferred from skills.
+  const existingServiceTypes = Array.isArray(user.serviceTypes) ? [...user.serviceTypes] : [];
   user.skills = [];
   user.skillsWithService = [];
-  user.serviceTypes = [];
+  user.serviceTypes = existingServiceTypes;
 
   // For each skill name, find the corresponding Skill document and validate
   for (const skillName of skills) {
-    const skill = await Skill.findOne({ name: skillName, isActive: true }).populate("serviceType");
+    const trimmedSkillName = skillName.trim();
+    if (!trimmedSkillName) continue; // Skip empty skills
+
+    const skill = await Skill.findOne({ name: trimmedSkillName, isActive: true }).populate("serviceType");
+    
     if (skill) {
+      // Skill exists in Skill collection - add to structured array
       const serviceTypeId = skill.serviceType._id.toString();
 
       // Initialize count for this service type
@@ -533,18 +541,23 @@ export const adminUpdateUserSkills = catchAsyncError(async (req, res, next) => {
         // Increment count
         skillCountsByServiceType[serviceTypeId]++;
       }
+    } else {
+      // Custom skill that doesn't exist in Skill collection - add directly to legacy skills array
+      // This allows admins to add custom skills that aren't in the predefined list
+      if (!user.skills.includes(trimmedSkillName)) {
+        user.skills.push(trimmedSkillName);
+      }
     }
   }
 
-  // If no valid skills were found and user is a Service Provider,
-  // we need to handle the validation carefully
-  let shouldSkipValidation = false;
-  if (user.role === "Service Provider" && user.skills.length === 0 && user.serviceTypes.length === 0) {
-    // Allow admins to clear all skills if needed for management purposes
-    shouldSkipValidation = true;
-  }
+  // Validation handling:
+  // The User schema requires at least one serviceType for Service Providers.
+  // However, admins may manage skills before serviceTypes are configured (or add custom skills).
+  // In these cases, skip schema validation to avoid 500s and allow admin recovery actions.
+  const shouldSkipValidation =
+    user.role === "Service Provider" &&
+    (!Array.isArray(user.serviceTypes) || user.serviceTypes.length === 0);
 
-  // Save with or without validation based on the situation
   await user.save({ validateBeforeSave: !shouldSkipValidation });
 
   const updatedUser = await User.findById(userId).populate({

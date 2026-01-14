@@ -93,7 +93,13 @@ const ProviderDashboard = () => {
 
   const fetchServiceOffers = async () => {
     try {
-      const response = await api.get('/user/provider-offers');
+      // Backend paginates offers (default limit=20). Use a high limit so the dashboard shows all received offers.
+      const response = await api.get('/user/provider-offers', {
+        params: {
+          page: 1,
+          limit: 10000
+        }
+      });
       if (response.data.success) {
         setServiceOffers(response.data.offers || []);
       } else {
@@ -233,42 +239,6 @@ const ProviderDashboard = () => {
     return stars;
   };
 
-  const renderOverviewTab = () => (
-    <div className="bg-gray-50 p-6 rounded-lg">
-      <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-      <div className="space-y-3">
-        {serviceRequests.length > 0 && (
-          <div className="flex items-center p-3 bg-white rounded">
-            <FaClipboardList className="text-blue-600 mr-3" />
-            <div>
-              <div className="font-medium">New service request available</div>
-              <div className="text-sm text-gray-600">{serviceRequests.length} requests waiting for your response</div>
-            </div>
-          </div>
-        )}
-        {serviceOffers.length > 0 && (
-          <div className="flex items-center p-3 bg-white rounded">
-            <FaHandshake className="text-green-600 mr-3" />
-            <div>
-              <div className="font-medium">Pending service offers</div>
-              <div className="text-sm text-gray-600">{serviceOffers.length} offers need your attention</div>
-            </div>
-          </div>
-        )}
-        {applications.length > 0 && (
-          <div className="flex items-center p-3 bg-white rounded">
-            <FaFileAlt className="text-purple-600 mr-3" />
-            <div>
-              <div className="font-medium">Work records submitted</div>
-              <div className="text-sm text-gray-600">{applications.length} work records pending response</div>
-            </div>
-          </div>
-        )}
-
-      </div>
-    </div>
-  );
-
   const hasAlreadyApplied = (requestId) => {
     return applications.some(app => app.serviceRequest && app.serviceRequest._id === requestId);
   };
@@ -375,6 +345,9 @@ const ProviderDashboard = () => {
   const renderOffersTab = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Service Offers</h3>
+      <p className="text-sm text-gray-600">
+        Showing {serviceOffers.length} offer{serviceOffers.length !== 1 ? 's' : ''} that require your response
+      </p>
       {serviceOffers.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           <FaHandshake className="mx-auto text-4xl mb-4 text-gray-300" />
@@ -382,24 +355,63 @@ const ProviderDashboard = () => {
         </div>
       ) : (
         serviceOffers.map((offer) => (
-          <div key={offer._id} className="bg-white border rounded-lg p-4">
+          <div key={offer._id} className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-3">
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">{offer.title}</h4>
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    offer.type === 'direct'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-purple-100 text-purple-800'
-                  }`}>
-                    {offer.type === 'direct' ? 'Direct Offer' : 'Service Request Offer'}
-                  </span>
+                  <h4 className="font-semibold text-lg">{offer.title}</h4>
+                  <div className="flex gap-2">
+                    <span className={`text-xs px-2 py-1 rounded font-medium ${
+                      offer.type === 'direct'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-purple-100 text-purple-800'
+                    }`}>
+                      {offer.type === 'direct' ? 'Direct Offer' : 'Service Request'}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded font-medium ${
+                      offer.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {offer.status}
+                    </span>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600">{offer.description}</p>
-                <p className="text-sm text-gray-500">{offer.location}</p>
+                <p className="text-sm text-gray-700 mb-2">{offer.description}</p>
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-600 flex items-center gap-1">
+                    <FaMapMarkerAlt className="text-gray-400" />
+                    {offer.location || 'Location not specified'}
+                  </p>
+                  {offer.preferredDate && (
+                    <p className="text-sm text-gray-600 flex items-center gap-1">
+                      <FaCalendarAlt className="text-gray-400" />
+                      {new Date(offer.preferredDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                      {offer.preferredDate && offer.preferredDate.toString().includes('T') &&
+                        ` at ${new Date(offer.preferredDate).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}`
+                      }
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-600 flex items-center gap-1">
+                    <FaUser className="text-gray-400" />
+                    From: {offer.requester?.firstName} {offer.requester?.lastName}
+                    {offer.requester?.email && (
+                      <span className="text-xs text-gray-500">({offer.requester.email})</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Received: {new Date(offer.createdAt).toLocaleDateString()} at {new Date(offer.createdAt).toLocaleTimeString()}
+                  </p>
+                </div>
               </div>
-              <div className="text-right ml-4">
-                <div className="font-bold text-green-600">
+              <div className="text-right ml-4 min-w-[150px]">
+                <div className="font-bold text-green-600 text-lg mb-1">
                   ₱{offer.minBudget && offer.maxBudget
                     ? `${offer.minBudget.toLocaleString()} - ₱${offer.maxBudget.toLocaleString()}`
                     : offer.minBudget || offer.maxBudget
@@ -407,23 +419,28 @@ const ProviderDashboard = () => {
                     : 'Budget not specified'
                   }
                 </div>
-                <div className="text-sm text-gray-500">From: {offer.requester?.firstName} {offer.requester?.lastName}</div>
+                {offer.requester?.phone && (
+                  <p className="text-sm text-gray-500 flex items-center justify-end gap-1">
+                    <FaPhone className="text-gray-400" />
+                    {offer.requester.phone}
+                  </p>
+                )}
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-4">
               <button
                 onClick={() => handleRespondToOffer(offer, 'accept')}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium flex-1"
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium flex-1 transition-colors"
               >
                 <FaCheck className="inline mr-2" />
-                Accept
+                Accept Offer
               </button>
               <button
                 onClick={() => handleRespondToOffer(offer, 'decline')}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium flex-1"
+                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium flex-1 transition-colors"
               >
                 <FaTimes className="inline mr-2" />
-                Decline
+                Decline Offer
               </button>
             </div>
           </div>
@@ -499,14 +516,14 @@ const ProviderDashboard = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-2">
-                Service Provider Dashboard
+                Worker Dashboard
               </h2>
               <p className="text-gray-600 text-lg">
-                Manage your services, applications
+                Manage your services, received offers and applications
               </p>
             </div>
             <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="bg-blue-50 p-4 rounded-lg cursor-pointer" onClick={() => setActiveTab('requests')}>
                 <div className="flex items-center">
                   <FaClipboardList className="text-blue-600 text-2xl mr-3" />
@@ -540,13 +557,54 @@ const ProviderDashboard = () => {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-lg mb-6">
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-t-lg shadow-lg mb-0">
+          <div className="flex border-b border-gray-200">
+            <button
+              onClick={() => {
+                setActiveTab('requests');
+                fetchServiceRequests();
+              }}
+              className={`flex-1 px-4 py-3 font-medium text-center transition-colors ${
+                activeTab === 'requests'
+                  ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Available Requests
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('offers');
+                fetchServiceOffers();
+              }}
+              className={`flex-1 px-4 py-3 font-medium text-center transition-colors ${
+                activeTab === 'offers'
+                  ? 'bg-green-50 text-green-600 border-b-2 border-green-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Service Offers
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('applications');
+                fetchApplications();
+              }}
+              className={`flex-1 px-4 py-3 font-medium text-center transition-colors ${
+                activeTab === 'applications'
+                  ? 'bg-purple-50 text-purple-600 border-b-2 border-purple-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              My Work Records
+            </button>
+          </div>
+        </div>
 
-
-          {/* Tab Content */}
+        {/* Tab Content */}
+        <div className="bg-white rounded-b-lg shadow-lg mb-6">
           <div className="p-6">
-            {activeTab === 'overview' && renderOverviewTab()}
             {activeTab === 'requests' && renderRequestsTab()}
             {activeTab === 'offers' && renderOffersTab()}
             {activeTab === 'applications' && renderApplicationsTab()}

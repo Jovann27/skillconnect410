@@ -119,6 +119,7 @@ const UserManagement = () => {
   const [editingServices, setEditingServices] = useState([]);
   const [isEditingSkills, setIsEditingSkills] = useState(false);
   const [editingSkills, setEditingSkills] = useState([]);
+  const [customSkill, setCustomSkill] = useState("");
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -294,7 +295,8 @@ const UserManagement = () => {
       if (result.data.success) {
         alert("Skills updated successfully");
         fetchData();
-        return true;
+        // Return the updated user data if available
+        return result.data.user || true;
       }
     } catch (err) {
       console.error("Error updating skills:", err);
@@ -314,10 +316,20 @@ const UserManagement = () => {
   };
 
   const addSkill = (skill) => {
-    if (!skill || editingSkills.includes(skill)) {
+    const trimmedSkill = (skill || "").trim();
+
+    // Prevent empty or duplicate skills
+    if (!trimmedSkill || editingSkills.includes(trimmedSkill)) {
       return;
     }
-    setEditingSkills([...editingSkills, skill]);
+
+    // Enforce a maximum of 10 skills per provider
+    if (editingSkills.length >= 10) {
+      alert("You can only assign up to 10 skills to this provider.");
+      return;
+    }
+
+    setEditingSkills([...editingSkills, trimmedSkill]);
   };
 
   const removeSkill = (skillToRemove) => {
@@ -328,13 +340,36 @@ const UserManagement = () => {
   const saveSkills = async () => {
     if (!selectedUser) return;
 
+    // Validate minimum skills requirement (1-2 skills)
+    if (editingSkills.length === 0) {
+      alert("Please add at least 1 skill to this provider.");
+      return;
+    }
+
+    if (editingSkills.length > 10) {
+      alert("Maximum 10 skills allowed per provider.");
+      return;
+    }
+
     setActionLoading('save-skills');
-    const success = await updateUserSkills(selectedUser._id, editingSkills);
+    const result = await updateUserSkills(selectedUser._id, editingSkills);
     setActionLoading(null);
 
-    if (success) {
+    if (result) {
       setIsEditingSkills(false);
       setEditingSkills([]);
+      
+      // Refresh the selected user data to show updated skills
+      try {
+        const updatedUserResult = await api.get(`/admin/users/${selectedUser._id}`);
+        if (updatedUserResult.data.success && updatedUserResult.data.user) {
+          setSelectedUser({ ...updatedUserResult.data.user, _isLoaded: true });
+        }
+      } catch (err) {
+        console.error("Error refreshing user data:", err);
+        // If refresh fails, update selectedUser with the skills we just saved
+        setSelectedUser({ ...selectedUser, skills: editingSkills });
+      }
     }
   };
 
@@ -1554,6 +1589,9 @@ const UserManagement = () => {
                         <h5 style={{ margin: '0 0 1rem 0', color: '#374151', fontSize: '0.875rem', fontWeight: '600' }}>
                           Add Skills by Service Category
                         </h5>
+                        <p style={{ margin: '0 0 0.75rem 0', color: '#6b7280', fontSize: '0.75rem' }}>
+                          Select up to <strong>10 skills</strong> for this provider. You can also add a custom skill below.
+                        </p>
                         {Object.entries(SKILLS_OPTIONS).map(([serviceType, skills]) => {
                           const availableSkills = skills.filter(skill => !editingSkills.includes(skill));
                           if (availableSkills.length === 0) return null;
@@ -1571,6 +1609,7 @@ const UserManagement = () => {
                               </label>
                               <select
                                 value=""
+                                disabled={editingSkills.length >= 10}
                                 onChange={(e) => {
                                   if (e.target.value) {
                                     addSkill(e.target.value);
@@ -1586,7 +1625,11 @@ const UserManagement = () => {
                                   marginBottom: '0.5rem'
                                 }}
                               >
-                                <option value="">{`Select ${serviceType} skill`}</option>
+                                <option value="">
+                                  {editingSkills.length >= 10
+                                    ? 'Maximum skills reached'
+                                    : `Select ${serviceType} skill`}
+                                </option>
                                 {availableSkills.map((skill) => (
                                   <option key={skill} value={skill}>{skill}</option>
                                 ))}
@@ -1599,6 +1642,53 @@ const UserManagement = () => {
                             All available skills have been added
                           </p>
                         )}
+
+                        {/* Custom / Other Skill Input */}
+                        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px dashed #e5e7eb' }}>
+                          <h5 style={{ margin: '0 0 0.5rem 0', color: '#374151', fontSize: '0.875rem', fontWeight: '600' }}>
+                            Other Skill (optional)
+                          </h5>
+                          <p style={{ margin: '0 0 0.5rem 0', color: '#6b7280', fontSize: '0.75rem' }}>
+                            Use this if the provider&apos;s skill is not listed in the predefined categories.
+                          </p>
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input
+                              type="text"
+                              value={customSkill}
+                              onChange={(e) => setCustomSkill(e.target.value)}
+                              placeholder="Enter custom skill (e.g. Laundry, Labandera)"
+                              disabled={editingSkills.length >= 2}
+                              style={{
+                                flex: 1,
+                                padding: '0.5rem',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '0.375rem',
+                                fontSize: '0.875rem'
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!customSkill.trim()) return;
+                                addSkill(customSkill);
+                                setCustomSkill("");
+                              }}
+                              disabled={editingSkills.length >= 2 || !customSkill.trim()}
+                              style={{
+                                padding: '0.5rem 1rem',
+                                background: editingSkills.length >= 2 || !customSkill.trim() ? '#9ca3af' : '#2563eb',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '0.375rem',
+                                fontSize: '0.875rem',
+                                fontWeight: '500',
+                                cursor: editingSkills.length >= 2 || !customSkill.trim() ? 'not-allowed' : 'pointer'
+                              }}
+                            >
+                              + Add Skill
+                            </button>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Current Skills */}

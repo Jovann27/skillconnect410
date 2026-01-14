@@ -14,6 +14,7 @@ export const serviceRequestSchema = {
   },
   phone: {
     type: 'string',
+    required: false,
     pattern: /^[\+]?[1-9][\d]{0,15}$/
   },
   typeOfWork: {
@@ -24,19 +25,23 @@ export const serviceRequestSchema = {
   },
   time: {
     type: 'string',
+    required: false,
     pattern: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/
   },
   budget: {
     type: 'number',
+    required: false,
     min: 0,
     max: 100000
   },
   notes: {
     type: 'string',
+    required: false,
     maxLength: 500
   },
   targetProvider: {
     type: 'string',
+    required: false,
     pattern: /^[0-9a-fA-F]{24}$/ // MongoDB ObjectId
   }
 };
