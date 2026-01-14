@@ -566,3 +566,46 @@
 {"level":"info","message":"Client Connected: SxcFZJCHAuhbyLM0AAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:05:20.338Z"}
 {"context":{},"level":"error","message":"Request Error User validation failed: skills: Service providers must select at least one skill, serviceTypes: Service providers must select at least one service type","method":"PUT","stack":"ValidationError: User validation failed: skills: Service providers must select at least one skill, serviceTypes: Service providers must select at least one service type\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T08:08:47.762Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
 {"context":{},"level":"error","message":"Request Error User validation failed: skills: Service providers must select at least one skill, serviceTypes: Service providers must select at least one service type","method":"PUT","stack":"ValidationError: User validation failed: skills: Service providers must select at least one skill, serviceTypes: Service providers must select at least one service type\n    at Document.invalidate (C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3373:32)\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\document.js:3134:17\n    at C:\\Users\\Admin\\Desktop\\skillconnect4b410\\backend\\node_modules\\mongoose\\lib\\schemaType.js:1446:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","statusCode":500,"timestamp":"2026-01-14T08:09:12.740Z","url":"/api/v1/admin/user/skills/69673ec29b63259c6df8a040","userId":"anonymous"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T08:10:41.922Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T08:10:41.934Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T08:10:42.350Z"}
+{"level":"info","message":"Client Connected: 1yhf17Xiu4e2U2IIAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:10:42.572Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T08:17:09.347Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T08:17:09.355Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T08:17:09.476Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T08:17:09.556Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:17:09.642Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T08:17:09.705Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T08:17:09.863Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T08:17:09.933Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T08:17:10.005Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T08:17:10.087Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:17:10.155Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T08:17:10.221Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T08:17:10.386Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T08:17:10.407Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T08:17:10.425Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T08:17:10.506Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:17:10.532Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T08:17:10.584Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T08:17:10.707Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T08:17:10.724Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T08:17:10.777Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T08:17:10.825Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:17:10.827Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T08:17:10.935Z"}
+{"level":"info","message":"Client Connected: 3stSRIu8GgTXlTrFAAAD, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T08:19:18.931Z"}
+{"level":"info","message":"Client Connected: X6kaP0s7PvXRNrf2AAAG, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T08:23:45.587Z"}
+{"level":"info","message":"Client Connected: wQ_C7Vz6Ppj466GDAAAJ, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:23:53.276Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T08:23:53.421Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T08:23:53.422Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T08:23:53.423Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T08:23:53.453Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:23:53.455Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T08:23:53.456Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-14T08:23:53.539Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-14T08:23:53.541Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-14T08:23:53.542Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[], occupation=","timestamp":"2026-01-14T08:23:53.578Z"}
+{"level":"warn","message":"No search patterns for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-14T08:23:53.580Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-14T08:23:53.582Z"}
