@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../api';
 
 let _socket = null;
 let pendingListeners = [];
@@ -39,7 +40,7 @@ const initializeSocket = async (token) => {
         return null;
     }
 
-    _socket = io("http://192.168.1.2:4000/api/v1", {
+    _socket = io(API_BASE_URL.replace('/api/v1', ''), {
         withCredentials: true,
         query: { token }
     });

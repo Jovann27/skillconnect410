@@ -1,525 +1,421 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  ScrollView,
-  Alert,
-  Linking,
+  View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView,
+  Image, ActivityIndicator, Alert
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useMainContext } from '../contexts/MainContext';
-import Loader from './Loader';
 
-const ProviderProfileModal = ({ providerId, onClose, onOpenChat }) => {
+// Helper function to render stars
+const renderStars = (rating) => {
+  const stars = [];
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 !== 0;
+
+  for (let i = 0; i < 5; i++) {
+    if (i < fullStars) {
+      stars.push(<Icon key={i} name="star" size={16} color="#FFD700" />);
+    } else if (i === fullStars && hasHalfStar) {
+      stars.push(<Icon key={i} name="star-half" size={16} color="#FFD700" />);
+    } else {
+      stars.push(<Icon key={i} name="star-outline" size={16} color="#DDD" />);
+    }
+  }
+  return stars;
+};
+
+const ProviderProfileModal = ({ visible, providerId, onClose, onOpenChat, hideRequestService }) => {
   const { api } = useMainContext();
   const [provider, setProvider] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('about');
 
   useEffect(() => {
-    if (providerId) {
+    if (visible && providerId) {
       fetchProviderDetails();
     }
-  }, [providerId]);
+  }, [visible, providerId]);
 
   const fetchProviderDetails = async () => {
     try {
       setLoading(true);
-
-      // Get provider basic info
-      const providerResponse = await api.get('/user/service-providers');
-      if (providerResponse.data.success) {
-        const foundProvider = providerResponse.data.workers.find(p => p._id === providerId);
-        if (foundProvider) {
-          setProvider(foundProvider);
-        }
+      const response = await api.get(`/user/service-provider/${providerId}`);
+      if (response.data.success) {
+        setProvider(response.data.worker);
       }
-
-      // Get provider reviews (mock data for now)
-      // In a real implementation, you'd have a dedicated endpoint for provider reviews
-
     } catch (error) {
-      console.error("Error fetching provider details:", error);
+      console.error('Error fetching provider details:', error);
       Alert.alert('Error', 'Failed to load provider details');
     } finally {
       setLoading(false);
     }
   };
 
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < 5; i++) {
-      if (i < fullStars) {
-        stars.push('★');
-      } else if (i === fullStars && hasHalfStar) {
-        stars.push('☆');
-      } else {
-        stars.push('☆');
-      }
+  const handleSendMessage = () => {
+    if (onOpenChat) {
+      onOpenChat(providerId);
+      onClose();
     }
-    return stars.join('');
   };
 
-  if (loading) {
-    return (
-      <Modal visible={true} animationType="slide">
-        <View style={styles.loadingContainer}>
-          <Loader />
-        </View>
-      </Modal>
-    );
-  }
+  const handleSendOffer = () => {
+    // This will be handled by the parent component
+    Alert.alert('Send Offer', 'Navigate to create service request');
+    onClose();
+  };
 
-  if (!provider) {
-    return (
-      <Modal visible={true} animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Provider Profile</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Icon name="times" size={24} color="#666" />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>Provider not found</Text>
-            <TouchableOpacity style={styles.closeErrorButton} onPress={onClose}>
-              <Text style={styles.closeErrorButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    );
-  }
+  if (!visible) return null;
 
   return (
-    <Modal visible={true} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>Provider Profile</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Icon name="times" size={24} color="#666" />
-          </TouchableOpacity>
-        </View>
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>Provider Profile</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Icon name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
 
-        <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-          {/* Provider Header Info */}
-          <View style={styles.headerCard}>
-            <View style={styles.headerContent}>
-              <View style={styles.profileImageContainer}>
-                <View style={styles.profileImage}>
-                  <Icon name="user" size={40} color="#666" />
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#2196F3" />
+              <Text style={styles.loadingText}>Loading provider details...</Text>
+            </View>
+          ) : provider ? (
+            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+              {/* Profile Header */}
+              <View style={styles.profileHeader}>
+                <View style={styles.avatarContainer}>
+                  <Image
+                    source={{ uri: `http://10.0.2.2:5000${provider.profilePic}` }}
+                    style={styles.avatar}
+                  />
+                  {provider.verified && (
+                    <View style={styles.verifiedBadge}>
+                      <Icon name="verified" size={14} color="#FFF" />
+                    </View>
+                  )}
+                  {provider.isOnline && (
+                    <View style={styles.onlineBadge}>
+                      <View style={styles.onlineDot} />
+                    </View>
+                  )}
                 </View>
-                {provider.verified && (
-                  <View style={styles.verifiedBadge}>
-                    <Icon name="check" size={12} color="#fff" />
-                  </View>
-                )}
-                {provider.isOnline && (
-                  <View style={styles.onlineBadge}>
-                    <View style={styles.onlineDot} />
-                  </View>
-                )}
-              </View>
 
-              <View style={styles.headerInfo}>
-                <View style={styles.nameRow}>
+                <View style={styles.profileInfo}>
                   <Text style={styles.providerName}>
                     {provider.firstName} {provider.lastName}
                   </Text>
-                  {provider.verified && (
-                    <View style={styles.verifiedTag}>
-                      <Icon name="check" size={10} color="#fff" />
-                      <Text style={styles.verifiedTagText}>Verified</Text>
-                    </View>
-                  )}
-                </View>
-
-                <Text style={styles.occupation}>{provider.occupation || "Service Provider"}</Text>
-
-                <View style={styles.ratingRow}>
-                  <Text style={styles.ratingStars}>
+                  <View style={styles.ratingContainer}>
                     {renderStars(provider.averageRating || 0)}
-                  </Text>
-                  <Text style={styles.ratingText}>
-                    {provider.averageRating?.toFixed(1) || "N/A"} ({provider.totalReviews || 0} reviews)
-                  </Text>
-                </View>
-
-                <Text style={styles.rateText}>
-                  ₱{provider.serviceRate?.toLocaleString() || "Rate not set"}
-                </Text>
-
-                <View style={styles.locationRow}>
-                  {provider.address && (
-                    <View style={styles.locationItem}>
-                      <Icon name="map-marker" size={12} color="#666" />
-                      <Text style={styles.locationText}>{provider.address}</Text>
-                    </View>
-                  )}
-                  <View style={styles.locationItem}>
-                    <Icon name={provider.isOnline ? "circle" : "circle-o"} size={12} color={provider.isOnline ? "#28a745" : "#666"} />
-                    <Text style={[styles.locationText, provider.isOnline && styles.onlineText]}>
-                      {provider.isOnline ? "Available now" : "Offline"}
+                    <Text style={styles.ratingText}>
+                      ({provider.totalReviews || 0} reviews)
                     </Text>
                   </View>
+                  <Text style={styles.occupation}>{provider.occupation || 'Service Provider'}</Text>
                 </View>
               </View>
-            </View>
-          </View>
 
-          {/* Stats Cards */}
-          <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
-              <Icon name="briefcase" size={20} color="#007bff" />
-              <Text style={styles.statNumber}>{provider.totalJobsCompleted || 0}</Text>
-              <Text style={styles.statLabel}>Jobs Completed</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <Icon name="trophy" size={20} color="#28a745" />
-              <Text style={styles.statNumber}>{provider.averageRating?.toFixed(1) || "N/A"}</Text>
-              <Text style={styles.statLabel}>Average Rating</Text>
-            </View>
-          </View>
-
-          {/* Skills & Services */}
-          <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Skills & Services</Text>
-
-            {/* Skills */}
-            {provider.skills && provider.skills.length > 0 && (
-              <View style={styles.skillsSection}>
-                <Text style={styles.subsectionTitle}>Skills:</Text>
-                <View style={styles.skillsContainer}>
-                  {provider.skills.map((skill, index) => (
-                    <View key={index} style={styles.skillTag}>
-                      <Text style={styles.skillTagText}>{skill}</Text>
-                    </View>
-                  ))}
+              {/* Action Buttons */}
+              {!hideRequestService && (
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity style={styles.messageButton} onPress={handleSendMessage}>
+                    <Icon name="message" size={16} color="#2196F3" />
+                    <Text style={styles.messageButtonText}>Message</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.hireButton} onPress={handleSendOffer}>
+                    <Icon name="work" size={16} color="#FFF" />
+                    <Text style={styles.hireButtonText}>Send Offer</Text>
+                  </TouchableOpacity>
                 </View>
-              </View>
-            )}
+              )}
 
-            {/* Services */}
-            {provider.services && provider.services.length > 0 && (
-              <View style={styles.servicesSection}>
-                <Text style={styles.subsectionTitle}>Services Offered:</Text>
-                {provider.services.map((service, index) => (
-                  <View key={index} style={styles.serviceItem}>
-                    <View style={styles.serviceHeader}>
-                      <Text style={styles.serviceName}>{service.name}</Text>
-                      <Text style={styles.serviceRate}>₱{service.rate?.toLocaleString() || 'N/A'}</Text>
+              {/* Tab Navigation */}
+              <View style={styles.tabContainer}>
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'about' && styles.activeTab]}
+                  onPress={() => setActiveTab('about')}
+                >
+                  <Text style={[styles.tabText, activeTab === 'about' && styles.activeTabText]}>About</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'services' && styles.activeTab]}
+                  onPress={() => setActiveTab('services')}
+                >
+                  <Text style={[styles.tabText, activeTab === 'services' && styles.activeTabText]}>Services</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'reviews' && styles.activeTab]}
+                  onPress={() => setActiveTab('reviews')}
+                >
+                  <Text style={[styles.tabText, activeTab === 'reviews' && styles.activeTabText]}>Reviews</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Tab Content */}
+              {activeTab === 'about' && (
+                <View style={styles.tabContent}>
+                  <Text style={styles.sectionTitle}>About</Text>
+
+                  <View style={styles.infoSection}>
+                    <View style={styles.infoRow}>
+                      <Icon name="location-on" size={18} color="#666" />
+                      <Text style={styles.infoText}>{provider.address || 'Location not specified'}</Text>
                     </View>
-                    {service.description && (
-                      <Text style={styles.serviceDescription}>{service.description}</Text>
+
+                    {provider.yearsExperience && (
+                      <View style={styles.infoRow}>
+                        <Icon name="work" size={18} color="#666" />
+                        <Text style={styles.infoText}>{provider.yearsExperience} years experience</Text>
+                      </View>
                     )}
+
+                    {provider.serviceDescription && (
+                      <View style={styles.descriptionSection}>
+                        <Text style={styles.descriptionTitle}>Service Description</Text>
+                        <Text style={styles.descriptionText}>{provider.serviceDescription}</Text>
+                      </View>
+                    )}
+
+                    <View style={styles.skillsSection}>
+                      <Text style={styles.skillsTitle}>Skills</Text>
+                      <View style={styles.skillsContainer}>
+                        {provider.skills?.map((skill, index) => (
+                          <View key={index} style={styles.skillTag}>
+                            <Text style={styles.skillText}>{skill}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
                   </View>
-                ))}
-              </View>
-            )}
-
-            {(!provider.skills || provider.skills.length === 0) &&
-             (!provider.services || provider.services.length === 0) && (
-              <Text style={styles.noDataText}>No skills or services information available.</Text>
-            )}
-          </View>
-
-          {/* Service Description */}
-          <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>About This Provider</Text>
-            <Text style={styles.descriptionText}>
-              {provider.serviceDescription || "No description provided."}
-            </Text>
-          </View>
-
-          {/* Reviews Section */}
-          {reviews.length > 0 && (
-            <View style={styles.sectionCard}>
-              <Text style={styles.sectionTitle}>Recent Reviews</Text>
-              {reviews.slice(0, 3).map((review, index) => (
-                <View key={index} style={styles.reviewItem}>
-                  <View style={styles.reviewHeader}>
-                    <Text style={styles.reviewStars}>
-                      {renderStars(review.rating || 0)}
-                    </Text>
-                    <Text style={styles.reviewerName}>{review.reviewer}</Text>
-                    <Text style={styles.reviewDate}>
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </Text>
-                  </View>
-                  <Text style={styles.reviewComment}>{review.comment}</Text>
                 </View>
-              ))}
+              )}
+
+              {activeTab === 'services' && (
+                <View style={styles.tabContent}>
+                  <Text style={styles.sectionTitle}>Services Offered</Text>
+
+                  {provider.services && provider.services.length > 0 ? (
+                    <View style={styles.servicesList}>
+                      {provider.services.map((service, index) => (
+                        <View key={index} style={styles.serviceCard}>
+                          <View style={styles.serviceHeader}>
+                            <Text style={styles.serviceName}>{service.name}</Text>
+                            <Text style={styles.serviceRate}>₱{service.rate?.toLocaleString() || 'N/A'}</Text>
+                          </View>
+                          {service.description && (
+                            <Text style={styles.serviceDescription}>{service.description}</Text>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <Text style={styles.noDataText}>No services listed</Text>
+                  )}
+                </View>
+              )}
+
+              {activeTab === 'reviews' && (
+                <View style={styles.tabContent}>
+                  <Text style={styles.sectionTitle}>Reviews</Text>
+                  <Text style={styles.noDataText}>Reviews functionality to be implemented</Text>
+                </View>
+              )}
+            </ScrollView>
+          ) : (
+            <View style={styles.errorContainer}>
+              <Icon name="error" size={48} color="#CCC" />
+              <Text style={styles.errorText}>Failed to load provider details</Text>
             </View>
           )}
-
-          {/* Action Buttons */}
-          <View style={styles.actionsContainer}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.secondaryButton]}
-              onPress={onClose}
-            >
-              <Text style={styles.secondaryButtonText}>Close</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.primaryButton]}
-              onPress={() => {
-                if (onOpenChat) {
-                  onOpenChat(provider._id);
-                } else {
-                  Alert.alert('Chat', `Opening chat with ${provider.firstName}`);
-                }
-              }}
-            >
-              <Icon name="envelope" size={16} color="#fff" />
-              <Text style={styles.primaryButtonText}>Message Provider</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.successButton]}
-              onPress={() => {
-                // Navigate to create service request or show modal
-                Alert.alert('Request Service', `Create service request for ${provider.firstName}`);
-              }}
-            >
-              <Icon name="handshake-o" size={16} color="#fff" />
-              <Text style={styles.successButtonText}>Request Service</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        </View>
       </View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
+  overlay: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
   },
-  modalHeader: {
+  container: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '90%',
+    minHeight: '70%',
+  },
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
   },
-  modalTitle: {
+  title: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
   closeButton: {
-    padding: 8,
-  },
-  scrollContainer: {
-    flex: 1,
+    padding: 4,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    padding: 40,
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
+  loadingText: {
+    marginTop: 16,
     fontSize: 16,
     color: '#666',
-    textAlign: 'center',
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 20,
   },
-  closeErrorButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#007bff',
-    borderRadius: 8,
-  },
-  closeErrorButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  headerCard: {
-    backgroundColor: '#fff',
-    margin: 16,
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  profileImageContainer: {
+  avatarContainer: {
     position: 'relative',
     marginRight: 16,
   },
-  profileImage: {
+  avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#f0f0f0',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: '#e0e0e0',
   },
   verifiedBadge: {
     position: 'absolute',
     bottom: -5,
     right: -5,
+    backgroundColor: '#4CAF50',
+    borderRadius: 12,
     width: 24,
     height: 24,
-    borderRadius: 12,
-    backgroundColor: '#007bff',
-    alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 3,
+    alignItems: 'center',
+    borderWidth: 2,
     borderColor: '#fff',
   },
   onlineBadge: {
     position: 'absolute',
     top: -5,
-    left: -5,
+    right: -5,
+    backgroundColor: '#fff',
+    borderRadius: 10,
     width: 20,
     height: 20,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   onlineDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#28a745',
+    backgroundColor: '#4CAF50',
   },
-  headerInfo: {
+  profileInfo: {
     flex: 1,
   },
-  nameRow: {
+  providerName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 4,
   },
-  providerName: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-    marginRight: 8,
-  },
-  verifiedTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007bff',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  verifiedTagText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
-    marginLeft: 4,
-  },
-  occupation: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 8,
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  ratingStars: {
-    color: '#ffc107',
-    fontSize: 16,
-    marginRight: 8,
-  },
   ratingText: {
+    marginLeft: 8,
     fontSize: 14,
     color: '#666',
   },
-  rateText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#28a745',
-    marginBottom: 8,
-  },
-  locationRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  locationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
-    marginBottom: 4,
-  },
-  locationText: {
-    fontSize: 12,
+  occupation: {
+    fontSize: 14,
     color: '#666',
-    marginLeft: 4,
   },
-  onlineText: {
-    color: '#28a745',
-    fontWeight: 'bold',
-  },
-  statsContainer: {
+  actionButtons: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  statCard: {
+  messageButton: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 8,
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginRight: 8,
   },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 8,
+  messageButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2196F3',
+    marginLeft: 8,
   },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+  hireButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2196F3',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginLeft: 8,
   },
-  sectionCard: {
+  hireButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    marginLeft: 8,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    padding: 4,
+    marginBottom: 20,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  activeTab: {
     backgroundColor: '#fff',
-    margin: 16,
-    marginTop: 0,
-    borderRadius: 12,
-    padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  activeTabText: {
+    color: '#2196F3',
+  },
+  tabContent: {
+    flex: 1,
   },
   sectionTitle: {
     fontSize: 18,
@@ -527,12 +423,42 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 16,
   },
-  skillsSection: {
-    marginBottom: 20,
+  infoSection: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 16,
   },
-  subsectionTitle: {
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#333',
+    marginLeft: 12,
+    flex: 1,
+  },
+  descriptionSection: {
+    marginTop: 16,
+  },
+  descriptionTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  skillsSection: {
+    marginTop: 16,
+  },
+  skillsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
     color: '#333',
     marginBottom: 12,
   },
@@ -544,126 +470,69 @@ const styles = StyleSheet.create({
     backgroundColor: '#e3f2fd',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: 16,
     marginRight: 8,
     marginBottom: 8,
   },
-  skillTagText: {
-    color: '#1976d2',
+  skillText: {
     fontSize: 12,
-    fontWeight: 'bold',
+    color: '#1976d2',
+    fontWeight: '600',
   },
-  servicesSection: {
-    // marginTop already covered
-  },
-  serviceItem: {
+  servicesList: {
     backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 16,
+  },
+  serviceCard: {
+    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 12,
-    marginBottom: 8,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   serviceHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   serviceName: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#333',
+    flex: 1,
   },
   serviceRate: {
-    fontSize: 14,
-    color: '#28a745',
+    fontSize: 16,
     fontWeight: 'bold',
+    color: '#4CAF50',
   },
   serviceDescription: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#666',
-    lineHeight: 18,
+    lineHeight: 20,
   },
   noDataText: {
-    fontSize: 14,
-    color: '#666',
-    fontStyle: 'italic',
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+    padding: 40,
   },
-  descriptionText: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-  },
-  reviewItem: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
-  },
-  reviewHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  reviewStars: {
-    color: '#ffc107',
-    fontSize: 14,
-    marginRight: 8,
-  },
-  reviewerName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
+  errorContainer: {
     flex: 1,
-  },
-  reviewDate: {
-    fontSize: 12,
-    color: '#666',
-  },
-  reviewComment: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    padding: 16,
-    paddingTop: 0,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginHorizontal: 4,
+    alignItems: 'center',
+    padding: 40,
   },
-  secondaryButton: {
-    backgroundColor: '#6c757d',
-  },
-  primaryButton: {
-    backgroundColor: '#6c757d',
-  },
-  successButton: {
-    backgroundColor: '#007bff',
-  },
-  secondaryButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  successButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginLeft: 8,
+  errorText: {
+    fontSize: 16,
+    color: '#999',
+    marginTop: 16,
   },
 });
 

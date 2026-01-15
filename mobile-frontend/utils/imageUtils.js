@@ -2,7 +2,7 @@
  * Utility functions for handling image URLs in React Native
  */
 
-// Get the API base URL from environment or fallback to localhost
+// Get the API base URL - hardcoded for React Native compatibility
 const getApiBaseUrl = () => {
   return 'http://192.168.1.2:4000/api/v1';
 };

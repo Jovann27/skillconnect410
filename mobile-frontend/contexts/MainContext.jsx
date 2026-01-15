@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Provider as PaperProvider, MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 import apiClient from '../api';
 import { socket, connectSocket, disconnectSocket } from '../utils/socket';
 import { notifyUserDataChange } from '../utils/storageEvents';
@@ -24,6 +25,7 @@ export const MainProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isUserVerified, setIsUserVerified] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Role-based access helpers
   const userRole = user?.role;
@@ -149,13 +151,47 @@ export const MainProvider = ({ children }) => {
     }
   };
 
+  // Fetch unread count
+  const fetchUnreadCount = async () => {
+    if (!isLoggedIn || !AsyncStorage.getItem('token')) {
+      setUnreadCount(0);
+      return;
+    }
+
+    try {
+      const response = await apiClient.get('/user/notifications/unread-count');
+      setUnreadCount(response.data.unreadCount || 0);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setUnreadCount(0);
+        return;
+      }
+      console.error('Error fetching unread count:', err);
+    }
+  };
+
   // Mark notifications as read
   const markNotificationsAsRead = () => {
     setUnreadCount(0);
   };
 
+  // Effect to fetch unread count when user logs in
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUnreadCount();
+    } else {
+      setUnreadCount(0);
+    }
+  }, [isLoggedIn]);
+
   // API functions
   const api = {
+    // Generic get method to support existing code
+    get: (url, config) => apiClient.get(url, config),
+    post: (url, data, config) => apiClient.post(url, data, config),
+    put: (url, data, config) => apiClient.put(url, data, config),
+    delete: (url, config) => apiClient.delete(url, config),
+
     // User related
     // Backend exposes the authenticated user's profile at /api/v1/user/me
     // and update at /api/v1/user/update-profile
@@ -239,9 +275,30 @@ export const MainProvider = ({ children }) => {
     socket,
   };
 
+  // Material Design theme configuration for Android-friendly UI
+  const theme = {
+    ...MD3LightTheme,
+    colors: {
+      ...MD3LightTheme.colors,
+      primary: '#1976D2', // Android blue
+      secondary: '#03DAC6', // Android teal
+      surface: '#FFFFFF',
+      background: '#F5F5F5',
+      error: '#B00020',
+      onPrimary: '#FFFFFF',
+      onSecondary: '#000000',
+      onSurface: '#000000',
+      onBackground: '#000000',
+      outline: '#79747E',
+    },
+    roundness: 12, // Android corner radius
+  };
+
   return (
-    <MainContext.Provider value={value}>
-      {children}
-    </MainContext.Provider>
+    <PaperProvider theme={theme}>
+      <MainContext.Provider value={value}>
+        {children}
+      </MainContext.Provider>
+    </PaperProvider>
   );
 };

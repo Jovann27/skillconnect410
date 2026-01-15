@@ -1134,3 +1134,39 @@
 {"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T09:14:52.131Z"}
 {"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T09:14:52.177Z"}
 {"context":{},"level":"error","message":"Request Error Not authorized","method":"GET","stack":"Error: Not authorized\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/userFlowController.js:480:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","statusCode":403,"timestamp":"2026-01-15T09:14:53.503Z","url":"/api/v1/user/booking/6968959c8a283e5d446d3e85","userId":"696893c98a283e5d446d3b7f"}
+{"level":"info","message":"Client Connected: 47W7ZzcWUNfh859eAAAJ, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T11:27:25.531Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T11:43:03.402Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T11:43:03.419Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T11:43:03.537Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T11:46:20.032Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T11:46:20.037Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T11:46:20.117Z"}
+{"level":"info","message":"Client Connected: a2K-9z40ccz0d20pAAAC, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T12:28:42.425Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T12:28:47.119Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T12:28:47.175Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T12:28:47.222Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T12:28:47.425Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T12:28:47.482Z"}
+{"level":"info","message":"No service requests found for provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T12:28:47.549Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T12:28:47.575Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T12:28:47.832Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T12:28:47.834Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T12:28:47.837Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T12:28:47.943Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T12:28:48.041Z"}
+{"level":"info","message":"No service requests found for provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T12:28:48.114Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T12:28:48.131Z"}
+{"level":"info","message":"Client Connected: jIyenfu-BkfaYNY9AAAE, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T12:28:57.849Z"}
+{"level":"warn","message":"[2026-01-15T12:38:21.115Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T12:38:21.125Z"}
+{"level":"warn","message":"[2026-01-15T12:38:21.132Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/notifications/unread-count - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T12:38:21.135Z"}
+{"level":"info","message":"Client Connected: ulCoh5Cf2QaHNyjRAAAH, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T13:00:43.969Z"}
+{"level":"warn","message":"[2026-01-15T13:11:02.707Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/my-certificates - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T13:11:02.713Z"}
+{"level":"warn","message":"[2026-01-15T13:11:02.781Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/provider-offers?page=1&limit=10000 - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T13:11:02.783Z"}
+{"level":"warn","message":"[2026-01-15T13:11:02.786Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/available-service-requests?limit=10000&useRecommendations=true - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T13:11:02.787Z"}
+{"level":"warn","message":"[2026-01-15T13:11:02.790Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/provider-applications - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T13:11:02.792Z"}
+{"level":"warn","message":"[2026-01-15T13:11:02.796Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/bookings?status=In+Progress - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T13:11:02.798Z"}
+{"level":"warn","message":"[2026-01-15T13:11:02.931Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/my-work-proof - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T13:11:02.945Z"}
+{"level":"warn","message":"[2026-01-15T13:11:02.957Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T13:11:02.960Z"}
+{"level":"warn","message":"[2026-01-15T13:11:02.965Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/notifications/unread-count - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T13:11:02.968Z"}
+{"level":"error","message":"JWT verification error:","timestamp":"2026-01-15T13:11:02.975Z"}
+{"level":"info","message":"Client Connected: gWXyIJVf7FeCx1XYAAAL, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T13:34:50.474Z"}
