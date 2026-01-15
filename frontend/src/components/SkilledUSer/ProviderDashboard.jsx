@@ -560,13 +560,7 @@ const ProviderDashboard = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="font-semibold">{record.title}</h4>
-                    <span className={`text-xs px-2 py-1 rounded font-medium ${
-                      record.type === 'active_booking'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {record.type === 'active_booking' ? 'Active Job' : 'Application'}
-                    </span>
+                    
                   </div>
                   <p className="text-sm text-gray-600">{record.description}</p>
                   <p className="text-sm text-gray-500">

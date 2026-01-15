@@ -189,7 +189,20 @@ const ChatIcon = () => {
     // Socket event listeners
     const handleNewMessage = (message) => {
       if (selectedChat && message.appointment.toString() === selectedChat.appointmentId.toString()) {
-        setMessages(prev => [...prev, message]);
+        // Prevent duplicate messages by checking if message already exists
+        setMessages(prev => {
+          const messageExists = prev.some(msg =>
+            msg._id === message._id ||
+            (msg.id === message.id && msg.id) ||
+            (msg.sender._id === message.sender._id &&
+             msg.message === message.message &&
+             Math.abs(new Date(msg.timestamp || msg.createdAt) - new Date(message.timestamp || message.createdAt)) < 5000) // Within 5 seconds
+          );
+          if (messageExists) {
+            return prev; // Don't add duplicate
+          }
+          return [...prev, message];
+        });
         markMessagesAsSeen(selectedChat.appointmentId);
       } else {
         // Update unread count for other chats

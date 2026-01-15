@@ -4,7 +4,7 @@
 
 // Get the API base URL from environment or fallback to localhost
 const getApiBaseUrl = () => {
-  return 'http://localhost:4000/api/v1';
+  return 'http://192.168.1.2:4000/api/v1';
 };
 
 /**

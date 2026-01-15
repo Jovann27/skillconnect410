@@ -62,8 +62,24 @@ export const postServiceRequest = catchAsyncError(async (req, res, next) => {
 
   // For inquiries (General Inquiry or Consultation), address and phone are not required
   const isInquiry = requestTypeOfWork === 'General Inquiry' || requestTypeOfWork === 'Consultation';
-  if (!requestTitle || !requestTypeOfWork || !requestTime || (!isInquiry && (!requestLocation || !phone))) {
-    return next(new ErrorHandler("Missing required fields: title/name, typeOfWork/serviceCategory, time/preferredTime, and location/address are required", 400));
+
+  if (!requestTitle || !requestTypeOfWork || !requestTime) {
+    return next(new ErrorHandler("Missing required fields: title/name, typeOfWork/serviceCategory, and time/preferredTime are required", 400));
+  }
+
+  if (!isInquiry && (!requestLocation || !phone)) {
+    return next(new ErrorHandler("For service requests, location/address and phone are required", 400));
+  }
+
+  // Validate targetProvider if provided (for inquiries)
+  if (targetProvider && isInquiry) {
+    const providerExists = await User.findById(targetProvider);
+    if (!providerExists) {
+      return next(new ErrorHandler("Target provider not found", 404));
+    }
+    if (providerExists.role !== "Service Provider") {
+      return next(new ErrorHandler("Target user is not a service provider", 400));
+    }
   }
 
   let preferredDateObj = null;
@@ -663,15 +679,27 @@ export const getChatHistory = catchAsyncError(async (req, res, next) => {
   let query = {};
 
   if (appointmentId) {
-    // Get chat history for a specific booking/appointment
+    // Check if it's a booking ID or service request ID
     query.appointment = appointmentId;
 
-    // Verify user is part of this booking
+    // First check if it's a booking
     const booking = await Booking.findById(appointmentId);
-    if (!booking) return next(new ErrorHandler("Booking not found", 404));
-
-    if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
-      return next(new ErrorHandler("Not authorized to view this chat", 403));
+    if (booking) {
+      // It's a booking - verify user is part of it
+      if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
+        return next(new ErrorHandler("Not authorized to view this chat", 403));
+      }
+    } else {
+      // Check if it's a service request
+      const serviceRequest = await ServiceRequest.findById(appointmentId);
+      if (serviceRequest) {
+        // Verify user is part of this service request
+        if (![String(serviceRequest.requester), String(serviceRequest.targetProvider), String(serviceRequest.serviceProvider)].includes(String(req.user._id))) {
+          return next(new ErrorHandler("Not authorized to view this chat", 403));
+        }
+      } else {
+        return next(new ErrorHandler("Appointment not found", 404));
+      }
     }
   } else if (userId) {
     // Get chat history between current user and specified user
@@ -683,11 +711,25 @@ export const getChatHistory = catchAsyncError(async (req, res, next) => {
       ]
     }).select('_id');
 
-    if (bookings.length === 0) {
+    // Also find service requests where both users are involved
+    const serviceRequests = await ServiceRequest.find({
+      $or: [
+        { requester: req.user._id, $or: [{ targetProvider: userId }, { serviceProvider: userId }] },
+        { $or: [{ targetProvider: req.user._id }, { serviceProvider: req.user._id }], requester: userId }
+      ],
+      status: { $in: ['Open', 'In Progress', 'Offered'] }
+    }).select('_id');
+
+    const allConversationIds = [
+      ...bookings.map(b => b._id),
+      ...serviceRequests.map(sr => sr._id)
+    ];
+
+    if (allConversationIds.length === 0) {
       return res.status(200).json({ success: true, chatHistory: [], message: "No chat history found" });
     }
 
-    query.appointment = { $in: bookings.map(b => b._id) };
+    query.appointment = { $in: allConversationIds };
   }
 
   const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -753,21 +795,49 @@ export const sendMessage = [
   }
 
   let booking = null;
+  let serviceRequest = null;
   let receiver = null;
+  let chatRoomId = null;
 
   if (appointmentId) {
-    // Verify the booking exists and user is part of it
+    // Check if it's a booking ID
     booking = await Booking.findById(appointmentId);
-    if (!booking) return next(new ErrorHandler("Booking not found", 404));
+    if (booking) {
+      // It's a booking
+      if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
+        return next(new ErrorHandler("Not authorized to send messages in this conversation", 403));
+      }
+      receiver = booking.requester._id.toString() === req.user._id.toString()
+        ? booking.provider
+        : booking.requester;
+      chatRoomId = booking._id;
+    } else {
+      // Check if it's a service request ID (for inquiries)
+      serviceRequest = await ServiceRequest.findById(appointmentId);
+      if (serviceRequest) {
+        // Verify user is part of this service request
+        if (![String(serviceRequest.requester), String(serviceRequest.targetProvider), String(serviceRequest.serviceProvider)].includes(String(req.user._id))) {
+          return next(new ErrorHandler("Not authorized to send messages in this conversation", 403));
+        }
 
-    if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
-      return next(new ErrorHandler("Not authorized to send messages in this conversation", 403));
+        // Determine receiver
+        if (serviceRequest.requester._id.toString() === req.user._id.toString()) {
+          // User is requester, receiver is targetProvider or serviceProvider
+          receiver = serviceRequest.targetProvider || serviceRequest.serviceProvider;
+        } else {
+          // User is provider, receiver is requester
+          receiver = serviceRequest.requester;
+        }
+
+        if (!receiver) {
+          return next(new ErrorHandler("No valid receiver found for this conversation", 400));
+        }
+
+        chatRoomId = serviceRequest._id;
+      } else {
+        return next(new ErrorHandler("Appointment not found", 404));
+      }
     }
-
-    // Determine receiver
-    receiver = booking.requester._id.toString() === req.user._id.toString()
-      ? booking.provider
-      : booking.requester;
   } else if (receiverId) {
     // Direct message - verify there's an existing relationship
     receiver = await User.findById(receiverId);
@@ -781,8 +851,23 @@ export const sendMessage = [
       ]
     });
 
-    if (!booking) {
-      return next(new ErrorHandler("No existing conversation found with this user", 400));
+    if (booking) {
+      chatRoomId = booking._id;
+    } else {
+      // Check if there's an existing service request (inquiry)
+      serviceRequest = await ServiceRequest.findOne({
+        $or: [
+          { requester: req.user._id, $or: [{ targetProvider: receiverId }, { serviceProvider: receiverId }] },
+          { $or: [{ targetProvider: req.user._id }, { serviceProvider: req.user._id }], requester: receiverId }
+        ],
+        status: { $in: ['Open', 'In Progress', 'Offered'] }
+      });
+
+      if (serviceRequest) {
+        chatRoomId = serviceRequest._id;
+      } else {
+        return next(new ErrorHandler("No existing conversation found with this user", 400));
+      }
     }
   } else {
     return next(new ErrorHandler("Either appointmentId or receiverId is required", 400));
@@ -790,7 +875,7 @@ export const sendMessage = [
 
   // Create the chat message
   const chatMessage = await Chat.create({
-    appointment: booking._id,
+    appointment: chatRoomId,
     sender: req.user._id,
     message: message.trim(),
     status: 'sent'
@@ -800,14 +885,19 @@ export const sendMessage = [
   await chatMessage.populate('sender', 'firstName lastName profilePic');
 
   // Send real-time notification via socket
-  io.to(`chat-${booking._id}`).emit("new-message", chatMessage);
+  io.to(`chat-${chatRoomId}`).emit("new-message", chatMessage);
 
   // Send notification to receiver
   await sendNotification(
     receiver._id,
     "New Message",
     `You have a new message from ${req.user.firstName} ${req.user.lastName}`,
-    { bookingId: booking._id, messageId: chatMessage._id, type: "new-message" }
+    {
+      appointmentId: chatRoomId,
+      messageId: chatMessage._id,
+      type: "new-message",
+      conversationType: booking ? 'booking' : 'service_request'
+    }
   );
 
   res.status(201).json({
@@ -833,12 +923,32 @@ export const getChatList = catchAsyncError(async (req, res, next) => {
   .populate('serviceRequest', 'name typeOfWork')
   .select('_id requester provider serviceRequest status createdAt');
 
-  if (userBookings.length === 0) {
+  // Get all service requests where user is involved (for inquiries that haven't become bookings yet)
+  const userServiceRequests = await ServiceRequest.find({
+    $or: [
+      { requester: req.user._id },
+      { targetProvider: req.user._id },
+      { serviceProvider: req.user._id }
+    ],
+    status: { $in: ['Open', 'In Progress', 'Offered'] } // Only active requests
+  })
+  .populate('requester', 'firstName lastName profilePic isOnline')
+  .populate('targetProvider', 'firstName lastName profilePic isOnline')
+  .populate('serviceProvider', 'firstName lastName profilePic isOnline')
+  .select('_id requester targetProvider serviceProvider name typeOfWork status createdAt');
+
+  // Filter out service requests that already have bookings
+  const bookingServiceRequestIds = userBookings.map(b => b.serviceRequest?._id?.toString()).filter(Boolean);
+  const activeServiceRequests = userServiceRequests.filter(sr =>
+    !bookingServiceRequestIds.includes(sr._id.toString())
+  );
+
+  if (userBookings.length === 0 && activeServiceRequests.length === 0) {
     return res.status(200).json({ success: true, chatList: [], message: "No active chats found" });
   }
 
-  // Get chat statistics for each booking
-  const chatList = await Promise.all(
+  // Process bookings
+  const bookingChats = await Promise.all(
     userBookings.map(async (booking) => {
       const otherUser = booking.requester._id.toString() === req.user._id.toString()
         ? booking.provider
@@ -859,7 +969,9 @@ export const getChatList = catchAsyncError(async (req, res, next) => {
       });
 
       return {
-        bookingId: booking._id,
+        id: booking._id,
+        type: 'booking',
+        appointmentId: booking._id,
         otherUser: {
           _id: otherUser._id,
           firstName: otherUser.firstName,
@@ -872,7 +984,7 @@ export const getChatList = catchAsyncError(async (req, res, next) => {
           name: booking.serviceRequest.name,
           typeOfWork: booking.serviceRequest.typeOfWork
         } : null,
-        bookingStatus: booking.status,
+        status: booking.status,
         latestMessage: latestMessage ? {
           message: latestMessage.message,
           sender: latestMessage.sender,
@@ -885,13 +997,74 @@ export const getChatList = catchAsyncError(async (req, res, next) => {
     })
   );
 
+  // Process service requests (inquiries)
+  const serviceRequestChats = await Promise.all(
+    activeServiceRequests.map(async (serviceRequest) => {
+      // Determine the other user
+      let otherUser = null;
+      if (serviceRequest.requester._id.toString() === req.user._id.toString()) {
+        // User is requester, other user is targetProvider or serviceProvider
+        otherUser = serviceRequest.targetProvider || serviceRequest.serviceProvider;
+      } else {
+        // User is provider, other user is requester
+        otherUser = serviceRequest.requester;
+      }
+
+      if (!otherUser) return null; // Skip if no other user found
+
+      // Get latest message for this service request
+      const latestMessage = await Chat.findOne({ appointment: serviceRequest._id })
+        .populate('sender', 'firstName lastName')
+        .sort({ createdAt: -1 })
+        .select('message sender createdAt status');
+
+      // Count unread messages for current user
+      const unreadCount = await Chat.countDocuments({
+        appointment: serviceRequest._id,
+        sender: { $ne: req.user._id },
+        status: { $ne: 'seen' },
+        seenBy: { $not: { $elemMatch: { user: req.user._id } } }
+      });
+
+      return {
+        id: serviceRequest._id,
+        type: 'service_request',
+        appointmentId: serviceRequest._id,
+        otherUser: {
+          _id: otherUser._id,
+          firstName: otherUser.firstName,
+          lastName: otherUser.lastName,
+          profilePic: otherUser.profilePic,
+          isOnline: otherUser.isOnline
+        },
+        serviceRequest: {
+          _id: serviceRequest._id,
+          name: serviceRequest.name,
+          typeOfWork: serviceRequest.typeOfWork
+        },
+        status: serviceRequest.status,
+        latestMessage: latestMessage ? {
+          message: latestMessage.message,
+          sender: latestMessage.sender,
+          createdAt: latestMessage.createdAt,
+          isFromMe: latestMessage.sender._id.toString() === req.user._id.toString()
+        } : null,
+        unreadCount,
+        lastActivity: latestMessage ? latestMessage.createdAt : serviceRequest.createdAt
+      };
+    })
+  );
+
+  // Combine and filter out null entries
+  const allChats = [...bookingChats, ...serviceRequestChats.filter(chat => chat !== null)];
+
   // Sort by last activity (most recent first)
-  chatList.sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity));
+  allChats.sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity));
 
   res.status(200).json({
     success: true,
-    chatList,
-    count: chatList.length
+    chatList: allChats,
+    count: allChats.length
   });
 });
 
@@ -904,15 +1077,27 @@ export const markMessagesAsSeen = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Appointment ID is required", 400));
   }
 
-  // Verify user is part of this booking
+  // Check if it's a booking or service request
   const booking = await Booking.findById(appointmentId);
-  if (!booking) return next(new ErrorHandler("Booking not found", 404));
-
-  if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
-    return next(new ErrorHandler("Not authorized to mark messages as seen in this conversation", 403));
+  if (booking) {
+    // It's a booking - verify user is part of it
+    if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
+      return next(new ErrorHandler("Not authorized to mark messages as seen in this conversation", 403));
+    }
+  } else {
+    // Check if it's a service request
+    const serviceRequest = await ServiceRequest.findById(appointmentId);
+    if (serviceRequest) {
+      // Verify user is part of this service request
+      if (![String(serviceRequest.requester), String(serviceRequest.targetProvider), String(serviceRequest.serviceProvider)].includes(String(req.user._id))) {
+        return next(new ErrorHandler("Not authorized to mark messages as seen in this conversation", 403));
+      }
+    } else {
+      return next(new ErrorHandler("Appointment not found", 404));
+    }
   }
 
-  // Update all unseen messages in this booking where the sender is not the current user
+  // Update all unseen messages in this conversation where the sender is not the current user
   const result = await Chat.updateMany(
     {
       appointment: appointmentId,
@@ -2393,6 +2578,97 @@ export const getAllUserRequests = catchAsyncError(async (req, res, next) => {
     success: true,
     count: allRequests.length,
     requests: paginatedRequests
+  });
+});
+
+// Report user endpoint
+export const reportUser = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { reportedUserId, reason, appointmentId } = req.body;
+
+  if (!reportedUserId || !reason) {
+    return next(new ErrorHandler("Reported user ID and reason are required", 400));
+  }
+
+  // Validate that reported user exists
+  const reportedUser = await User.findById(reportedUserId);
+  if (!reportedUser) {
+    return next(new ErrorHandler("Reported user not found", 404));
+  }
+
+  // Check if appointment exists and user is part of it
+  if (appointmentId) {
+    const booking = await Booking.findById(appointmentId);
+    if (!booking) {
+      return next(new ErrorHandler("Booking not found", 404));
+    }
+    if (![String(booking.requester), String(booking.provider)].includes(String(req.user._id))) {
+      return next(new ErrorHandler("Not authorized to report from this conversation", 403));
+    }
+  }
+
+  // Create report (you might want to create a Report model for this)
+  // For now, we'll just log it and return success
+  console.log(`User ${req.user._id} reported user ${reportedUserId} for: ${reason}`);
+
+  // In a real implementation, you would save this to a reports collection
+  // const report = await Report.create({
+  //   reporter: req.user._id,
+  //   reportedUser: reportedUserId,
+  //   reason,
+  //   appointment: appointmentId,
+  //   status: 'pending'
+  // });
+
+  res.status(200).json({
+    success: true,
+    message: "User report submitted successfully. Our team will review it."
+  });
+});
+
+// Block user endpoint
+export const blockUser = catchAsyncError(async (req, res, next) => {
+  if (!req.user) return next(new ErrorHandler("Unauthorized", 401));
+
+  const { targetUserId } = req.body;
+
+  if (!targetUserId) {
+    return next(new ErrorHandler("Target user ID is required", 400));
+  }
+
+  // Validate that target user exists
+  const targetUser = await User.findById(targetUserId);
+  if (!targetUser) {
+    return next(new ErrorHandler("Target user not found", 404));
+  }
+
+  // Check if user is trying to block themselves
+  if (String(req.user._id) === String(targetUserId)) {
+    return next(new ErrorHandler("You cannot block yourself", 400));
+  }
+
+  // Get current user and add to blocked users list
+  const user = await User.findById(req.user._id);
+  if (!user) return next(new ErrorHandler("User not found", 404));
+
+  // Initialize blockedUsers array if it doesn't exist
+  if (!user.blockedUsers) {
+    user.blockedUsers = [];
+  }
+
+  // Check if already blocked
+  if (user.blockedUsers.includes(targetUserId)) {
+    return next(new ErrorHandler("User is already blocked", 400));
+  }
+
+  // Add to blocked users
+  user.blockedUsers.push(targetUserId);
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: `${targetUser.firstName} ${targetUser.lastName} has been blocked successfully`
   });
 });
 

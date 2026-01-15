@@ -458,11 +458,20 @@ router.post('/offer-to-provider', isUserAuthenticated, isUserVerified, offerToPr
 router.post('/offer/:requestId/accept', criticalOperationLimiter, isUserAuthenticated, isUserVerified, acceptOffer);
 router.post('/offer/:requestId/reject', isUserAuthenticated, isUserVerified, rejectOffer);
 
+import {
+  reportUser,
+  blockUser
+} from '../controllers/userFlowController.js';
+
 // Chat routes
 router.get("/chat-history", isUserAuthenticated, isUserVerified, getChatHistory);
 router.get("/chat-list", isUserAuthenticated, isUserVerified, getChatList);
 router.post("/send-message", isUserAuthenticated, isUserVerified, validateSchema(chatMessageSchema), handleValidationErrors, sendMessage);
 router.put("/chat/:appointmentId/mark-seen", isUserAuthenticated, isUserVerified, markMessagesAsSeen);
+
+// User management routes
+router.post("/report-user", isUserAuthenticated, isUserVerified, reportUser);
+router.post("/block-user", isUserAuthenticated, isUserVerified, blockUser);
 
 // Notification routes
 router.get('/notifications', isUserAuthenticated, isUserVerified, catchAsyncError(async (req, res) => {
