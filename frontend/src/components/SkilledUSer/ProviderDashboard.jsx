@@ -515,6 +515,7 @@ const ProviderDashboard = () => {
   };
 
   const renderApplicationsTab = () => {
+    const pendingApplications = applications.filter(app => app.status !== 'Accepted');
     const allWorkRecords = [
       ...activeBookings.map(booking => ({
         ...booking,
@@ -526,22 +527,34 @@ const ProviderDashboard = () => {
         status: booking.status,
         createdAt: booking.createdAt
       })),
-
+      ...pendingApplications.map(application => ({
+        ...application,
+        type: 'application',
+        title: application.serviceRequest?.name || 'Application',
+        description: application.serviceRequest?.notes || 'Service request application',
+        client: application.serviceRequest?.requester,
+        budget: application.commissionFee || application.serviceRequest?.minBudget || application.serviceRequest?.maxBudget,
+        status: application.status || 'Applied',
+        createdAt: application.createdAt
+      }))
     ];
+
+    // Ensure uniqueness by _id to prevent duplicate records for the same booking ID
+    const uniqueWorkRecords = allWorkRecords.filter((record, index, self) =>
+      index === self.findIndex(r => r._id === record._id)
+    );
 
     return (
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">My Work Records</h3>
-        <p className="text-sm text-gray-600">
-          Showing {activeBookings.length} active job{activeBookings.length !== 1 ? 's' : ''} and {applications.length} application{applications.length !== 1 ? 's' : ''}
-        </p>
-        {allWorkRecords.length === 0 ? (
+        
+        {uniqueWorkRecords.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <FaFileAlt className="mx-auto text-4xl mb-4 text-gray-300" />
             <p>You haven't submitted any work records yet.</p>
           </div>
         ) : (
-          allWorkRecords.map((record) => (
+          uniqueWorkRecords.map((record) => (
             <div key={record._id} className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
@@ -567,7 +580,7 @@ const ProviderDashboard = () => {
                 </div>
                 <div className="text-right ml-4">
                   <div className="font-bold text-green-600 mb-2">
-                    ₱{record.budget ? record.budget.toLocaleString() : 'Budget not specified'}
+                    {record.budget ? `₱${record.budget.toLocaleString()}` : 'Budget not specified'}
                   </div>
                   <div className={`text-sm px-2 py-1 rounded inline-block ${
                     record.status === 'In Progress' ? 'bg-green-100 text-green-800' :
@@ -661,7 +674,17 @@ const ProviderDashboard = () => {
                 <div className="flex items-center">
                   <FaFileAlt className="text-purple-600 text-2xl mr-3" />
                   <div>
-                    <div className="text-2xl font-bold text-purple-600">{applications.length}</div>
+                    <div className="text-2xl font-bold text-purple-600">{(() => {
+                      const pendingApplications = applications.filter(app => app.status !== 'Accepted');
+                      const allWorkRecords = [
+                        ...activeBookings.map(booking => ({ ...booking, _id: booking._id })),
+                        ...pendingApplications.map(application => ({ ...application, _id: application._id }))
+                      ];
+                      const uniqueWorkRecords = allWorkRecords.filter((record, index, self) =>
+                        index === self.findIndex(r => r._id === record._id)
+                      );
+                      return uniqueWorkRecords.length;
+                    })()}</div>
                     <div className="text-sm text-gray-600">Work Records</div>
                   </div>
                 </div>

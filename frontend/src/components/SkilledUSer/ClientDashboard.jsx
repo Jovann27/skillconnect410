@@ -79,7 +79,7 @@ const ClientDashboard = () => {
   const [offerProvider, setOfferProvider] = useState(null);
   const [reviewBooking, setReviewBooking] = useState(null);
   const [reviewProvider, setReviewProvider] = useState(null);
-  const [reviewedBookings, setReviewedBookings] = useState([]);
+  const [reviewedServiceRequests, setReviewedServiceRequests] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
 
@@ -185,14 +185,16 @@ const ClientDashboard = () => {
     }
   };
 
-
-
   const fetchAllUserRequests = async () => {
     try {
       setRequestsLoading(true);
       const response = await api.get('/user/all-user-requests');
       if (response.data.success) {
-        setAllRequests(response.data.requests);
+        // Ensure uniqueness by _id to prevent duplicate records for the same booking ID
+        const uniqueRequests = response.data.requests.filter((request, index, self) =>
+          index === self.findIndex(r => r._id === request._id)
+        );
+        setAllRequests(uniqueRequests);
       }
     } catch (error) {
       console.error('Error fetching user requests:', error);
@@ -206,10 +208,10 @@ const ClientDashboard = () => {
     try {
       const response = await api.get('/review/my-reviews');
       if (response.data.success) {
-        // Extract booking IDs from reviews to mark them as reviewed
-        const bookingIds = response.data.reviews.map(review => review.booking.toString());
-        setReviewedBookings(bookingIds);
-        console.log('Fetched user reviews:', response.data.reviews.length, 'reviews for bookings:', bookingIds);
+        // Extract serviceRequest IDs from reviews to mark them as reviewed
+        const serviceRequestIds = response.data.reviews.map(review => review.booking?.serviceRequest?.toString()).filter(Boolean);
+        setReviewedServiceRequests(serviceRequestIds);
+        console.log('Fetched user reviews:', response.data.reviews.length, 'reviews for serviceRequests:', serviceRequestIds);
       }
     } catch (error) {
       console.error('Error fetching user reviews:', error);
@@ -426,9 +428,11 @@ const ClientDashboard = () => {
     setShowReviewModal(true);
   };
 
-  const handleReviewSuccess = (bookingId) => {
-    // Mark this booking as reviewed so we can disable the review button
-    setReviewedBookings(prev => [...prev, bookingId]);
+  const handleReviewSuccess = (booking) => {
+    // Mark this serviceRequest as reviewed so we can disable the review button
+    if (booking?.serviceRequest?._id) {
+      setReviewedServiceRequests(prev => [...prev, booking.serviceRequest._id]);
+    }
   };
 
   const handleSubmitReview = async (bookingId, rating, comments) => {
@@ -451,9 +455,9 @@ const ClientDashboard = () => {
         // Show success notification
         toast.success('Review submitted successfully!');
 
-        // Mark this booking as reviewed
-        const bookingIdToMark = bookingId._id || bookingId;
-        handleReviewSuccess(bookingIdToMark);
+        // Mark this serviceRequest as reviewed
+        const bookingObject = bookingId._id ? bookingId : response.data.review?.booking;
+        handleReviewSuccess(bookingObject);
 
         // Refresh the requests data to update the UI
         fetchAllUserRequests();
@@ -1405,8 +1409,8 @@ const ClientDashboard = () => {
                         )}
                       </div>
                     );
-                  } else if (request.type === 'offer') {
-                    // Offer display
+                  } else if (request.type === 'offer' && request.status !== 'Accepted') {
+                    // Offer display - only show if not accepted
                     return (
                       <div key={request._id} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
                         <div className="flex items-start justify-between mb-4">
@@ -1644,11 +1648,14 @@ const ClientDashboard = () => {
 
                           {/* Review Button for Completed Bookings */}
                           {request.status === 'Completed' && (
-                            reviewedBookings.includes(request._id) ? (
-                              <div className="bg-green-600 text-white px-6 py-2 rounded-lg flex items-center text-sm font-medium">
+                            reviewedServiceRequests.includes(request.data?.serviceRequest?._id || request.data?.serviceRequest) ? (
+                              <button
+                                disabled
+                                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
                                 <FaCheckCircle className="mr-2" />
-                                Request Completed
-                              </div>
+                                Successful Request
+                              </button>
                             ) : (
                               <button
                                 onClick={() => handleLeaveReview(request._id, request.otherParty)}
@@ -1706,26 +1713,6 @@ const ClientDashboard = () => {
                           application={application}
                           onAccept={() => handleAcceptApplication(application._id)}
                           onDecline={() => handleDeclineApplication(application._id)}
-                          onViewProfile={(providerId) => handleViewProfile(providerId)}
-                          onMessage={(providerId) => handleSendMessage(providerId)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Accepted Applications */}
-                {applications.filter(app => app.status === 'In Progress').length > 0 && (
-                  <div>
-                    <div className="flex items-center mb-4">
-                      <FaCheckCircle className="text-green-500 mr-2" />
-                      <h3 className="text-lg font-semibold text-gray-900">Accepted Applications ({applications.filter(app => app.status === 'In Progress').length})</h3>
-                    </div>
-                    <div className="space-y-4">
-                      {applications.filter(app => app.status === 'In Progress').map((application) => (
-                        <AcceptedApplicationCard
-                          key={application._id}
-                          application={application}
                           onViewProfile={(providerId) => handleViewProfile(providerId)}
                           onMessage={(providerId) => handleSendMessage(providerId)}
                         />
@@ -2458,6 +2445,22 @@ const RequestDetailsModal = ({ request, onClose }) => {
                   {request._id}
                 </p>
               </div>
+              {request.status === 'Completed' && request.completedAt && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Completion Date</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded">
+                    {new Date(request.completedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+              {request.status === 'Completed' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
+                  <p className="text-gray-900 bg-gray-50 px-3 py-2 rounded font-semibold text-green-600">
+                    ₱{request.finalAmount?.toLocaleString() || request.data?.finalAmount?.toLocaleString() || 'N/A'}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Description */}

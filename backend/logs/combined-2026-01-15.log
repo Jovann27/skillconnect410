@@ -559,3 +559,235 @@
 {"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T19:56:30.771Z"}
 {"level":"info","message":"Client Connected: 4Oau6a0iZUEUycxCAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T19:56:34.385Z"}
 {"level":"info","message":"Client Connected: pjhxWx14nKhVbDoQAAAE, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T19:57:53.951Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-14T19:59:49.359Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-14T19:59:49.362Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-14T19:59:49.430Z"}
+{"level":"info","message":"Client Connected: anf7rug3uDZKrxXEAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T19:59:49.563Z"}
+{"level":"info","message":"Client Connected: 4RVxroTgLj57fYbsAAAE, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T20:00:27.970Z"}
+{"context":{},"level":"error","message":"Request Error You have already reviewed this booking","method":"POST","stack":"Error: You have already reviewed this booking\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/reviewController.js:113:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","statusCode":400,"timestamp":"2026-01-14T20:00:35.730Z","url":"/api/v1/review","userId":"6967516ca27f4091a38fdc6e"}
+{"context":{},"level":"error","message":"Request Error You have already reviewed this booking","method":"POST","stack":"Error: You have already reviewed this booking\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/reviewController.js:113:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","statusCode":400,"timestamp":"2026-01-14T20:00:36.818Z","url":"/api/v1/review","userId":"6967516ca27f4091a38fdc6e"}
+{"level":"info","message":"Client Connected: PPVvQg60ugXdj_5ZAAAG, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-14T20:04:27.360Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T05:32:43.586Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T05:32:43.591Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T05:32:43.733Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T05:54:24.558Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T05:54:24.563Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T05:54:24.631Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T05:54:36.862Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T05:54:36.866Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T05:54:36.928Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T06:15:02.560Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T06:15:02.562Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T06:15:02.633Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T06:15:49.375Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T06:15:49.378Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T06:15:49.447Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T06:17:15.063Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T06:17:15.066Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T06:17:15.140Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T06:17:36.227Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T06:17:36.229Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T06:17:36.291Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T06:17:48.029Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T06:17:48.031Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T06:17:48.150Z"}
+{"level":"info","message":"Client Connected: 4i2vHOgKb4zI5CmTAAAC, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-15T06:21:35.495Z"}
+{"level":"info","message":"Client Connected: 16O8iFVRHQbpKiGPAAAE, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-15T06:22:02.879Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T06:31:19.338Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T06:31:19.343Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T06:31:19.441Z"}
+{"level":"info","message":"Client Connected: 85rBw9Z0_HeNVRGQAAAB, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-15T06:31:19.885Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T06:31:30.385Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T06:31:30.420Z"}
+{"level":"info","message":"Client Connected: dexV56K5N89qcEGJAAAE, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-15T06:33:11.214Z"}
+{"level":"info","message":"Client Connected: 79fTnlm2QHIWlPMLAAAH, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-15T06:42:30.298Z"}
+{"context":{},"level":"error","message":"Request Error You have already reviewed this service request","method":"POST","stack":"Error: You have already reviewed this service request\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/reviewController.js:114:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","statusCode":400,"timestamp":"2026-01-15T06:42:38.276Z","url":"/api/v1/review","userId":"6967516ca27f4091a38fdc6e"}
+{"context":{},"level":"error","message":"Request Error You have already reviewed this service request","method":"POST","stack":"Error: You have already reviewed this service request\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/reviewController.js:114:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","statusCode":400,"timestamp":"2026-01-15T06:42:39.101Z","url":"/api/v1/review","userId":"6967516ca27f4091a38fdc6e"}
+{"context":{},"level":"error","message":"Request Error You have already reviewed this service request","method":"POST","stack":"Error: You have already reviewed this service request\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/reviewController.js:114:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)","statusCode":400,"timestamp":"2026-01-15T06:47:21.376Z","url":"/api/v1/review","userId":"6967516ca27f4091a38fdc6e"}
+{"level":"info","message":"Client Connected: f8bO4G1bFkhERs-yAAAK, User: 6967516ca27f4091a38fdc6e","timestamp":"2026-01-15T06:47:22.641Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T07:07:50.519Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T07:07:50.522Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T07:07:50.588Z"}
+{"level":"warn","message":"[2026-01-15T07:14:17.871Z] AUTH_FAILURE: No token provided - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:14:17.888Z"}
+{"level":"warn","message":"[2026-01-15T07:14:17.895Z] AUTH_FAILURE: No token provided - GET /api/v1/user/notifications - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:14:17.913Z"}
+{"level":"warn","message":"[2026-01-15T07:14:17.919Z] AUTH_FAILURE: No token provided - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:14:17.920Z"}
+{"level":"warn","message":"[2026-01-15T07:14:18.290Z] AUTH_FAILURE: No token provided - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:14:18.295Z"}
+{"level":"warn","message":"[2026-01-15T07:14:18.325Z] AUTH_FAILURE: No token provided - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:14:18.326Z"}
+{"level":"info","message":"Client Connected: 5P_8bWq9y4WEmnpNAAAB, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:16:04.506Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:16:04.756Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:16:04.761Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:16:04.771Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\"], occupation=","timestamp":"2026-01-15T07:16:04.884Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 4 patterns","timestamp":"2026-01-15T07:16:04.937Z"}
+{"level":"info","message":"No service requests found for provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:16:05.007Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T07:16:05.009Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:16:05.149Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:16:05.150Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:16:05.152Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\"], occupation=","timestamp":"2026-01-15T07:16:05.193Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 4 patterns","timestamp":"2026-01-15T07:16:05.249Z"}
+{"level":"info","message":"No service requests found for provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:16:05.283Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T07:16:05.284Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:16:05.412Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:16:05.415Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:16:05.416Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\"], occupation=","timestamp":"2026-01-15T07:16:05.490Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 4 patterns","timestamp":"2026-01-15T07:16:05.510Z"}
+{"level":"info","message":"No service requests found for provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:16:05.540Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T07:16:05.543Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:16:05.584Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:16:05.585Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:16:05.586Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\"], occupation=","timestamp":"2026-01-15T07:16:05.617Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 4 patterns","timestamp":"2026-01-15T07:16:05.623Z"}
+{"level":"info","message":"No service requests found for provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:16:05.635Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T07:16:05.639Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:16:14.712Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:16:14.713Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:16:14.714Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\"], occupation=","timestamp":"2026-01-15T07:16:14.731Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 4 patterns","timestamp":"2026-01-15T07:16:14.747Z"}
+{"level":"info","message":"No service requests found for provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:16:14.792Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T07:16:14.794Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:16:16.780Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:16:16.781Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:16:16.782Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\"], occupation=","timestamp":"2026-01-15T07:16:16.792Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 4 patterns","timestamp":"2026-01-15T07:16:16.810Z"}
+{"level":"info","message":"No service requests found for provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:16:16.827Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T07:16:16.829Z"}
+{"level":"info","message":"Client Connected: wzwBRaP1LXH-zJazAAAE, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:17:04.096Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:17:04.282Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:17:04.283Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:17:04.285Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:17:04.373Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:17:04.415Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:17:04.492Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:17:04.536Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:17:04.545Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:17:04.650Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:17:04.651Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:17:04.652Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:17:04.662Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:17:04.680Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:17:04.694Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:17:04.703Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:17:04.715Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:17:17.534Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:17:17.547Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:17:17.550Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:17:17.570Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:17:17.585Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:17:17.605Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:17:17.617Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:17:17.619Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:17:26.782Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:17:26.788Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:17:26.791Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:17:26.826Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:17:26.829Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:17:26.848Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:17:26.860Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:17:26.862Z"}
+{"level":"warn","message":"[2026-01-15T07:19:07.811Z] AUTH_FAILURE: No token provided - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:19:07.813Z"}
+{"level":"warn","message":"[2026-01-15T07:19:07.824Z] AUTH_FAILURE: No token provided - GET /api/v1/user/notifications - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:19:07.826Z"}
+{"level":"warn","message":"[2026-01-15T07:19:07.830Z] AUTH_FAILURE: No token provided - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:19:07.832Z"}
+{"level":"warn","message":"[2026-01-15T07:19:07.921Z] AUTH_FAILURE: No token provided - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:19:07.922Z"}
+{"level":"warn","message":"[2026-01-15T07:19:07.925Z] AUTH_FAILURE: No token provided - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:19:07.925Z"}
+{"level":"info","message":"Client Connected: iFw89FT1A9dRT6x2AAAG, User: 696894eb8a283e5d446d3d42","timestamp":"2026-01-15T07:19:59.861Z"}
+{"level":"warn","message":"[2026-01-15T07:21:21.003Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/notifications - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa - Error: jwt expired","timestamp":"2026-01-15T07:21:21.047Z"}
+{"level":"error","message":"JWT verification error:","timestamp":"2026-01-15T07:21:21.061Z"}
+{"level":"warn","message":"[2026-01-15T07:21:21.143Z] AUTH_FAILURE: No token provided - GET /api/v1/user/chat-list - IP: ::ffff:192.168.1.2 - UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Sa","timestamp":"2026-01-15T07:21:21.227Z"}
+{"level":"info","message":"Client Connected: 4zerZ7xz5LcFM5TKAAAL, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:21:52.561Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:21:52.875Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:21:52.878Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:21:52.879Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:21:52.969Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:21:52.999Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:21:53.081Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:21:53.134Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:21:53.146Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:21:53.336Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:21:53.337Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:21:53.339Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:21:53.394Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:21:53.450Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:21:53.550Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:21:53.600Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:21:53.603Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:21:53.708Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:21:53.709Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:21:53.711Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:21:53.818Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:21:53.849Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:21:53.889Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:21:53.903Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:21:53.911Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:21:53.930Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:21:53.932Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:21:53.934Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:21:53.947Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:21:53.951Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:21:53.963Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:21:53.984Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:21:53.986Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:21:58.679Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:21:58.680Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:21:58.680Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:21:58.689Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:21:58.693Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:21:58.725Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:21:58.729Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:21:58.729Z"}
+{"level":"info","message":"Client Connected: vUzKnqjRzDiUUfYdAAAO, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:22:08.888Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:22:09.020Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:22:09.028Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:22:09.030Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:22:09.129Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:22:09.185Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:22:09.253Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:22:09.320Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:22:09.322Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:22:09.527Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:22:09.547Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:22:09.547Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:22:09.687Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:22:09.717Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:22:09.747Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:22:09.753Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:22:09.765Z"}
+{"level":"info","message":"Client Connected: xwpkdRvzSILtmU1lAAAR, User: 696894eb8a283e5d446d3d42","timestamp":"2026-01-15T07:22:48.174Z"}
+{"level":"info","message":"Client Connected: 3IM3a0tq0eOEIlGHAAAU, User: 696894eb8a283e5d446d3d42","timestamp":"2026-01-15T07:30:58.919Z"}
+{"level":"info","message":"Client Connected: QnICM7PvUQySeq0YAAAW, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:32:05.816Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:32:06.040Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:32:06.153Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:32:06.167Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:32:06.386Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:32:06.411Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:32:06.637Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:32:06.875Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:32:06.949Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:32:07.215Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:32:07.248Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:32:07.268Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:32:07.361Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:32:07.401Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:32:07.498Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:32:07.567Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:32:07.577Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:32:07.692Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:32:07.698Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:32:07.699Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:32:07.792Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:32:07.811Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:32:07.851Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:32:07.861Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:32:07.864Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 696893c98a283e5d446d3b7f (Seido Ryu), Role: Service Provider","timestamp":"2026-01-15T07:32:07.915Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T07:32:07.916Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T07:32:07.917Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Aircon Installation\",\"Plumbing\",\"Leak Repair\",\"Pipe Installation\",\"Drain Cleaning\"], occupation=","timestamp":"2026-01-15T07:32:07.940Z"}
+{"level":"info","message":"Querying service requests for provider 696893c98a283e5d446d3b7f with 8 patterns","timestamp":"2026-01-15T07:32:07.950Z"}
+{"level":"info","message":"Found 1 total service requests for provider","timestamp":"2026-01-15T07:32:07.962Z"}
+{"level":"info","message":"Recommended 1 of 1 matching requests to provider 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T07:32:07.965Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 1 requests","timestamp":"2026-01-15T07:32:07.966Z"}

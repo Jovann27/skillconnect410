@@ -10,6 +10,7 @@ import {
   Modal,
   TextInput,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { useMainContext } from '../contexts/MainContext';
 import Loader from '../components/Loader';
@@ -34,8 +35,15 @@ const ProviderDashboardScreen = () => {
   const [serviceRequests, setServiceRequests] = useState([]);
   const [serviceOffers, setServiceOffers] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [activeBookings, setActiveBookings] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [workProof, setWorkProof] = useState([]);
+
+  // Proof of work modal state
+  const [showProofModal, setShowProofModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [proofFiles, setProofFiles] = useState([]);
+  const [completionNotes, setCompletionNotes] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -50,6 +58,7 @@ const ProviderDashboardScreen = () => {
         fetchServiceRequests(),
         fetchServiceOffers(),
         fetchApplications(),
+        fetchActiveBookings(),
         fetchCertificates(),
         fetchWorkProof()
       ]);
@@ -102,6 +111,27 @@ const ProviderDashboardScreen = () => {
       }
     } catch (error) {
       console.error('Error fetching certificates:', error);
+    }
+  };
+
+  const fetchActiveBookings = async () => {
+    try {
+      const response = await api.get('/user/bookings', {
+        params: { status: 'In Progress' }
+      });
+      if (response.data.success) {
+        // Filter to only show bookings where current user is the provider
+        const providerBookings = response.data.bookings.filter(booking =>
+          booking.provider && String(booking.provider._id) === String(user._id)
+        );
+        setActiveBookings(providerBookings || []);
+      } else {
+        setActiveBookings([]);
+      }
+    } catch (error) {
+      console.error('Error fetching active bookings:', error);
+      setActiveBookings([]);
+      Alert.alert('Error', 'Failed to load active bookings');
     }
   };
 
@@ -270,25 +300,56 @@ const ProviderDashboardScreen = () => {
     </View>
   );
 
-  const renderApplicationsTab = () => (
-    <View>
-      <Text style={styles.sectionTitle}>My Work Records</Text>
-      {applications.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>📄</Text>
-          <Text style={styles.emptyTitle}>No work records yet</Text>
-          <Text style={styles.emptyText}>Your submitted applications will appear here.</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={applications}
-          renderItem={renderApplicationItem}
-          keyExtractor={(item) => item._id}
-          scrollEnabled={false}
-        />
-      )}
-    </View>
-  );
+  const renderApplicationsTab = () => {
+    const pendingApplications = applications.filter(app => app.status !== 'Accepted');
+    const allWorkRecords = [
+      ...activeBookings.map(booking => ({
+        ...booking,
+        type: 'active_booking',
+        title: booking.serviceRequest?.name || booking.serviceOffer?.title || 'Active Service',
+        description: booking.serviceRequest?.notes || booking.serviceOffer?.description || 'Ongoing service work',
+        client: booking.requester,
+        budget: booking.serviceRequest?.minBudget || booking.serviceRequest?.maxBudget || booking.serviceOffer?.minBudget || booking.serviceOffer?.maxBudget,
+        status: booking.status,
+        createdAt: booking.createdAt
+      })),
+      ...pendingApplications.map(application => ({
+        ...application,
+        type: 'application',
+        title: application.serviceRequest?.name || 'Application',
+        description: application.serviceRequest?.notes || 'Service request application',
+        client: application.serviceRequest?.requester,
+        budget: application.commissionFee || application.serviceRequest?.minBudget || application.serviceRequest?.maxBudget,
+        status: application.status || 'Applied',
+        createdAt: application.createdAt
+      }))
+    ];
+
+    // Ensure uniqueness by _id to prevent duplicate records for the same booking ID
+    const uniqueWorkRecords = allWorkRecords.filter((record, index, self) =>
+      index === self.findIndex(r => r._id === record._id)
+    );
+
+    return (
+      <View>
+        <Text style={styles.sectionTitle}>My Work Records</Text>
+        {uniqueWorkRecords.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyEmoji}>📄</Text>
+            <Text style={styles.emptyTitle}>No work records yet</Text>
+            <Text style={styles.emptyText}>Your submitted applications and active jobs will appear here.</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={uniqueWorkRecords}
+            renderItem={renderWorkRecordItem}
+            keyExtractor={(item) => item._id}
+            scrollEnabled={false}
+          />
+        )}
+      </View>
+    );
+  };
 
   const renderServiceRequestItem = ({ item }) => {
     const alreadyApplied = hasAlreadyApplied(item._id);
@@ -394,6 +455,97 @@ const ProviderDashboardScreen = () => {
       </Text>
     </View>
   );
+
+  const renderWorkRecordItem = ({ item }) => (
+    <View style={styles.workRecordCard}>
+      <View style={styles.workRecordHeader}>
+        <Text style={styles.workRecordTitle}>{item.title}</Text>
+        <Text style={[styles.workRecordType,
+          item.type === 'active_booking' ? styles.activeBookingType : styles.applicationType
+        ]}>
+          {item.type === 'active_booking' ? 'Active Job' : 'Application'}
+        </Text>
+      </View>
+
+      <Text style={styles.workRecordDescription} numberOfLines={2}>
+        {item.description}
+      </Text>
+
+      <View style={styles.workRecordInfo}>
+        <Text style={styles.workRecordClient}>
+          Client: {item.client?.firstName} {item.client?.lastName}
+        </Text>
+        <Text style={styles.workRecordBudget}>
+          {item.budget ? `₱${item.budget.toLocaleString()}` : 'Budget not specified'}
+        </Text>
+      </View>
+
+      <View style={styles.workRecordFooter}>
+        <Text style={[styles.workRecordStatus,
+          item.status === 'In Progress' && styles.statusProgress,
+          item.status === 'Applied' && styles.statusPending,
+          item.status === 'Declined' && styles.statusDeclined,
+          item.status === 'Completed' && styles.statusCompleted
+        ]}>
+          {item.status}
+        </Text>
+        <Text style={styles.workRecordDate}>
+          {item.type === 'active_booking'
+            ? `Started: ${new Date(item.createdAt).toLocaleDateString()}`
+            : `Applied: ${new Date(item.createdAt).toLocaleDateString()}`
+          }
+        </Text>
+      </View>
+
+      {item.type === 'active_booking' && item.status === 'In Progress' && (
+        <TouchableOpacity
+          style={styles.uploadProofButton}
+          onPress={() => {
+            setSelectedBooking(item);
+            setShowProofModal(true);
+          }}
+        >
+          <Text style={styles.uploadProofButtonText}>Upload Proof of Work & Complete</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
+  const handleUploadProofOfWork = async () => {
+    if (!selectedBooking || proofFiles.length === 0) {
+      Alert.alert('Error', 'Please select files to upload');
+      return;
+    }
+
+    const formData = new FormData();
+    proofFiles.forEach(file => {
+      formData.append('proofOfWork', file);
+    });
+    if (completionNotes.trim()) {
+      formData.append('completionNotes', completionNotes.trim());
+    }
+
+    try {
+      const response = await api.post(`/user/booking/${selectedBooking._id}/upload-proof`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.data.success) {
+        Alert.alert('Success', 'Proof of work uploaded successfully! Service marked as completed.');
+        setShowProofModal(false);
+        setSelectedBooking(null);
+        setProofFiles([]);
+        setCompletionNotes('');
+        fetchActiveBookings();
+        fetchApplications();
+      }
+    } catch (error) {
+      console.error('Error uploading proof of work:', error);
+      Alert.alert('Error', 'Failed to upload proof of work');
+    }
+  };
 
   if (loading) {
     return <Loader />;
@@ -621,6 +773,79 @@ const ProviderDashboardScreen = () => {
               >
                 <Text style={styles.primaryButtonText}>View My Applications</Text>
               </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Proof of Work Upload Modal */}
+      <Modal visible={showProofModal} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Upload Proof of Work</Text>
+
+            {selectedBooking && (
+              <View style={styles.requestPreview}>
+                <Text style={styles.previewTitle}>{selectedBooking.title}</Text>
+                <Text style={styles.previewType}>Client: {selectedBooking.client?.firstName} {selectedBooking.client?.lastName}</Text>
+              </View>
+            )}
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Upload Photos/Videos of Completed Work</Text>
+              <TouchableOpacity
+                style={styles.fileInput}
+                onPress={() => Alert.alert('File Upload', 'File picker will be implemented soon')}
+              >
+                <Text style={styles.fileInputText}>
+                  {proofFiles.length > 0 ? `${proofFiles.length} file(s) selected` : 'Tap to select files'}
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.inputHelp}>
+                Supported formats: Images, Videos, PDFs (Max 5MB each)
+              </Text>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Completion Notes (Optional)</Text>
+              <TextInput
+                style={[styles.textInput, { height: 80 }]}
+                value={completionNotes}
+                onChangeText={setCompletionNotes}
+                placeholder="Describe what was completed..."
+                multiline
+                maxLength={500}
+              />
+              <Text style={styles.inputHelp}>
+                {completionNotes.length}/500 characters
+              </Text>
+            </View>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  setShowProofModal(false);
+                  setSelectedBooking(null);
+                  setProofFiles([]);
+                  setCompletionNotes('');
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={handleUploadProofOfWork}
+                disabled={proofFiles.length === 0}
+              >
+                <Text style={styles.confirmButtonText}>Upload & Complete</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.warningInfo}>
+              <Text style={styles.infoText}>
+                <Text style={styles.infoBold}>Note:</Text> Once uploaded, this job will be marked as completed and the client will be able to leave a review.
+              </Text>
             </View>
           </View>
         </View>
@@ -1136,6 +1361,108 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginBottom: 20,
+  },
+  workRecordCard: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  workRecordHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  workRecordTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    flex: 1,
+    marginRight: 8,
+  },
+  workRecordType: {
+    fontSize: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    fontWeight: 'bold',
+  },
+  activeBookingType: {
+    backgroundColor: '#d4edda',
+    color: '#155724',
+  },
+  applicationType: {
+    backgroundColor: '#e3f2fd',
+    color: '#1976d2',
+  },
+  workRecordDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  workRecordInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  workRecordClient: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+  },
+  workRecordBudget: {
+    fontSize: 14,
+    color: '#28a745',
+    fontWeight: '500',
+  },
+  workRecordFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  workRecordStatus: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  statusCompleted: {
+    color: '#28a745',
+  },
+  workRecordDate: {
+    fontSize: 12,
+    color: '#999',
+  },
+  uploadProofButton: {
+    backgroundColor: '#28a745',
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  uploadProofButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  fileInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+    alignItems: 'center',
+  },
+  fileInputText: {
+    fontSize: 14,
+    color: '#666',
   },
 });
 

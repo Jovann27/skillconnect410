@@ -328,6 +328,21 @@ const AcceptedOrderPage = ({ request, isOpen, onClose }) => {
               </View>
             )}
 
+            {/* Review Section - Show for completed bookings */}
+            {currentRequest?.status === 'Completed' && (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Review Service</Text>
+                <View style={styles.reviewSection}>
+                  <Text style={styles.reviewMessage}>
+                    You have already reviewed this service request.
+                  </Text>
+                  <View style={styles.reviewIconContainer}>
+                    <Icon name="check-circle" size={48} color="#28a745" />
+                  </View>
+                </View>
+              </View>
+            )}
+
             {/* Customer Details Card */}
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Customer Details</Text>
@@ -727,6 +742,20 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#666',
     fontSize: 16,
+  },
+  reviewSection: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  reviewMessage: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 16,
+    fontWeight: '500',
+  },
+  reviewIconContainer: {
+    alignItems: 'center',
   },
 });
 

@@ -11,9 +11,11 @@ import {
   Modal,
   Switch,
   Image,
+  Dimensions,
 } from 'react-native';
 import { useMainContext } from '../contexts/MainContext';
 import Loader from '../components/Loader';
+import CreateServiceRequest from '../components/CreateServiceRequest';
 
 const ClientDashboardScreen = () => {
   const { user, api } = useMainContext();
@@ -382,6 +384,18 @@ const ClientDashboardScreen = () => {
         </TouchableOpacity>
       </View>
 
+      {/* Create Service Request Button - Only show on browse tab */}
+      {activeTab === 'browse' && (
+        <View style={styles.createRequestContainer}>
+          <TouchableOpacity
+            style={styles.createRequestButton}
+            onPress={() => setShowCreateRequest(true)}
+          >
+            <Text style={styles.createRequestButtonText}>+ Create Service Request</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {activeTab === 'browse' && (
         <>
           {/* Search Bar */}
@@ -585,6 +599,13 @@ const ClientDashboardScreen = () => {
           )}
         </View>
       )}
+
+      {/* Create Service Request Modal */}
+      {showCreateRequest && (
+        <CreateServiceRequest
+          onClose={() => setShowCreateRequest(false)}
+        />
+      )}
     </ScrollView>
   );
 };
@@ -637,6 +658,22 @@ const styles = StyleSheet.create({
   },
   activeTabText: {
     color: '#fff',
+  },
+  createRequestContainer: {
+    padding: 20,
+    paddingTop: 0,
+  },
+  createRequestButton: {
+    backgroundColor: '#28a745',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  createRequestButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   searchContainer: {
     flexDirection: 'row',
