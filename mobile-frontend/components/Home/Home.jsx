@@ -22,7 +22,7 @@ const Home = () => {
             style={styles.notificationsButton}
             onPress={() => navigation.navigate('Login')}
           >
-            <MaterialIcons name="notifications" size={24} color="#fff" />
+            <MaterialIcons name="login" size={24} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.loginButton}
@@ -51,11 +51,11 @@ const Home = () => {
         <View style={styles.actionsSection}>
           <TouchableOpacity
             style={styles.actionCard}
-            onPress={() => navigation.navigate('BrowseServices')}
+            onPress={() => navigation.navigate('Login')}
           >
-            <MaterialIcons name="search" size={32} color="#e11d48" />
-            <Text style={styles.actionTitle}>Find Services</Text>
-            <Text style={styles.actionDescription}>Browse available service providers</Text>
+            <MaterialIcons name="login" size={32} color="#e11d48" />
+            <Text style={styles.actionTitle}>Login to Find Services</Text>
+            <Text style={styles.actionDescription}>Sign in to browse available service providers</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
