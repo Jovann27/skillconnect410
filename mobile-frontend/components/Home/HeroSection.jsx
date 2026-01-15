@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
+const isAndroid = Platform.OS === 'android';
 
 const HeroSection = () => {
   const navigation = useNavigation();
@@ -91,11 +92,11 @@ const HeroSection = () => {
 
 const styles = StyleSheet.create({
   container: {
-    minHeight: height * 0.9,
+    minHeight: height * 0.7,
   },
   gradient: {
     flex: 1,
-    minHeight: height * 0.9,
+    minHeight: height * 0.7,
   },
   pattern: {
     ...StyleSheet.absoluteFillObject,
@@ -115,121 +116,134 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingHorizontal: isAndroid ? 16 : 20,
+    paddingVertical: isAndroid ? 30 : 40,
+    paddingTop: isAndroid ? 60 : 40,
   },
   textContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: isAndroid ? 30 : 40,
   },
   welcomeText: {
-    fontSize: 18,
+    fontSize: isAndroid ? 16 : 18,
     fontWeight: '500',
     color: '#666',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   title: {
-    fontSize: 48,
+    fontSize: isAndroid ? (width < 360 ? 28 : 32) : 36,
     fontWeight: '900',
     color: '#333',
     textAlign: 'center',
     marginBottom: 5,
   },
   subtitle: {
-    fontSize: 24,
+    fontSize: isAndroid ? 18 : 20,
     fontWeight: 'bold',
     color: '#c20884',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   location: {
-    fontSize: 16,
+    fontSize: isAndroid ? 14 : 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   description: {
-    fontSize: 16,
+    fontSize: isAndroid ? 14 : 16,
     color: '#555',
     textAlign: 'center',
-    lineHeight: 24,
-    maxWidth: 300,
+    lineHeight: isAndroid ? 20 : 24,
+    maxWidth: isAndroid ? width * 0.85 : 300,
+    paddingHorizontal: 10,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    gap: 15,
-    marginBottom: 30,
+    flexDirection: isAndroid && width < 400 ? 'column' : 'row',
+    gap: isAndroid ? 12 : 15,
+    marginBottom: isAndroid ? 25 : 30,
+    width: '100%',
+    maxWidth: 320,
+    alignItems: 'center',
   },
   primaryButton: {
     backgroundColor: '#fff',
-    paddingHorizontal: 25,
-    paddingVertical: 12,
+    paddingHorizontal: isAndroid ? 20 : 25,
+    paddingVertical: isAndroid ? 14 : 12,
     borderRadius: 25,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 5,
+    minWidth: isAndroid ? 160 : 'auto',
+    alignItems: 'center',
   },
   primaryButtonText: {
     color: '#c20884',
-    fontSize: 16,
+    fontSize: isAndroid ? 14 : 16,
     fontWeight: 'bold',
   },
   secondaryButton: {
     backgroundColor: '#c20884',
     borderWidth: 2,
     borderColor: '#c20884',
-    paddingHorizontal: 25,
-    paddingVertical: 12,
+    paddingHorizontal: isAndroid ? 20 : 25,
+    paddingVertical: isAndroid ? 14 : 12,
     borderRadius: 25,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 5,
+    minWidth: isAndroid ? 160 : 'auto',
+    alignItems: 'center',
   },
   secondaryButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: isAndroid ? 14 : 16,
     fontWeight: 'bold',
   },
   trustContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    maxWidth: 350,
+    maxWidth: isAndroid ? width * 0.9 : 350,
+    paddingHorizontal: isAndroid ? 10 : 0,
   },
   trustItem: {
     alignItems: 'center',
     flex: 1,
+    minWidth: isAndroid ? 80 : 'auto',
   },
   trustIcon: {
-    width: 40,
-    height: 40,
+    width: isAndroid ? 36 : 40,
+    height: isAndroid ? 36 : 40,
     backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: isAndroid ? 4 : 5,
     backdropFilter: 'blur(10px)',
   },
   starIcon: {
-    fontSize: 20,
+    fontSize: isAndroid ? 18 : 20,
     color: '#ffd700',
   },
   usersIcon: {
-    fontSize: 20,
+    fontSize: isAndroid ? 18 : 20,
     color: '#4CAF50',
   },
   searchIcon: {
-    fontSize: 20,
+    fontSize: isAndroid ? 18 : 20,
     color: '#c20884',
   },
   trustText: {
-    fontSize: 12,
+    fontSize: isAndroid ? 11 : 12,
     fontWeight: '500',
     color: '#333',
     textAlign: 'center',
+    lineHeight: isAndroid ? 14 : 'auto',
+    paddingHorizontal: 2,
   },
   floatingElements: {
     ...StyleSheet.absoluteFillObject,

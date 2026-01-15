@@ -1,0 +1,1 @@
+{"context":{},"level":"error","message":"Request Error Invalid email/username or password!","method":"POST","stack":"Error: Invalid email/username or password!\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/userController.js:252:39","statusCode":400,"timestamp":"2026-01-15T16:09:46.794Z","url":"/api/v1/user/login","userId":"anonymous"}

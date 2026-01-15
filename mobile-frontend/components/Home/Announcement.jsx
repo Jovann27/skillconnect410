@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image, ActivityIndicator, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Image, ActivityIndicator, ScrollView, Dimensions, Platform } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import api from "../../api";
+
+const { width } = Dimensions.get('window');
+const isAndroid = Platform.OS === 'android';
 
 const Announcement = () => {
   const [jobfair, setJobfair] = useState(null);
@@ -124,39 +127,38 @@ const Announcement = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
+    paddingVertical: isAndroid ? 16 : 20,
+    paddingHorizontal: isAndroid ? 12 : 15,
   },
   gradient: {
-    borderRadius: 20,
+    borderRadius: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowRadius: 4,
+    elevation: 3,
   },
   header: {
     alignItems: 'center',
-    paddingTop: 40,
-    paddingBottom: 20,
+    paddingTop: isAndroid ? 16 : 20,
+    paddingBottom: isAndroid ? 12 : 15,
   },
   title: {
-    fontSize: 32,
+    fontSize: isAndroid ? (width < 360 ? 20 : 22) : 24,
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
   },
   mainContent: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+    flexDirection: 'column',
+    paddingHorizontal: isAndroid ? 12 : 15,
+    paddingBottom: isAndroid ? 16 : 20,
   },
   leftContent: {
-    flex: 1,
-    paddingRight: 20,
+    marginBottom: isAndroid ? 16 : 20,
   },
   card: {
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -165,51 +167,51 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardGradient: {
-    padding: 24,
+    padding: isAndroid ? 14 : 16,
   },
   eventTitle: {
-    fontSize: 28,
+    fontSize: isAndroid ? (width < 360 ? 18 : 20) : 22,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 16,
+    marginBottom: isAndroid ? 10 : 12,
     textAlign: 'center',
   },
   description: {
-    fontSize: 16,
+    fontSize: isAndroid ? 13 : 14,
     color: '#666',
-    lineHeight: 24,
-    marginBottom: 24,
+    lineHeight: isAndroid ? 18 : 20,
+    marginBottom: isAndroid ? 16 : 20,
     textAlign: 'center',
   },
   details: {
-    gap: 20,
+    gap: isAndroid ? 14 : 16,
   },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   iconContainer: {
-    width: 48,
-    height: 48,
+    width: isAndroid ? 36 : 40,
+    height: isAndroid ? 36 : 40,
     backgroundColor: '#fce4ec',
-    borderRadius: 24,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: isAndroid ? 10 : 12,
   },
   icon: {
-    fontSize: 24,
+    fontSize: isAndroid ? 18 : 20,
   },
   detailLabel: {
-    fontSize: 12,
+    fontSize: isAndroid ? 10 : 11,
     fontWeight: '600',
     color: '#666',
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: 4,
+    marginBottom: isAndroid ? 1 : 2,
   },
   detailValue: {
-    fontSize: 16,
+    fontSize: isAndroid ? 13 : 14,
     fontWeight: '500',
     color: '#333',
   },
@@ -217,12 +219,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   imagesGrid: {
-    gap: 16,
+    flexDirection: 'row',
+    gap: isAndroid ? 10 : 12,
   },
   image: {
-    width: '100%',
-    height: 180,
-    borderRadius: 12,
+    flex: 1,
+    height: isAndroid ? (width < 360 ? 100 : 110) : 120,
+    borderRadius: 8,
   },
   loadingContainer: {
     paddingVertical: 40,

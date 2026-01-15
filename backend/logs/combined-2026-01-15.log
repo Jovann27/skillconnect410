@@ -1170,3 +1170,25 @@
 {"level":"warn","message":"[2026-01-15T13:11:02.965Z] AUTH_FAILURE: Invalid token - GET /api/v1/user/notifications/unread-count - IP: ::ffff:192.168.1.3 - UA: okhttp/4.12.0 - Error: invalid signature","timestamp":"2026-01-15T13:11:02.968Z"}
 {"level":"error","message":"JWT verification error:","timestamp":"2026-01-15T13:11:02.975Z"}
 {"level":"info","message":"Client Connected: gWXyIJVf7FeCx1XYAAAL, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T13:34:50.474Z"}
+{"level":"info","message":"Client Connected: mA7beUTjxo2ysl_NAAAN, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T14:59:14.924Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T15:09:16.536Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T15:09:16.538Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T15:09:16.614Z"}
+{"level":"info","message":"Client Connected: B4esvn43ZI8CIiE1AAAB, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T15:09:16.759Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T15:22:44.747Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T15:22:44.751Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T15:22:44.838Z"}
+{"level":"info","message":"Client Connected: fC1Do8cBsIuOZS_nAAAB, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T15:22:49.050Z"}
+{"level":"info","message":"Client Connected: FrB8NPK7O21erP75AAAD, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T15:23:55.465Z"}
+{"level":"info","message":"Client Connected: HSWs8473Zl2ApMPWAAAF, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T15:26:03.380Z"}
+{"level":"info","message":"Client Connected: Jiny7AjNWjPWx-9xAAAH, User: 696893c98a283e5d446d3b7f","timestamp":"2026-01-15T15:26:07.407Z"}
+{"level":"info","message":"Client Connected: LGb4jlbs1LiOqfVxAAAJ, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T15:27:23.806Z"}
+{"level":"info","message":"Client Connected: _6w1WG2vyG_O9H0MAAAL, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T15:27:37.238Z"}
+{"level":"info","message":"Client Connected: TGfYHX2M6-rGyVa_AAAN, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T15:35:10.964Z"}
+{"level":"info","message":"Client Connected: 6E5baTD66O3NE6JKAAAP, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T15:35:33.716Z"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T15:52:20.883Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T15:52:20.889Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T15:52:20.997Z"}
+{"level":"info","message":"Client Connected: pXuANkmU7fEVyNjhAAAF, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T15:52:25.341Z"}
+{"level":"info","message":"Client Connected: WNOkU_rlOFrX2nZ3AAAH, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T15:56:59.045Z"}
+{"level":"info","message":"Client Connected: gpHG4rDVEwwX0TvEAAAJ, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T15:57:08.804Z"}

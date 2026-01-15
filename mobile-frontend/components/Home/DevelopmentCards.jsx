@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
+const isAndroid = Platform.OS === 'android';
 
 const DevelopmentCards = () => {
   const cards = [
@@ -59,39 +62,40 @@ const DevelopmentCards = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
+    paddingVertical: isAndroid ? 16 : 20,
+    paddingHorizontal: isAndroid ? 12 : 15,
   },
   gradient: {
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 15,
+    padding: isAndroid ? 12 : 15,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: isAndroid ? 16 : 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: isAndroid ? (width < 360 ? 18 : 20) : 22,
     fontWeight: 'bold',
     color: '#c20884',
     textAlign: 'center',
   },
   cardsContainer: {
-    gap: 16,
+    gap: isAndroid ? 10 : 12,
+    paddingHorizontal: isAndroid ? 4 : 0,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    width: 280,
+    borderRadius: 12,
+    width: isAndroid ? (width < 360 ? 200 : 220) : 240,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowRadius: 4,
+    elevation: 3,
     overflow: 'hidden',
   },
   imageContainer: {
-    height: 160,
+    height: isAndroid ? (width < 360 ? 100 : 110) : 120,
     overflow: 'hidden',
   },
   image: {
@@ -99,18 +103,18 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   cardContent: {
-    padding: 20,
+    padding: isAndroid ? 14 : 16,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: isAndroid ? 15 : 16,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 12,
+    marginBottom: isAndroid ? 6 : 8,
   },
   cardDescription: {
-    fontSize: 14,
+    fontSize: isAndroid ? 12 : 13,
     color: '#666',
-    lineHeight: 20,
+    lineHeight: isAndroid ? 16 : 18,
   },
 });
 

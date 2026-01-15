@@ -105,47 +105,47 @@ const ContactForm = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 15,
   },
   gradient: {
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 15,
+    padding: 15,
   },
   content: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
   },
   formContainer: {
-    flex: 1,
-    paddingRight: 20,
+    width: '100%',
+    marginBottom: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   form: {
-    gap: 16,
+    gap: 12,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 10,
+    padding: 14,
     fontSize: 16,
     backgroundColor: '#fff',
   },
   textArea: {
-    height: 100,
+    height: 80,
     textAlignVertical: 'top',
   },
   button: {
     backgroundColor: '#c20884',
-    padding: 16,
-    borderRadius: 12,
+    padding: 14,
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 8,
   },
@@ -158,12 +158,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   imageContainer: {
-    flex: 1,
     alignItems: 'center',
   },
   logo: {
-    width: 200,
-    height: 200,
+    width: 150,
+    height: 150,
   },
 });
 

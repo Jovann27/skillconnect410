@@ -1098,7 +1098,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingTop: Platform.OS === 'ios' ? 0 : StatusBar.currentHeight,
+    paddingTop: 10,
   },
 
   // Enhanced loading states with better visual feedback
@@ -1106,8 +1106,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
     backgroundColor: '#f5f5f5',
+    paddingTop: 20,
   },
   loadingText: {
     marginTop: 10,

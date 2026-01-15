@@ -1,0 +1,176 @@
+{"level":"info","message":"Client Connected: LOU7i62RDzHxgRmwAAAL, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:02:02.181Z"}
+{"level":"info","message":"Client Connected: xk68McJzFp8ACptsAAAN, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:08:21.652Z"}
+{"level":"info","message":"Client Connected: NMVrQDIhrRcr7GvSAAAP, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:09:26.675Z"}
+{"context":{},"level":"error","message":"Request Error Invalid email/username or password!","method":"POST","stack":"Error: Invalid email/username or password!\n    at file:///C:/Users/Admin/Desktop/skillconnect4b410/backend/controllers/userController.js:252:39","statusCode":400,"timestamp":"2026-01-15T16:09:46.794Z","url":"/api/v1/user/login","userId":"anonymous"}
+{"level":"info","message":"✅ Database connected successfully","timestamp":"2026-01-15T16:20:35.577Z"}
+{"level":"info","message":"Email queue initialized - emails will be sent directly","timestamp":"2026-01-15T16:20:35.580Z"}
+{"level":"info","message":"Server is running on port 4000","timestamp":"2026-01-15T16:20:35.659Z"}
+{"level":"info","message":"Client Connected: mV5t2wtDIOZMqOMYAAAB, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:20:36.833Z"}
+{"level":"info","message":"Client Connected: Srqb6R1n33ZmhrSwAAAE, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:21:18.868Z"}
+{"level":"info","message":"Client Connected: aeytDaPGgVbHjdnFAAAG, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:31:45.221Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:31:59.106Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:31:59.108Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:31:59.110Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:31:59.149Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:31:59.159Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:31:59.238Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:31:59.256Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:32:20.764Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:32:20.766Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:32:20.767Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:32:20.782Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:32:20.788Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:32:20.818Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:32:20.847Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:33:05.557Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:33:05.560Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:33:05.560Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:33:05.579Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:33:05.580Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:33:05.592Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:33:05.594Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:33:05.682Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:33:05.683Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:33:05.683Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:33:05.697Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:33:05.699Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:33:05.722Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:33:05.723Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:34:49.831Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:34:50.081Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:34:50.197Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:34:50.287Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:34:50.336Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:34:50.469Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:34:50.556Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:34:50.734Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:34:50.745Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:34:50.767Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:34:50.892Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:34:50.924Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:34:51.075Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:34:51.118Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:46:08.766Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:46:08.768Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:46:08.864Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:46:08.966Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:46:09.178Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:46:09.266Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:46:09.439Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:46:09.934Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:46:10.033Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:46:10.178Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:46:10.296Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:46:10.350Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:46:10.478Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:46:10.542Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:46:23.136Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:46:23.374Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:46:23.448Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:46:23.598Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:46:23.718Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:46:23.811Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:46:23.834Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:46:24.059Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:46:24.157Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:46:24.251Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:46:24.358Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:46:24.440Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:46:24.526Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:46:24.547Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:48:40.581Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:48:40.582Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:48:40.582Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:48:40.597Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:48:40.598Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:48:40.614Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:48:40.615Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:52:47.915Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:52:47.922Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:52:47.934Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:52:47.968Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:52:47.985Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:52:48.151Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:52:48.252Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:53:03.144Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:53:03.516Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:53:03.518Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:53:03.583Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:53:03.636Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:53:03.752Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:53:03.881Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:53:39.154Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:53:39.243Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:53:39.291Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:53:39.402Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:53:39.436Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:53:39.526Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:53:39.598Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T16:57:48.156Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T16:57:48.346Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T16:57:48.765Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T16:57:49.070Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T16:57:49.194Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T16:57:49.326Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T16:57:49.415Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T17:03:18.220Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T17:03:18.626Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T17:03:18.733Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T17:03:18.791Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T17:03:18.809Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:03:18.936Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T17:03:18.941Z"}
+{"level":"info","message":"Client Connected: JPhNPZc4uePLJ7WNAAAI, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:04:28.322Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T17:11:08.357Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T17:11:08.358Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T17:11:08.360Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T17:11:08.370Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T17:11:08.371Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:11:08.385Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T17:11:08.386Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T17:12:11.220Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T17:12:11.220Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T17:12:11.221Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T17:12:11.276Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T17:12:11.277Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:12:11.322Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T17:12:11.323Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T17:12:28.673Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T17:12:28.674Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T17:12:28.675Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T17:12:28.688Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T17:12:28.689Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:12:28.705Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T17:12:28.804Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T17:12:48.816Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T17:12:48.819Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T17:12:48.825Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T17:12:48.860Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T17:12:48.861Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:12:48.873Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T17:12:48.877Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T17:13:05.032Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T17:13:05.033Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T17:13:05.033Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T17:13:05.048Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T17:13:05.050Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:13:05.145Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T17:13:05.145Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T17:13:43.510Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T17:13:43.510Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T17:13:43.511Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T17:13:43.526Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T17:13:43.582Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:13:43.663Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T17:13:43.755Z"}
+{"level":"info","message":"Client Connected: XqIP9aoEqfe1X2s_AAAK, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:18:53.676Z"}
+{"level":"info","message":"Client Connected: t-W2Zn35LRZSsYZ9AAAM, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:27:37.142Z"}
+{"level":"info","message":"Client Connected: HUYMkdLUPGNK3ZqmAAAO, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:37:39.390Z"}
+{"level":"info","message":"Client Connected: 1YZQ-dCaA_tfqoB2AAAQ, User: 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:37:48.526Z"}
+{"level":"info","message":"[getAvailableServiceRequests] User: 69673ec29b63259c6df8a040 (Jovann Rolluque), Role: Service Provider","timestamp":"2026-01-15T17:37:48.663Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Params: useRecommendations=true, limit=10000, page=1","timestamp":"2026-01-15T17:37:48.664Z"}
+{"level":"info","message":"[getAvailableServiceRequests] shouldUseRecommendations=true","timestamp":"2026-01-15T17:37:48.664Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Worker profile loaded: skills=[\"Plumbing\",\"Bathroom Plumbing\",\"Pipe Installation\",\"Electrical Work\",\"House Cleaning\",\"Carpentry\",\"Exterior Painting\",\"Masonry\",\"Welding\"], occupation=","timestamp":"2026-01-15T17:37:48.673Z"}
+{"level":"info","message":"Querying service requests for provider 69673ec29b63259c6df8a040 with 9 patterns","timestamp":"2026-01-15T17:37:48.674Z"}
+{"level":"info","message":"No service requests found for provider 69673ec29b63259c6df8a040","timestamp":"2026-01-15T17:37:48.688Z"}
+{"level":"info","message":"[getAvailableServiceRequests] Recommendation engine returned 0 requests","timestamp":"2026-01-15T17:37:48.689Z"}

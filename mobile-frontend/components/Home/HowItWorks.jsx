@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
+const isAndroid = Platform.OS === 'android';
 
 const HowItWorks = () => {
   const steps = [
@@ -68,38 +71,39 @@ const HowItWorks = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
+    paddingVertical: isAndroid ? 16 : 20,
+    paddingHorizontal: isAndroid ? 12 : 15,
   },
   gradient: {
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 15,
+    padding: isAndroid ? 12 : 15,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: isAndroid ? 20 : 24,
   },
   mainTitle: {
-    fontSize: 28,
+    fontSize: isAndroid ? (width < 360 ? 20 : 22) : 24,
     fontWeight: 'bold',
     color: '#c20884',
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: isAndroid ? 6 : 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: isAndroid ? 13 : 14,
     color: '#666',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: isAndroid ? 18 : 20,
+    paddingHorizontal: isAndroid ? 10 : 0,
   },
   stepsContainer: {
-    gap: 24,
-    marginBottom: 40,
+    gap: isAndroid ? 14 : 16,
+    marginBottom: isAndroid ? 20 : 24,
   },
   stepCard: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 12,
+    padding: isAndroid ? 14 : 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -109,57 +113,57 @@ const styles = StyleSheet.create({
   stepHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: isAndroid ? 10 : 12,
   },
   stepNumber: {
-    width: 32,
-    height: 32,
+    width: isAndroid ? 26 : 28,
+    height: isAndroid ? 26 : 28,
     backgroundColor: '#c20884',
-    borderRadius: 16,
+    borderRadius: 13,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: isAndroid ? 8 : 10,
   },
   stepNumberText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: isAndroid ? 13 : 14,
     fontWeight: 'bold',
   },
   stepIcon: {
-    fontSize: 24,
+    fontSize: isAndroid ? 18 : 20,
   },
   stepContent: {
     flex: 1,
   },
   stepTitle: {
-    fontSize: 18,
+    fontSize: isAndroid ? 15 : 16,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 8,
+    marginBottom: isAndroid ? 5 : 6,
   },
   stepDescription: {
-    fontSize: 14,
+    fontSize: isAndroid ? 12 : 13,
     color: '#666',
-    lineHeight: 20,
+    lineHeight: isAndroid ? 16 : 18,
   },
   ctaContainer: {
     alignItems: 'center',
     backgroundColor: '#c20884',
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 12,
+    padding: isAndroid ? 14 : 16,
   },
   ctaTitle: {
-    fontSize: 20,
+    fontSize: isAndroid ? 15 : 16,
     fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: isAndroid ? 5 : 6,
   },
   ctaText: {
-    fontSize: 14,
+    fontSize: isAndroid ? 12 : 13,
     color: 'rgba(255,255,255,0.9)',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: isAndroid ? 16 : 18,
   },
 });
 

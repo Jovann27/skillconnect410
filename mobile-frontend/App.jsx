@@ -23,6 +23,7 @@ import Settings from './screens/Settings';
 import ServiceProviders from './screens/ServiceProviders';
 import VerificationPending from './screens/VerificationPending';
 import AccountBanned from './screens/AccountBanned';
+import Notifications from './screens/Notifications';
 
 // Import Home components
 import Home from './components/Home/Home';
@@ -58,6 +59,8 @@ const Service = () => (
   </View>
 );
 
+
+
 // Admin functionality removed for mobile - placeholder for AdminLogin
 const AdminLogin = () => null;
 
@@ -65,7 +68,7 @@ const AdminLogin = () => null;
 import Loader from './components/Loader';
 import NotificationListener from './components/NotificationListener';
 import ChatIcon from './components/ChatIcon';
-import CustomDrawer from './components/CustomDrawer';
+
 
 // Layout Components
 import { ErrorBoundary, PopupContext } from './screens/Layout';
@@ -114,61 +117,20 @@ const UserDashboard = () => {
 
 // User Tab Navigator
 const UserTabNavigator = () => {
-  const { user, isLoggedIn } = useMainContext();
-  const userRole = user?.role;
-
   return (
-    <CustomDrawer>
-      {(toggleDrawer) => (
-        <View style={{ flex: 1 }}>
-          {/* Custom Header with Hamburger Menu */}
-          {isLoggedIn && (
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingHorizontal: 20,
-              paddingVertical: 15,
-              backgroundColor: '#fff',
-              borderBottomWidth: 1,
-              borderBottomColor: '#eee',
-              paddingTop: 50, // Account for status bar
-            }}>
-              <TouchableOpacity
-                onPress={toggleDrawer}
-                style={{
-                  padding: 8,
-                  marginRight: 15,
-                }}
-              >
-                <Ionicons name="menu" size={24} color="#c20884" />
-              </TouchableOpacity>
-              <Text style={{
-                fontSize: 20,
-                fontWeight: 'bold',
-                color: '#c20884',
-              }}>
-                SkillConnect
-              </Text>
-            </View>
-          )}
-
-          {/* Main Content Area */}
-          <View style={{ flex: 1 }}>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="Dashboard" component={UserDashboard} />
-              <Stack.Screen name="Profile" component={ManageProfile} />
-              <Stack.Screen name="Settings" component={Settings} />
-              <Stack.Screen name="PlaceOrder" component={PlaceOrder} />
-              <Stack.Screen name="Records" component={Records} />
-              <Stack.Screen name="Chat" component={Chat} />
-              <Stack.Screen name="Workers" component={ServiceProviders} />
-              <Stack.Screen name="ProfileReviews" component={ProfileReviews} />
-              <Stack.Screen name="Service" component={Service} />
-            </Stack.Navigator>
-          </View>
-        </View>
-      )}
-    </CustomDrawer>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Dashboard" component={UserDashboard} />
+      <Stack.Screen name="Profile" component={ManageProfile} />
+      <Stack.Screen name="Settings" component={Settings} />
+      <Stack.Screen name="PlaceOrder" component={PlaceOrder} />
+      <Stack.Screen name="Records" component={Records} />
+      <Stack.Screen name="Chat" component={Chat} />
+      <Stack.Screen name="Notifications" component={Notifications} />
+      <Stack.Screen name="ServiceProviders" component={ServiceProviders} />
+      <Stack.Screen name="Workers" component={ServiceProviders} />
+      <Stack.Screen name="ProfileReviews" component={ProfileReviews} />
+      <Stack.Screen name="Service" component={Service} />
+    </Stack.Navigator>
   );
 };
 
@@ -178,7 +140,7 @@ const AppContent = () => {
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#e91e63" />
       </View>
     );
   }
@@ -190,7 +152,7 @@ const AppContent = () => {
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false }}
-      initialRouteName="Home"
+      initialRouteName={isLoggedIn ? "UserTabs" : "Home"}
     >
       {/* Always available screens */}
       <Stack.Screen name="Home" component={Home} />

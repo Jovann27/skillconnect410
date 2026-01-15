@@ -497,7 +497,7 @@ const ClientDashboard = () => {
     return (
       <View style={styles.requestCard}>
         <View style={styles.requestHeader}>
-          <Icon name="work" size={24} color="#2196F3" />
+          <Icon name="work" size={24} color="#e91e63" />
           <Text style={styles.requestTitle}>{request.title}</Text>
         </View>
         <Text style={styles.requestStatus}>{request.status}</Text>
@@ -511,7 +511,7 @@ const ClientDashboard = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2196F3" />
+        <ActivityIndicator size="large" color="#e91e63" />
         <Text style={styles.loadingText}>Finding the best providers...</Text>
       </View>
     );
@@ -607,13 +607,13 @@ const ClientDashboard = () => {
                 <TouchableOpacity
                   style={styles.checkbox}
                   onPress={() => setFilters(prev => ({ ...prev, verified: !prev.verified }))}>
-                  <Icon name={filters.verified ? "check-box" : "check-box-outline-blank"} size={20} color="#2196F3" />
+                  <Icon name={filters.verified ? "check-box" : "check-box-outline-blank"} size={20} color="#e91e63" />
                   <Text style={styles.checkboxText}>Verified Only</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.checkbox}
                   onPress={() => setFilters(prev => ({ ...prev, topRated: !prev.topRated }))}>
-                  <Icon name={filters.topRated ? "check-box" : "check-box-outline-blank"} size={20} color="#2196F3" />
+                  <Icon name={filters.topRated ? "check-box" : "check-box-outline-blank"} size={20} color="#e91e63" />
                   <Text style={styles.checkboxText}>Top Rated</Text>
                 </TouchableOpacity>
               </View>
@@ -651,7 +651,7 @@ const ClientDashboard = () => {
                 onPress={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
               >
-                <Icon name="chevron-left" size={20} color={currentPage === 1 ? "#CCC" : "#2196F3"} />
+              <Icon name="chevron-left" size={20} color={currentPage === 1 ? "#CCC" : "#e91e63"} />
                 <Text style={[styles.paginationText, currentPage === 1 && styles.paginationTextDisabled]}>Previous</Text>
               </TouchableOpacity>
 
@@ -665,7 +665,7 @@ const ClientDashboard = () => {
                 disabled={currentPage === Math.ceil(filteredProviders.length / itemsPerPage)}
               >
                 <Text style={[styles.paginationText, currentPage === Math.ceil(filteredProviders.length / itemsPerPage) && styles.paginationTextDisabled]}>Next</Text>
-                <Icon name="chevron-right" size={20} color={currentPage === Math.ceil(filteredProviders.length / itemsPerPage) ? "#CCC" : "#2196F3"} />
+                <Icon name="chevron-right" size={20} color={currentPage === Math.ceil(filteredProviders.length / itemsPerPage) ? "#CCC" : "#e91e63"} />
               </TouchableOpacity>
             </View>
           )}
@@ -1092,7 +1092,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingTop: Platform.OS === 'ios' ? 0 : StatusBar.currentHeight,
+    paddingTop: 10,
   },
 
   // Enhanced loading states
@@ -1130,8 +1130,8 @@ const styles = StyleSheet.create({
     minHeight: 44, // Ensure minimum touch target
   },
   activeTab: {
-    backgroundColor: '#2196F3',
-    shadowColor: '#2196F3',
+    backgroundColor: '#e91e63',
+    shadowColor: '#e91e63',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -1368,8 +1368,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   primaryAction: {
-    backgroundColor: '#2196F3',
-    shadowColor: '#2196F3',
+    backgroundColor: '#e91e63',
+    shadowColor: '#e91e63',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -1504,7 +1504,7 @@ const styles = StyleSheet.create({
   paginationText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#2196F3',
+    color: '#e91e63',
     marginLeft: 6,
   },
   paginationTextDisabled: {

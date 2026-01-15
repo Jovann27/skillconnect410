@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
+const isAndroid = Platform.OS === 'android';
 
 const Mission = () => {
   return (
@@ -31,20 +34,20 @@ const Mission = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
+    paddingVertical: isAndroid ? 16 : 20,
+    paddingHorizontal: isAndroid ? 12 : 15,
   },
   gradient: {
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 15,
+    padding: isAndroid ? 12 : 15,
   },
   content: {
-    gap: 24,
+    gap: isAndroid ? 14 : 16,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 12,
+    padding: isAndroid ? 14 : 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -52,17 +55,18 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   title: {
-    fontSize: 24,
+    fontSize: isAndroid ? (width < 360 ? 18 : 19) : 20,
     fontWeight: 'bold',
     color: '#c20884',
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: isAndroid ? 10 : 12,
   },
   description: {
-    fontSize: 16,
+    fontSize: isAndroid ? 13 : 14,
     color: '#666',
-    lineHeight: 24,
+    lineHeight: isAndroid ? 18 : 20,
     textAlign: 'center',
+    paddingHorizontal: isAndroid ? 4 : 0,
   },
 });
 

@@ -77,51 +77,51 @@ const TeamSection = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 15,
   },
   gradient: {
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 15,
+    padding: 15,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
   },
   mainTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'normal',
     color: '#666',
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   description: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 18,
   },
   teamContainer: {
-    paddingHorizontal: 10,
-    gap: 16,
+    paddingHorizontal: 8,
+    gap: 12,
   },
   teamMember: {
     alignItems: 'center',
-    width: 120,
+    width: 100,
   },
   imageContainer: {
-    width: 100,
-    height: 120,
-    borderRadius: 8,
+    width: 80,
+    height: 100,
+    borderRadius: 6,
     overflow: 'hidden',
-    marginBottom: 8,
+    marginBottom: 6,
     backgroundColor: '#f0f0f0',
   },
   image: {
@@ -129,10 +129,11 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   role: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     color: '#333',
     textAlign: 'center',
+    lineHeight: 14,
   },
 });
 
